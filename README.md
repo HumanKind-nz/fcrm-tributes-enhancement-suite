@@ -1,4 +1,4 @@
-# fcrm-tributes-custom-overrides
+# FireHawk CRM Tributes Custom Overrides
 Overrides specific dependencies in the FCRM Tributes plugin
 
 Currently the FireHawk CRM Tributes WordPress plugin (as at v2.0.1.10) auto loads everything including the Flower Delivery features not used by some sites.
