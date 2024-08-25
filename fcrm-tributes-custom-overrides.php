@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       FireHawk CRM Tribute plugin - Custom Overrides
+ * Plugin Name:       FireHawkCRM Tribute plugin - Custom Overrides
  * Plugin URI:        https://github.com/weavedigitalstudio/fcrm-tributes-custom-overrides
  * Description:       Overrides specific dependencies in the FCRM Tributes plugin.
  * Version:           0.0.1
