@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       FireHawkCRM Tribute plugin - Custom Overrides
+ * Plugin Name:       FireHawkCRM Tributes - Custom Plugin Overrides
  * Plugin URI:        https://github.com/weavedigitalstudio/fcrm-tributes-custom-overrides
  * Description:       Overrides specific dependencies in the FCRM Tributes plugin.
- * Version:           0.0.2
+ * Version:           0.0.3
  * Author:            Gareth Bissland, Weave Digital Studio
- * License:           
+ * License:           MIT
  * GitHub Plugin URI: https://github.com/weavedigitalstudio/fcrm-tributes-custom-overrides
  * Primary Branch:    main
  * Requires at least: 6.0
@@ -14,8 +14,9 @@
 
 /*
 Changelog:
-Version 0.0.2
+Version 0.0.3
 - Initial release for testing
+- Disables Flower Delivery files loading
 */
  
  // Prevent direct access to the file
