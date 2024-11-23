@@ -95,9 +95,11 @@ The enhancement suite automatically detects pages using these shortcodes:
 ```
 fcrm-tributes-enhancement-suite/
 ├── assets/
+│   ├── plugin-header.png   	      # Plugin header image
 │   ├── css/
 │   │   ├── admin/
 │   │   │   └── alpha-picker.css      # Alpha color picker styles
+│   │   │   └── admin-styles.css      # Styles for the plugin admin
 │   │   ├── enhancement.css           # Main styling for tributes
 │   │   └── loader.css                # Loading animation styles
 │   └── js/
@@ -113,6 +115,7 @@ fcrm-tributes-enhancement-suite/
 ├── README.md                             # Documentation
 ├── LICENSE                               
 └── fcrm-tributes-enhancement-suite.php   # Main plugin file
+└── icon-256x256.png   			  # Plugin square icon
 ```
 
 
