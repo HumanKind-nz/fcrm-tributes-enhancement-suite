@@ -1,8 +1,8 @@
+![Plugin Header](assets/plugin-header.png)
+
 # FireHawkCRM Tributes - Enhancement Suite
 
 A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially combines performance optimisations, custom styling, and loading animations into one unified solution.
-
-![Plugin Header](assets/plugin-header.png)
 
 ---
 
