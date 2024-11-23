@@ -1,0 +1,20 @@
+/* Custom styles for FCRM Enhancement Suite admin pages */
+
+/* Form table column widths */
+.toplevel_page_fcrm-enhancements .form-table th {
+	width: 260px;
+}
+
+.toplevel_page_fcrm-enhancements .form-table th label {
+	display: inline-block;
+	max-width: 260px;
+}
+
+#fcrm_enhancement_styling_border-radius, 
+#fcrm_enhancement_styling_grid-border-radius {
+  width: 60px;
+}
+
+.fcrm-enhancement .plugin-description {
+	padding-bottom: 50px;
+}
