@@ -1,8 +1,8 @@
+![Plugin Header](assets/plugin-header.png)
+
 # FireHawkCRM Tributes - Enhancement Suite
 
 A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially combines performance optimisations, custom styling, and loading animations into one unified solution.
-
-![Plugin Header](assets/plugin-header.png)
 
 ---
 
@@ -95,9 +95,11 @@ The enhancement suite automatically detects pages using these shortcodes:
 ```
 fcrm-tributes-enhancement-suite/
 ├── assets/
+│   ├── plugin-header.png   	      # Plugin header image
 │   ├── css/
 │   │   ├── admin/
 │   │   │   └── alpha-picker.css      # Alpha color picker styles
+│   │   │   └── admin-styles.css      # Styles for the plugin admin
 │   │   ├── enhancement.css           # Main styling for tributes
 │   │   └── loader.css                # Loading animation styles
 │   └── js/
@@ -114,6 +116,7 @@ fcrm-tributes-enhancement-suite/
 ├── README.md                             # Documentation
 ├── LICENSE                               
 └── fcrm-tributes-enhancement-suite.php   # Main plugin file
+└── icon-256x256.png   			  # Plugin square icon
 ```
 
 
@@ -222,7 +225,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - No configuration required for update functionality
 
 ### v1.1.0 (Initial Public Release)
-- Performance optimization features
+- Performance optimisation features
 - Custom styling interface
 - Loading animation functionality
 - WordPress 6.0+ compatibility
