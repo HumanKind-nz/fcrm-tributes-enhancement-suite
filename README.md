@@ -110,6 +110,7 @@ fcrm-tributes-enhancement-suite/
 │   ├── class-fcrm-optimisation.php       # Performance optimisation module
 │   ├── class-fcrm-styling.php            # Custom styling module
 │   └── class-fcrm-loader.php             # Loading animation module
+│   └── class-github-updater.php          # Auto-update from Github module
 ├── README.md                             # Documentation
 ├── LICENSE                               
 └── fcrm-tributes-enhancement-suite.php   # Main plugin file
@@ -214,12 +215,15 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Changelog
 
-### 1.1.0
-- Initial release combining three separate plugins into the one suite.
-- Features include:
-  - Performance and loading optimisations.
-  - Custom styling from admin with a colour picker.
-  - Loading animation for tribute grids.
-- Added unified admin interface.
-- Improved page detection for loading scripts.
-- Flower delivery disabled by default.
+### v1.1.1 (2024-11-25) - Auto-Update Version
+- Added automatic updates via WordPress dashboard
+- Integrated GitHub releases for version control
+- Update notifications now include release notes
+- No configuration required for update functionality
+
+### v1.1.0 (Initial Public Release)
+- Performance optimization features
+- Custom styling interface
+- Loading animation functionality
+- WordPress 6.0+ compatibility
+- PHP 8.0+ support

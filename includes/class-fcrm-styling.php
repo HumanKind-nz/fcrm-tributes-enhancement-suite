@@ -61,8 +61,8 @@ class Styling extends Enhancement_Base {
 	 */
 	protected function get_default_value(string $key): mixed {
 		$defaults = [
-			'primary-color'              => '#000000',
-			'secondary-color'            => '#FFFFFF',
+			'primary-color'              => '#FFFFFF',
+			'secondary-color'            => '#000000',
 			'primary-button'             => '#007BFF',
 			'primary-button-text'        => '#FFFFFF',
 			'primary-button-hover'       => '#0056B3',
