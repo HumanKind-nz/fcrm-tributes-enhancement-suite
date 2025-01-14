@@ -5,6 +5,7 @@ namespace FCRM\EnhancementSuite;
  * Optimisation Module 
  * 
  * Handles script optimisation and feature management for FirehawkCRM Tributes.
+ * Uses a dedicated Flower_Delivery_Disabler for cleaner feature management.
  */
 class Optimisation extends Enhancement_Base {
 	/**
@@ -13,6 +14,13 @@ class Optimisation extends Enhancement_Base {
 	 * @var bool|null
 	 */
 	private $is_tribute_page = null;
+
+	/**
+	 * Flower delivery disabler instance
+	 *
+	 * @var Flower_Delivery_Disabler|null
+	 */
+	private $flower_disabler = null;
 
 	/**
 	 * Constructor
@@ -29,9 +37,10 @@ class Optimisation extends Enhancement_Base {
 			return;
 		}
 
-		// Handle flower delivery dependencies first
+		// Initialize flower delivery disabler if needed
 		if ($this->get_option('disable_flowers')) {
-			$this->handle_flower_delivery();
+			$this->flower_disabler = new Flower_Delivery_Disabler();
+			$this->flower_disabler->init();
 		}
 
 		// Add optimization hooks
@@ -77,7 +86,7 @@ class Optimisation extends Enhancement_Base {
 	public function render_settings(): void {
 		$this->render_common_settings();
 		?>
-		<p style="margin-top:0px;"><?php echo esc_html__('Enabling this will improve site performance by restriciting all the scripts and style sheets associated with the FH Tributes to only load on the required tribute pages and not across the whole site', 'fcrm-enhancement-suite'); ?></p>
+		<p style="margin-top:0px;"><?php echo esc_html__('Enabling this will improve site performance by restricting all the scripts and style sheets associated with the FH Tributes to only load on the required tribute pages and not across the whole site', 'fcrm-enhancement-suite'); ?></p>
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php echo esc_html__('Disable Flower Delivery Feature', 'fcrm-enhancement-suite'); ?></th>
@@ -90,7 +99,7 @@ class Optimisation extends Enhancement_Base {
 						<?php echo esc_html__('Completely disables the flower delivery functionality if it not needed', 'fcrm-enhancement-suite'); ?>
 					</label>
 					<p class="description">
-						<?php echo esc_html__('Improve site performance by disabling all the flower delivery related files from loading across the site. Changes will take effect after saving and refreshing the tribute page.', 'fcrm-enhancement-suite'); ?>
+						<?php echo esc_html__('Improve site performance by disabling all the flower delivery related files from loading across the site. Changes will take effect immediately after saving.', 'fcrm-enhancement-suite'); ?>
 					</p>
 				</td>
 			</tr>
@@ -154,7 +163,8 @@ class Optimisation extends Enhancement_Base {
 	}
 
 	/**
-	 * Optimise asset loading (NZ English)
+	 * Optimise asset loading
+	 * Removes unnecessary scripts and styles on non-tribute pages
 	 */
 	public function optimise_assets(): void {
 		if (!class_exists('Fcrm_Tributes_Public')) {
@@ -208,44 +218,6 @@ class Optimisation extends Enhancement_Base {
 				wp_deregister_style($handle);
 			}
 		}
-	}
-
-	/**
-	 * Handle flower delivery dependency removal
-	 */
-	private function handle_flower_delivery(): void {
-		remove_action('plugins_loaded', ['Fcrm_Tributes', 'load_dependencies']);
-		add_action('plugins_loaded', [$this, 'custom_load_dependencies'], 20);
-	}
-
-	/**
-	 * Custom dependency loader - excludes flower delivery
-	 */
-	public function custom_load_dependencies(): void {
-		if (!class_exists('Fcrm_Tributes')) {
-			return;
-		}
-
-		$plugin = new \Fcrm_Tributes();
-
-		// Load core dependencies but skip flower delivery
-		$base_path = plugin_dir_path(dirname(FCRM_ENHANCEMENT_FILE)) . 'fcrm-tributes/';
-		$required_files = [
-			'includes/class-fcrm-tributes-loader.php',
-			'includes/class-fcrm-tributes-i18n.php',
-			'includes/fcrm-api.php',
-			'admin/class-fcrm-tributes-admin.php',
-			'public/class-single-tribute-type.php',
-			'public/class-fcrm-tributes-public.php'
-		];
-
-		foreach ($required_files as $file) {
-			if (file_exists($base_path . $file)) {
-				require_once $base_path . $file;
-			}
-		}
-
-		$plugin->get_loader()->run();
 	}
 
 	/**

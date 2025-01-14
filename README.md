@@ -2,7 +2,15 @@
 
 # FireHawkCRM Tributes - Enhancement Suite
 
-A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially combines performance optimisations, custom styling, and loading animations into one unified solution.
+A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially combines performance optimisations, custom styling, and loading animations into one unified solution. Originally for internal use by Weave Digital Studio / Human Kind.
+
+This enhancement suite is part of a small family of complimentary plugins we've developed to extend FireHawkCRM Tributes functionality for our use building funeral websites in WordPress.
+For a complete tribute management solution and CRM, consider trying FireHawkCRM and our other add-ons:
+
+- [FCRM SEOPress Integration](https://github.com/weavedigitalstudio/fcrm-seopress): 
+If you use SEOPress on your WordPress site, this replaces the current bundled Yoast SEO integration of the FireHawkCRM Tributes plugin with added support for SEOPress and SEOPress Pro. Meta titles and tags are then controlled by SEOPress.
+- [FCRM Plausible Analytics](https://github.com/weavedigitalstudio/fcrm-plausible-analytics): 
+Integration for FireHawkCRM Tributes plugin which adds Plausible Analytics tracking code to the individual funerals/tribute pages. Plausible is a privacy-focused analytics to track tribute engagement while respecting visitor privacy.
 
 ---
 
@@ -19,7 +27,7 @@ A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially
 
 ### Performance Optimisation
 - Conditionally loads scripts and styles only on tribute-related pages (Not Side-wide).
-- Optionally disables flower delivery functionality (disabled by default).
+- Optionally disables flower delivery functionality site-wide if not used/offered (disabled by default).
 - Removes unnecessary DNS prefetch hints.
 - Optimised asset handling for better performance.
 
@@ -57,7 +65,7 @@ A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially
 1. Download the latest release from the GitHub repository.
 2. Upload to your WordPress site through the Plugins menu or via FTP.
 3. Activate the plugin through the WordPress admin interface.
-4. Configure settings under "FH Enhancements" in the admin menu.
+4. Configure settings under "FH Tributes Enhancements" in the admin menu.
 
 ---
 
@@ -66,7 +74,7 @@ A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially
 ### Performance Settings
 - Navigate to FH Tributes Enhancements → Performance.
 - Enable/disable performance optimisations.
-- Configure flower delivery functionality.
+- Enable/disable flower delivery functionality.
 
 ### Styling Settings
 - Navigate to FH Tributes Enhancements → Custom Styles.
@@ -76,7 +84,7 @@ A enhancement suite for the FireHawkCRM Tributes WordPress plugin that initially
 
 ### Loading Animation Settings
 - Navigate to FH Tributes Enhancements → Loading Animation.
-- Enable/disable the loading animation.
+- Enable/disable the loading animation used when tributes load from the grid.
 - Customise the spinner colour.
 
 ---
@@ -113,7 +121,9 @@ fcrm-tributes-enhancement-suite/
 │   ├── class-fcrm-styling.php            # Custom styling module
 │   └── class-fcrm-loader.php             # Loading animation module
 │   └── class-update-checker.php          # Auto-update from Github module
+│   └── class-fcrm-flower-delivery-disabler.php  # Flower delivery removal module
 ├── README.md                             # Documentation
+├── CHANGELOG.md                          # Changelog
 ├── LICENSE                               
 └── fcrm-tributes-enhancement-suite.php   # Main plugin file
 └── icon-256x256.png   			  # Plugin square icon
@@ -218,10 +228,14 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Changelog
 
-### v1.1.2 (2025-01-14)
-- Minor update to auto-update code.
+### v1.2.0 (2025-01-15) - Performance Optimisations 
+- Completely rebuilt flower delivery disabling functionality for better performance and reliability
+- Implemented new system to properly remove flower delivery features from all pages when disabled
+- Optimised code to prevent unnecessary script loading and improve site performance
+- Styling change for streaming and social share button colour defaults
+- Minor bug fixes
 
-### v1.1.1 (2024-11-25) - Auto-Update Version
+### v1.1.1 (2024-11-25) - Plugin Auto-Update Version
 - Added automatic updates via WordPress dashboard
 - Integrated GitHub releases for version control
 - Update notifications now include release notes

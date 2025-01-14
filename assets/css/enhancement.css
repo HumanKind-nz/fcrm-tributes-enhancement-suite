@@ -41,6 +41,12 @@
 	 border: 1px solid var(--fcrm-primary-button);
  }
  
+ .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.dynamic-live-stream-link,
+ .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.social-share {
+	   color: var(--fcrm-secondary-color);
+	   border: 1px solid var(--fcrm-primary-button);
+ }
+ 
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link:focus, 
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link:hover,
  .firehawk-crm-tributes .btn-light:hover {
