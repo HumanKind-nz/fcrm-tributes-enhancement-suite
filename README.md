@@ -112,7 +112,7 @@ fcrm-tributes-enhancement-suite/
 │   ├── class-fcrm-optimisation.php       # Performance optimisation module
 │   ├── class-fcrm-styling.php            # Custom styling module
 │   └── class-fcrm-loader.php             # Loading animation module
-│   └── class-github-updater.php          # Auto-update from Github module
+│   └── class-update-checker.php          # Auto-update from Github module
 ├── README.md                             # Documentation
 ├── LICENSE                               
 └── fcrm-tributes-enhancement-suite.php   # Main plugin file
@@ -217,6 +217,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 ## Changelog
+
+### v1.1.2 (2025-01-14)
+- Minor update to auto-update code.
 
 ### v1.1.1 (2024-11-25) - Auto-Update Version
 - Added automatic updates via WordPress dashboard
