@@ -4,7 +4,7 @@ All notable changes to the FirehawkCRM Tributes Enhancement Suite will be docume
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.1.2 - 2025-01-14
+## v1.1.2
 - Minor tweak to auto update code
 
 ## v1.1.1 - Auto-Update Feature Release
