@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes - Enhancement Suite
  * Plugin URI:  https://github.com/weavedigitalstudio/fcrm-tributes-enhancement-suite/
  * Description: An enhancement suite for the FireHawkCRM Tributes plugin, including performance optimisations, custom styling from admin, and loading animations.
- * Version:     1.1.1
+ * Version:     1.1.2
  * Author:      Weave Digital Studio, Gareth Bissland
  * Author URI:  https://weave.co.nz/
  * License:     MIT
@@ -16,16 +16,16 @@
  
  namespace FCRM\EnhancementSuite;
  
- // Load the updater class
- require_once plugin_dir_path(__FILE__) . 'includes/class-github-updater.php';
+// Load the updater class
+ require_once plugin_dir_path(__FILE__) . 'includes/class-update-checker.php';
  
  // Initialize the updater
- if (class_exists('GitHubPluginUpdater')) {
-	 new GitHubPluginUpdater(
-		 __FILE__,
-		 'weavedigitalstudio/fcrm-tributes-enhancement-suite'
-	 );
- }
+if (is_admin() && class_exists('PluginUpdateChecker')) {
+    new PluginUpdateChecker(
+        __FILE__,
+        'weavedigitalstudio/fcrm-tributes-enhancement-suite'
+    );
+}
   
  // Prevent direct access
  if (!defined('ABSPATH')) {
@@ -33,7 +33,7 @@
  }
 
  // Plugin constants
- define('FCRM_ENHANCEMENT_VERSION', '1.1.1');
+ define('FCRM_ENHANCEMENT_VERSION', '1.1.2');
  define('FCRM_ENHANCEMENT_FILE', __FILE__);
  define('FCRM_ENHANCEMENT_PATH', plugin_dir_path(__FILE__));
  define('FCRM_ENHANCEMENT_URL', plugin_dir_url(__FILE__));
