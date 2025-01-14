@@ -10,6 +10,8 @@
  * - Optional authentication token support
  */
 
+namespace FCRM\EnhancementSuite;
+
 if (!class_exists('PluginUpdateChecker')) {
     class PluginUpdateChecker {
         private $file;           // Full path to plugin file
