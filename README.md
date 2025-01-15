@@ -228,12 +228,12 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Changelog
 
-### v1.2.0 (2025-01-15) - Performance Optimisations 
+### v1.2.1 (2025-01-15) - Performance Optimisations 
 - Completely rebuilt flower delivery disabling functionality for better performance and reliability
 - Implemented new system to properly remove flower delivery features from all pages when disabled
 - Optimised code to prevent unnecessary script loading and improve site performance
 - Styling change for streaming and social share button colour defaults
-- Minor bug fixes
+- Minor bug fixes and tweaks to auto plugin update class
 
 ### v1.1.1 (2024-11-25) - Plugin Auto-Update Version
 - Added automatic updates via WordPress dashboard
