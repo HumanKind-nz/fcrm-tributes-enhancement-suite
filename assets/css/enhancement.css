@@ -7,7 +7,8 @@
 	Button Styles
 	========================================================================== */
  
- .fcrm-search-bar .btn.btn-primary.submit-btn {
+ .fcrm-search-bar .btn.btn-primary.submit-btn,
+ .firehawk-tributes .btn-primary.submit-btn {
 	 display: inline-block;
 	 font-size: 0.85rem;
 	 font-weight: 400;
@@ -17,9 +18,7 @@
 	 user-select: none;
 	 background-color: var(--fcrm-primary-button);
 	 color: var(--fcrm-primary-button-text);
-	 border-radius: 6px !important;
-	 border-bottom-left-radius: 0px !important;  
-	 border-top-left-radius: 0px !important;     
+	 border-radius: var(--fcrm-border-radius) !important;   
 	 line-height: 1.5;
 	 transition: color 0.15s ease-in-out, 
 				 background-color 0.15s ease-in-out, 
@@ -27,7 +26,13 @@
 				 box-shadow 0.15s ease-in-out;
  }
  
+ .fcrm-search-bar .btn.btn-primary.submit-btn {
+	  border-bottom-left-radius: 0px !important;  
+	  border-top-left-radius: 0px !important;     
+  }
+ 
  .fcrm-search-bar .btn.btn-primary.submit-btn:hover,
+ .firehawk-tributes .btn-primary.submit-btn:hover,
  .firehawk-tributes .tribute-display .event-card .service-buttons-group .service-button:hover { 
 	 background-color: var(--fcrm-primary-button-hover);
 	 color: var(--fcrm-primary-button-hover-text);
@@ -36,16 +41,34 @@
 
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link,
  .firehawk-crm .service-buttons-group .service-button,
- .firehawk-crm-tributes .btn-light {
+ .firehawk-crm-tributes .btn-light,
+ .firehawk-tributes .btn-primary.submit-btn,
+ #fcrm-tributes-page-menu a[data-page="messages"] {
 	 color: var(--fcrm-primary-color);
+	 background-color: var(--fcrm-primary-button);
 	 border: 1px solid var(--fcrm-primary-button);
+	 transition: color 0.15s ease-in-out, 
+	  background-color 0.15s ease-in-out, 
+	  border-color 0.15s ease-in-out, 
+	  box-shadow 0.15s ease-in-out;
+	  font-size: 1em;
  }
  
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.dynamic-live-stream-link,
- .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.social-share {
-	   color: var(--fcrm-secondary-color);
-	   border: 1px solid var(--fcrm-primary-button);
+ .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.social-share,
+ .firehawk-crm-tributes .toggle-candle-btn {
+	   color: var(--fcrm-secondary-button-text);
+	   border: 1px solid var(--fcrm-secondary-button-border);
+	   background-color: var(--fcrm-secondary-button);
  }
+ 
+ .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.dynamic-live-stream-link:hover,
+  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link.social-share:hover,
+  .firehawk-crm-tributes .toggle-candle-btn:hover {
+		color: var(--fcrm-secondary-button-hover-text) !important;
+		border: 1px solid var(--fcrm-secondary-button-hover-border) !important;
+		background-color: var(--fcrm-secondary-button-hover) !important;
+  }
  
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link:focus, 
  .firehawk-crm-tributes #fcrm-tributes-page-menu .nav-link:hover,
@@ -150,17 +173,16 @@
    ========================================================================== */
 
 .fcrm-pagination .fcrm-pagination-pages li {
-	border: 1px solid var(--fcrm-secondary-color) !important;
 	background: var(--fcrm-primary-color) !important;
 }
 
 .fcrm-pagination .fcrm-pagination-pages li a {
-	color: var(--fcrm-secondary-color) !important;
+	color: var(--fcrm-secondary-button) !important;
 }
 
 .fcrm-pagination .fcrm-pagination-pages li.active > a {
-	background: var(--fcrm-primary-button);
-	color: var(--fcrm-primary-button-text) !important;
+	background: var(--fcrm-secondary-button);
+	color: var(--fcrm-secondary-button-text) !important;
 }
 
 /* ==========================================================================

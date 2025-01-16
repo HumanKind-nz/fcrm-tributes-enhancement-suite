@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes - Enhancement Suite
  * Plugin URI:  https://github.com/weavedigitalstudio/fcrm-tributes-enhancement-suite/
  * Description: An enhancement suite for the FireHawkCRM Tributes plugin, including performance optimisations, custom styling from admin, and loading animations.
- * Version:     1.2.1
+ * Version:     1.3.0
  * Author:      Weave Digital Studio, Gareth Bissland
  * Author URI:  https://weave.co.nz/
  * License:     GPL-2.0+
@@ -24,7 +24,7 @@ namespace FCRM\EnhancementSuite;
  }
  
  // Plugin constants
- define('FCRM_ENHANCEMENT_VERSION', '1.2.1');
+ define('FCRM_ENHANCEMENT_VERSION', '1.3.0');
  define('FCRM_ENHANCEMENT_FILE', __FILE__);
  define('FCRM_ENHANCEMENT_PATH', plugin_dir_path(__FILE__));
  define('FCRM_ENHANCEMENT_URL', plugin_dir_url(__FILE__));
@@ -284,7 +284,7 @@ namespace FCRM\EnhancementSuite;
 			 <h1><?php _e('Firehawk Tributes Enhancement Suite', 'fcrm-enhancement-suite'); ?></h1>
 			 <?php
 			 echo '<p class="plugin-description">';
-			 echo esc_html__('Originally developed for internal use, this third-party plugin helps optimise and enhance your website’s functionality with the FH Tributes plugin. It removes unnecessary scripts and styles to improve site performance and includes styling UI options to customise the plugin’s tribute output to better match your site. This plugin has no direct affiliation with FireHawkCRM or FireHawk Funerals.', 'fcrm-enhancement-suite');
+			 echo esc_html__('Originally developed for our internal use, this third-party plugin helps optimise and enhance your funeral website with the FireHawk Tributes plugin. It removes unnecessary scripts and styles to help improve site performance and includes colour styling UI options to help customise the tributes to better match your website styles. This plugin has no direct affiliation with FireHawkCRM or FireHawk Funerals.', 'fcrm-enhancement-suite');
 			 echo '</p>';
 			 ?>
 			 <nav class="nav-tab-wrapper">

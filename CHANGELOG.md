@@ -4,10 +4,11 @@ All notable changes to the FirehawkCRM Tributes Enhancement Suite will be docume
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## v1.2.1 - Performance Optimisations
+## v1.3.0 - Performance Optimisations
 - Completely rebuilt flower delivery disabling functionality for better performance and reliability
 - Implemented new system to properly remove flower delivery features from all pages when disabled
+- Optimised style loading to only enqueue CSS on tribute pages and pages containing tribute shortcodes
+- Improved performance by preventing unnecessary style loading across non-tribute pages
 - Optimised code to prevent unnecessary script loading and improve site performance
 - Styling change for streaming and social share button colour defaults
 - Minor bug fixes and tweaks to auto plugin updates

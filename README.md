@@ -14,12 +14,17 @@ Integration for FireHawkCRM Tributes plugin which adds Plausible Analytics track
 
 ---
 
-## Quick Start
+## ⚠️ Important Notice
 
-1. Activate the plugin from the WordPress Plugins menu.
-2. Navigate to the "FH Tributes Enhancements" menu in the WordPress admin panel.
-3. Configure the performance, styling, and loading animation settings to suit your needs.
-4. Save your changes and refresh your site to see the enhancements.
+This plugin is primarily developed for internal use at Weave Digital Studio & Human Kind and with our  funeral websites we build. While we're making it available publicly, please note:
+
+- Features and updates are driven by our specific needs and client requirements
+- Testing is conducted only within our controlled environments
+- We cannot guarantee compatibility with all WordPress setups or themes
+- No official support is provided for external users
+- Use in production environments outside our ecosystem is at your own risk
+
+We encourage you to test thoroughly in a staging environment before any production use.
 
 ---
 
@@ -60,12 +65,21 @@ Integration for FireHawkCRM Tributes plugin which adds Plausible Analytics track
 
 ---
 
-## Installation
+## Installation from GitHub
 
-1. Download the latest release from the GitHub repository.
-2. Upload to your WordPress site through the Plugins menu or via FTP.
-3. Activate the plugin through the WordPress admin interface.
-4. Configure settings under "FH Tributes Enhancements" in the admin menu.
+When installing this plugin from GitHub:
+
+1. Go to the [Releases](https://github.com/your-repo/fcrm-tributes-enhancement-suite/releases) page
+2. Download the latest release ZIP file
+3. Extract the ZIP file on your computer
+4. Rename the extracted folder to remove the version number  
+   (e.g., from `fcrm-tributes-enhancement-suite-1.3.0` to `fcrm-tributes-enhancement-suite`)
+5. Create a new ZIP file from the renamed folder
+6. In your WordPress admin panel, go to Plugins → Add New → Upload Plugin
+7. Upload your new ZIP file and activate the plugin
+8. Plugin should then auto-update moving forward if there are any changes.
+
+**Note**: The folder renaming step is necessary for WordPress to properly handle plugin updates and functionality.
 
 ---
 
@@ -75,6 +89,7 @@ Integration for FireHawkCRM Tributes plugin which adds Plausible Analytics track
 - Navigate to FH Tributes Enhancements → Performance.
 - Enable/disable performance optimisations.
 - Enable/disable flower delivery functionality.
+- Enable/disable bootstrap.js library, if a conflict is present.
 
 ### Styling Settings
 - Navigate to FH Tributes Enhancements → Custom Styles.
@@ -228,12 +243,16 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Changelog
 
-### v1.2.1 (2025-01-15) - Performance Optimisations 
+### v1.3.0 (2025-01-15) - Performance Optimisations
 - Completely rebuilt flower delivery disabling functionality for better performance and reliability
 - Implemented new system to properly remove flower delivery features from all pages when disabled
+- Optimised style loading to only enqueue CSS on tribute pages and pages containing tribute shortcodes
+- Improved performance by preventing unnecessary style loading across non-tribute pages
 - Optimised code to prevent unnecessary script loading and improve site performance
 - Styling change for streaming and social share button colour defaults
-- Minor bug fixes and tweaks to auto plugin update class
+- Updated README
+- Minor bug fixes and tweaks to auto plugin updates
+
 
 ### v1.1.1 (2024-11-25) - Plugin Auto-Update Version
 - Added automatic updates via WordPress dashboard

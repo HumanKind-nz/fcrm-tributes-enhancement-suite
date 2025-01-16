@@ -21,14 +21,23 @@ class Styling extends Enhancement_Base {
 		'primary-button-hover-text'  => 'Search &amp; Primary Button Hover Text Colour',
 		'secondary-button'           => 'Secondary Button Colour',
 		'secondary-button-text'      => 'Secondary Button Text Colour',
+		'secondary-button-border'    => 'Secondary Button Border Colour',
 		'secondary-button-hover'     => 'Secondary Button Hover Colour',
 		'secondary-button-hover-text'=> 'Secondary Button Hover Text Colour',
+		'secondary-button-hover-border' => 'Secondary Button Hover Border Colour',
 		'focus-border-color'         => 'Grid Card Border Colour',
 		'card-background'            => 'Grid Card Background Colour',
 		'primary-shadow'             => 'Grid Card Box Shading',
 		'focus-shadow-color'         => 'Focus Shadow Colour',
 		'link-color'                 => 'Link Colour'
 	];
+
+	/**
+	 * Static cache for tribute page detection
+	 *
+	 * @var bool|null
+	 */
+	private $is_tribute_page = null;
 
 	/**
 	 * Constructor
@@ -69,8 +78,10 @@ class Styling extends Enhancement_Base {
 			'primary-button-hover-text'  => '#FFFFFF',
 			'secondary-button'           => '#6C757D',
 			'secondary-button-text'      => '#FFFFFF',
-			'secondary-button-hover'     => '#5A6268',
-			'secondary-button-hover-text'=> '#FFFFFF',
+			'secondary-button-border'    => '#FFFFFF',
+			'secondary-button-hover'     => '#FFFFFF',
+			'secondary-button-hover-text'=> '#6C757D',
+			'secondary-button-hover-border' => '#6C757D',
 			'focus-border-color'         => '#007BFF',
 			'card-background'            => '#FFFFFF',
 			'primary-shadow'             => 'rgba(0, 0, 0, 0.1)',
@@ -122,6 +133,57 @@ class Styling extends Enhancement_Base {
 				'default' => $this->get_default_value('grid-border-radius')
 			]
 		);
+	}
+
+	/**
+	 * Check if current page is tribute-related
+	 */
+	protected function is_tribute_page(): bool {
+		if ($this->is_tribute_page !== null) {
+			return $this->is_tribute_page;
+		}
+	
+		$is_tribute = false;
+	
+		// Check for tribute single post type
+		if (isset($_GET['id']) && is_singular() && get_post_type() === 'tribute') {
+			$is_tribute = true;
+		}
+	
+		// Check if we're on the designated tribute search page
+		if (is_page(get_option('fcrm_tributes_search_page_id'))) {
+			$is_tribute = true;
+		}
+	
+		// Check for tribute shortcodes
+		if ($this->has_tribute_shortcode()) {
+			$is_tribute = true;
+		}
+	
+		$this->is_tribute_page = $is_tribute;
+		return $is_tribute;
+	}
+
+	/**
+	 * Check if current post contains tribute shortcodes
+	 */
+	protected function has_tribute_shortcode(): bool {
+		global $post;
+		if (!$post || !is_a($post, 'WP_Post')) {
+			return false;
+		}
+
+		$shortcodes = [
+			'show_crm_tribute',
+			'show_crm_tributes_grid',
+			'show_crm_tributes_large_grid',
+			'show_crm_tributes_carousel',
+			'show_crm_tribute_search',
+			'show_crm_tribute_search_bar'
+		];
+
+		$pattern = get_shortcode_regex($shortcodes);
+		return preg_match('/' . $pattern . '/', $post->post_content);
 	}
 
 	/**
@@ -245,6 +307,11 @@ class Styling extends Enhancement_Base {
 	 * Enqueue frontend assets
 	 */
 	public function enqueue_frontend_assets(): void {
+		// Only load styles on tribute pages or where shortcode is used
+		if (!$this->is_tribute_page()) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'fcrm-enhancement-styles',
 			FCRM_ENHANCEMENT_URL . 'assets/css/enhancement.css',
