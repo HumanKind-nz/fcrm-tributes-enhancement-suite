@@ -23,23 +23,27 @@ namespace FCRM\EnhancementSuite;
 	 exit;
  }
  
- // Plugin constants
- define('FCRM_ENHANCEMENT_VERSION', '1.3.0');
- define('FCRM_ENHANCEMENT_FILE', __FILE__);
- define('FCRM_ENHANCEMENT_PATH', plugin_dir_path(__FILE__));
- define('FCRM_ENHANCEMENT_URL', plugin_dir_url(__FILE__));
- define('FCRM_ENHANCEMENT_BASENAME', plugin_basename(__FILE__));
- 
- // Load the updater class
- require_once FCRM_ENHANCEMENT_PATH . 'includes/class-update-checker.php';
- 
- // Initialize the updater
- if (is_admin() && class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
-	 new PluginUpdateChecker(
-		 __FILE__,
-		 'weavedigitalstudio/fcrm-tributes-enhancement-suite'
-	 );
- }
+// Plugin constants
+define('FCRM_ENHANCEMENT_VERSION', '1.3.0');
+define('FCRM_ENHANCEMENT_FILE', __FILE__);
+define('FCRM_ENHANCEMENT_PATH', plugin_dir_path(__FILE__));
+define('FCRM_ENHANCEMENT_URL', plugin_dir_url(__FILE__));
+define('FCRM_ENHANCEMENT_BASENAME', plugin_basename(__FILE__));
+
+// Load the updater class
+require_once FCRM_ENHANCEMENT_PATH . 'includes/class-update-checker.php';
+
+// Initialize the updater on init hook
+function fcrm_init_updater() {
+    if (is_admin() && class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
+        // Use the static init method instead of constructor for singleton pattern
+        \FCRM\EnhancementSuite\PluginUpdateChecker::init(
+            FCRM_ENHANCEMENT_FILE,
+            'weavedigitalstudio/fcrm-tributes-enhancement-suite'
+        );
+    }
+}
+add_action('init', 'fcrm_init_updater');
   
  /**
   * Main plugin class
