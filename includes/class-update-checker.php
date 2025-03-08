@@ -2,12 +2,16 @@
 /**
  * Plugin Update Checker
  *
+ * @version    1.1.0
+ * 
  * Enables automatic updates from GitHub releases for WordPress plugins.
  * Features:
  * - GitHub API integration with rate limit protection
  * - Response caching to minimize API calls (4 hour cache, 1 hour for errors)
  * - Detailed error logging
  * - Optional authentication token support
+ * - Proper version comparison handling
+ * - No-update status management
  */
 
 namespace FCRM\EnhancementSuite;
@@ -85,6 +89,16 @@ if (!class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
             }
             
             return $this->plugin;
+        }
+        
+        /**
+         * Normalize a version string by removing 'v' prefix
+         * 
+         * @param string $version Version string
+         * @return string Normalized version
+         */
+        private function normalize_version($version) {
+            return ltrim($version, "v");
         }
         
         /**
@@ -206,12 +220,28 @@ if (!class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
                 return $transient;
             }
 
-            $current_version = $transient->checked[$this->basename];
-            $latest_version = ltrim($repository_info->tag_name, 'v'); // Remove 'v' prefix if present
+            // Get current version directly from plugin header data
+            $plugin_data = $this->get_plugin_data();
+            $current_version = $plugin_data['Version'];
+            
+            // Normalize versions
+            $current_version_normalized = $this->normalize_version($current_version);
+            $latest_version = $this->normalize_version($repository_info->tag_name);
 
-            if (version_compare($latest_version, $current_version, 'gt')) {
+            // Debug log if needed
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf(
+                    'Plugin Update Checker: %s - Current version: %s, GitHub version: %s',
+                    $plugin_data['Name'],
+                    $current_version_normalized,
+                    $latest_version
+                ));
+            }
+
+            // Only add to update response if GitHub version is strictly greater
+            if (version_compare($latest_version, $current_version_normalized, 'gt')) {
                 $plugin = array(
-                    'url' => $this->get_plugin_data()['PluginURI'],
+                    'url' => $plugin_data['PluginURI'],
                     'slug' => current(explode('/', $this->basename)),
                     'package' => $repository_info->zipball_url,
                     'new_version' => $latest_version,
@@ -223,6 +253,27 @@ if (!class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
                 );
 
                 $transient->response[$this->basename] = (object) $plugin;
+            } else {
+                // Make sure we're not in the response array if the version is the same or older
+                if (isset($transient->response[$this->basename])) {
+                    unset($transient->response[$this->basename]);
+                }
+                
+                // Add to the no_update list to show as "up to date"
+                if (!isset($transient->no_update[$this->basename])) {
+                    $plugin = [
+                        "slug" => current(explode('/', $this->basename)),
+                        "plugin" => $this->basename,
+                        "new_version" => $latest_version,
+                        "url" => $plugin_data["PluginURI"],
+                        "package" => "",
+                        "icons" => [
+                            "1x" => self::ICON_SMALL,
+                            "2x" => self::ICON_LARGE,
+                        ],
+                    ];
+                    $transient->no_update[$this->basename] = (object) $plugin;
+                }
             }
 
             return $transient;
@@ -248,7 +299,7 @@ if (!class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
                 $plugin_info = array(
                     'name'              => $plugin_data['Name'],
                     'slug'              => $this->basename,
-                    'version'           => ltrim($repository_info->tag_name, 'v'),
+                    'version'           => $this->normalize_version($repository_info->tag_name),
                     'author'            => $plugin_data['Author'],
                     'author_profile'    => $plugin_data['AuthorURI'],
                     'last_updated'      => $repository_info->published_at,
@@ -284,6 +335,9 @@ if (!class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
             if (is_plugin_active($this->basename)) {
                 activate_plugin($this->basename);
             }
+            
+            // Clear cache after installation
+            delete_transient($this->get_cache_key());
 
             return $result;
         }
