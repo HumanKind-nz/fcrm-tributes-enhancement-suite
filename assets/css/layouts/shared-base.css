@@ -1,0 +1,295 @@
+/**
+ * FCRM Layouts - Shared Base Styles
+ * 
+ * Common variables, utilities, and base styles for all modern layouts
+ * 
+ * @package FCRM_Enhancement_Suite
+ * @subpackage Layouts
+ * @since 1.0.0
+ */
+
+/* CSS Custom Properties (Variables) */
+:root {
+    /* Color Palette */
+    --fcrm-primary: #2c3e50;
+    --fcrm-primary-light: #34495e;
+    --fcrm-primary-dark: #1a252f;
+    --fcrm-secondary: #3498db;
+    --fcrm-secondary-light: #5dade2;
+    --fcrm-secondary-dark: #2980b9;
+    
+    /* Neutral Colors */
+    --fcrm-white: #ffffff;
+    --fcrm-gray-50: #f8f9fa;
+    --fcrm-gray-100: #f1f3f4;
+    --fcrm-gray-200: #e9ecef;
+    --fcrm-gray-300: #dee2e6;
+    --fcrm-gray-400: #ced4da;
+    --fcrm-gray-500: #adb5bd;
+    --fcrm-gray-600: #6c757d;
+    --fcrm-gray-700: #495057;
+    --fcrm-gray-800: #343a40;
+    --fcrm-gray-900: #212529;
+    
+    /* Semantic Colors */
+    --fcrm-text-primary: var(--fcrm-gray-900);
+    --fcrm-text-secondary: var(--fcrm-gray-600);
+    --fcrm-text-muted: var(--fcrm-gray-500);
+    --fcrm-border: var(--fcrm-gray-200);
+    --fcrm-border-light: var(--fcrm-gray-100);
+    --fcrm-background: var(--fcrm-white);
+    --fcrm-background-alt: var(--fcrm-gray-50);
+    
+    /* Typography */
+    --fcrm-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --fcrm-font-size-xs: 0.75rem;
+    --fcrm-font-size-sm: 0.875rem;
+    --fcrm-font-size-base: 1rem;
+    --fcrm-font-size-lg: 1.125rem;
+    --fcrm-font-size-xl: 1.25rem;
+    --fcrm-font-size-2xl: 1.5rem;
+    --fcrm-font-size-3xl: 1.875rem;
+    
+    --fcrm-font-weight-normal: 400;
+    --fcrm-font-weight-medium: 500;
+    --fcrm-font-weight-semibold: 600;
+    --fcrm-font-weight-bold: 700;
+    
+    --fcrm-line-height-tight: 1.25;
+    --fcrm-line-height-normal: 1.5;
+    --fcrm-line-height-relaxed: 1.625;
+    
+    /* Spacing */
+    --fcrm-space-1: 0.25rem;
+    --fcrm-space-2: 0.5rem;
+    --fcrm-space-3: 0.75rem;
+    --fcrm-space-4: 1rem;
+    --fcrm-space-5: 1.25rem;
+    --fcrm-space-6: 1.5rem;
+    --fcrm-space-8: 2rem;
+    --fcrm-space-10: 2.5rem;
+    --fcrm-space-12: 3rem;
+    --fcrm-space-16: 4rem;
+    --fcrm-space-20: 5rem;
+    
+    /* Border Radius */
+    --fcrm-radius-sm: 0.25rem;
+    --fcrm-radius: 0.375rem;
+    --fcrm-radius-md: 0.5rem;
+    --fcrm-radius-lg: 0.75rem;
+    --fcrm-radius-xl: 1rem;
+    --fcrm-radius-full: 9999px;
+    
+    /* Shadows */
+    --fcrm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --fcrm-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --fcrm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --fcrm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --fcrm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Transitions */
+    --fcrm-transition-fast: 150ms ease-in-out;
+    --fcrm-transition-normal: 250ms ease-in-out;
+    --fcrm-transition-slow: 350ms ease-in-out;
+    
+    /* Z-index */
+    --fcrm-z-dropdown: 1000;
+    --fcrm-z-sticky: 1020;
+    --fcrm-z-fixed: 1030;
+    --fcrm-z-modal-backdrop: 1040;
+    --fcrm-z-modal: 1050;
+    --fcrm-z-popover: 1060;
+    --fcrm-z-tooltip: 1070;
+}
+
+/* Base Reset and Normalisation */
+.fcrm-tributes-container {
+    box-sizing: border-box;
+    font-family: var(--fcrm-font-family);
+    line-height: var(--fcrm-line-height-normal);
+    color: var(--fcrm-text-primary);
+}
+
+.fcrm-tributes-container *,
+.fcrm-tributes-container *::before,
+.fcrm-tributes-container *::after {
+    box-sizing: inherit;
+}
+
+/* Screen Reader Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus Styles */
+.fcrm-tributes-container a:focus,
+.fcrm-tributes-container button:focus {
+    outline: 2px solid var(--fcrm-secondary);
+    outline-offset: 2px;
+}
+
+/* Button Base Styles */
+.fcrm-tributes-container button,
+.fcrm-tributes-container .service-button,
+.fcrm-tributes-container .view-details-button,
+.fcrm-tributes-container .fcrm-load-more-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--fcrm-space-2);
+    padding: var(--fcrm-space-2) var(--fcrm-space-4);
+    font-family: inherit;
+    font-size: var(--fcrm-font-size-sm);
+    font-weight: var(--fcrm-font-weight-medium);
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: var(--fcrm-radius);
+    cursor: pointer;
+    transition: all var(--fcrm-transition-fast);
+    user-select: none;
+}
+
+.fcrm-tributes-container button:disabled,
+.fcrm-tributes-container .service-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Icon Styles */
+.fcrm-tributes-container .service-icon,
+.fcrm-tributes-container .button-icon {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+}
+
+/* Loading Spinner */
+.fcrm-tributes-container .spinner {
+    animation: fcrm-spin 1s linear infinite;
+}
+
+@keyframes fcrm-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* No Tributes Message */
+.fcrm-no-tributes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: var(--fcrm-space-8);
+    text-align: center;
+}
+
+.no-tributes-message h3 {
+    margin: 0 0 var(--fcrm-space-2) 0;
+    font-size: var(--fcrm-font-size-xl);
+    font-weight: var(--fcrm-font-weight-semibold);
+    color: var(--fcrm-text-primary);
+}
+
+.no-tributes-message p {
+    margin: 0;
+    font-size: var(--fcrm-font-size-base);
+    color: var(--fcrm-text-secondary);
+}
+
+/* Modal Base Styles (preserve FCRM functionality) */
+.fcrm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: var(--fcrm-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--fcrm-space-4);
+}
+
+.fcrm-modal-content {
+    background: var(--fcrm-background);
+    border-radius: var(--fcrm-radius-lg);
+    box-shadow: var(--fcrm-shadow-xl);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    position: relative;
+}
+
+.fcrm-modal-close {
+    position: absolute;
+    top: var(--fcrm-space-4);
+    right: var(--fcrm-space-4);
+    font-size: var(--fcrm-font-size-2xl);
+    font-weight: var(--fcrm-font-weight-bold);
+    color: var(--fcrm-text-secondary);
+    cursor: pointer;
+    z-index: 1;
+    transition: color var(--fcrm-transition-fast);
+}
+
+.fcrm-modal-close:hover {
+    color: var(--fcrm-text-primary);
+}
+
+.fcrm-modal-body {
+    padding: var(--fcrm-space-6);
+}
+
+/* Responsive Utilities */
+@media (max-width: 640px) {
+    :root {
+        --fcrm-space-4: 0.75rem;
+        --fcrm-space-6: 1rem;
+        --fcrm-space-8: 1.5rem;
+    }
+    
+    .fcrm-modal {
+        padding: var(--fcrm-space-2);
+    }
+    
+    .fcrm-modal-content {
+        max-width: 95vw;
+    }
+    
+    .fcrm-modal-body {
+        padding: var(--fcrm-space-4);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .fcrm-tributes-container .service-buttons,
+    .fcrm-tributes-container .view-details-button,
+    .fcrm-tributes-container .fcrm-load-more-container {
+        display: none;
+    }
+    
+    .fcrm-tributes-container {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .fcrm-tribute-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+} 

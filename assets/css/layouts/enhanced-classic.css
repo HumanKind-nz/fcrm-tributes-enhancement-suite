@@ -1,0 +1,167 @@
+/**
+ * Enhanced Classic Single Tribute Layout Styles
+ * 
+ * SUBTLE ENHANCEMENT STRATEGY:
+ * 
+ * This CSS provides minimal modern enhancements to FCRM's proven layout:
+ * - Border radius on banner to match modern card design
+ * - Modern button styling with clean borders and hover states
+ * - Enhanced navigation pills with subtle background colors
+ * - Preserve all of FCRM's excellent spacing and layout decisions
+ * - Keep familiar structure that funeral homes know and trust
+ */
+
+/* Enhanced Classic Base Styles - Minimal Variables */
+.fcrm-enhanced-classic {
+    --enhanced-primary: #3b82f6;
+    --enhanced-primary-hover: #2563eb;
+    --enhanced-border: #e5e7eb;
+    --enhanced-border-hover: #d1d5db;
+    --enhanced-radius: 0.5rem;
+    --enhanced-transition: all 0.2s ease-in-out;
+    --enhanced-nav-bg: #f8fafc;
+    --enhanced-nav-hover: #f1f5f9;
+    --enhanced-nav-active: #e2e8f0;
+    
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Banner Border Radius - Only Visual Change */
+.fcrm-enhanced-classic .banner {
+    border-radius: var(--enhanced-radius);
+    overflow: hidden;
+}
+
+/* Modern Button Styling */
+.fcrm-enhanced-classic .btn,
+.fcrm-enhanced-classic .enhanced-action-btn,
+.fcrm-enhanced-classic .write-message-btn,
+.fcrm-enhanced-classic .plant-tree-btn,
+.fcrm-enhanced-classic .make-donation-btn {
+    border-radius: var(--enhanced-radius);
+    border: 2px solid var(--enhanced-border);
+    background: #ffffff;
+    color: #374151;
+    font-weight: 500;
+    transition: var(--enhanced-transition);
+    text-decoration: none;
+}
+
+.fcrm-enhanced-classic .btn:hover,
+.fcrm-enhanced-classic .enhanced-action-btn:hover,
+.fcrm-enhanced-classic .write-message-btn:hover,
+.fcrm-enhanced-classic .plant-tree-btn:hover,
+.fcrm-enhanced-classic .make-donation-btn:hover {
+    border-color: var(--enhanced-primary);
+    color: var(--enhanced-primary);
+    background: #ffffff;
+    text-decoration: none;
+}
+
+/* Primary Button Variant */
+.fcrm-enhanced-classic .btn-primary,
+.fcrm-enhanced-classic .write-message-btn {
+    background: var(--enhanced-primary);
+    border-color: var(--enhanced-primary);
+    color: #ffffff;
+}
+
+/* Icon alignment for buttons and nav links */
+.fcrm-enhanced-classic .enhanced-action-btn svg,
+.fcrm-enhanced-classic .enhanced-nav-link svg {
+    margin-right: 6px;
+    vertical-align: -2px;
+}
+
+.fcrm-enhanced-classic .btn-primary:hover,
+.fcrm-enhanced-classic .write-message-btn:hover {
+    background: var(--enhanced-primary-hover);
+    border-color: var(--enhanced-primary-hover);
+    color: #ffffff;
+}
+
+/* Enhanced Navigation Pills - Increased specificity to override FCRM styles */
+.fcrm-enhanced-classic .nav-pills .nav-link,
+.fcrm-enhanced-classic .enhanced-nav-link,
+.fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .nav-pills .nav-link {
+    border-radius: var(--enhanced-radius) !important;
+    background: var(--enhanced-nav-bg) !important;
+    border: 1px solid #d1d5db !important; /* Darker border for accessibility */
+    color: var(--fcrm-ui-secondary, #475569) !important;
+    font-weight: 500 !important;
+    transition: var(--enhanced-transition) !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.fcrm-enhanced-classic .nav-pills .nav-link:hover,
+.fcrm-enhanced-classic .enhanced-nav-link:hover,
+.fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .nav-pills .nav-link:hover {
+    background: var(--enhanced-nav-hover) !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    border-color: #9ca3af !important; /* Darker hover border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
+}
+
+.fcrm-enhanced-classic .nav-pills .nav-link.active,
+.fcrm-enhanced-classic .enhanced-nav-link.active,
+.fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .nav-pills .nav-link.active {
+    background: var(--enhanced-nav-active) !important;
+    color: #1e293b !important;
+    border-color: #9ca3af !important; /* Darker active border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* External Link Pills - More Distinctive Styling */
+.fcrm-enhanced-classic .enhanced-external-link,
+.fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .enhanced-external-link {
+    background: #f1f5f9 !important;
+    border-color: #9ca3af !important; /* Darker border for better contrast */
+    color: var(--fcrm-ui-secondary, #475569) !important;
+}
+
+.fcrm-enhanced-classic .enhanced-external-link:hover,
+.fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .enhanced-external-link:hover {
+    background: #e2e8f0 !important;
+    border-color: var(--enhanced-primary) !important;
+    color: var(--enhanced-primary) !important;
+    box-shadow: 0 3px 6px rgba(59, 130, 246, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Subtle Card Enhancement */
+.fcrm-enhanced-classic .card,
+.fcrm-enhanced-classic .tribute-message,
+.fcrm-enhanced-classic .event-card {
+    border-radius: var(--enhanced-radius);
+    border: 1px solid var(--enhanced-border);
+}
+
+/* Ensure Messages Section Visibility */
+.fcrm-enhanced-classic #fcrm-tributes-messages,
+.fcrm-enhanced-classic .tribute-messages-container,
+.fcrm-enhanced-classic .messages-section {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fcrm-enhanced-classic .banner {
+        border-radius: 0;
+    }
+    
+    .fcrm-enhanced-classic .nav-pills .nav-link,
+    .fcrm-enhanced-classic .enhanced-nav-link {
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .fcrm-enhanced-classic .banner {
+        border-radius: 0;
+    }
+} 
