@@ -1,10 +1,10 @@
-# 🔥 FireHawk Tributes Enhancement Suite 
+# FireHawkCRM Tributes Enhancement Suite 
 
 **The ultimate enhancement suite for FireHawkCRM Tributes & WordPress** - performance optimisations, modern layouts, comprehensive caching, and integrated alternative SEO & analytics. Built by devs, for devs who want their funeral websites to perform well.
 
 > Originally built for internal use at Human Kind Funeral Websites / Weave Digital Studio, but we figured other devs might find it useful as well.
 
-![Plugin Header](assets/plugin-header.png)
+![HumanKind Funeral Notices](https://weave-hk-github.b-cdn.net/humankind/plugin-header.png)
 
 ---
 
@@ -298,46 +298,6 @@ The caching system intercepts API calls at the HTTP level, so even complex tribu
 - **Test in staging**: We can't guarantee compatibility with every theme/plugin combo
 - **Performance testing**: Done primarily on our own NGINX high performance cloud hosting with Redis
 - **No official support**: For external users - community support via GitHub issues
-
----
-
-## 📝 Changelog
-
-### v2.0.1 (2025-09-18) - Latest Stable Release
-**Recent Updates:**
-- ⚡ Enhanced API caching with better route classification
-- 🎯 Improved single tribute page routing and ID detection
-- 🖱️ Full-card click functionality across all layout templates (entire card area clickable)
-- 🔧 Debug logging toggle in admin interface for easier troubleshooting
-- 🎨 Updated UI icons and improved admin styling
-
-### v2.0.0 (2025-06-06) - Complete Rewrite
-**Major Changes:**
-- 🚀 Complete architectural rewrite with a new modular system
-- ⚡ New API caching system (3-5s → <500ms page loads)
-- 🎯 **FCRM Asset Dequeuing**: Fixes major performance issue where FCRM loaded 28+ files on every page (saves 500KB-2MB+ per page load)
-- 🎨 Modern layout templates with responsive card designs
-- 🎛️ Universal UI styling system
-- 📊 Integrated our SEO & Analytics modules (Plausible + SEOPress)
-- 🛡️ Enhanced security and WordPress standards compliance
-- 📱 admin interface redesign
-- 🔧 Extensible framework for custom modules
-
-**Breaking Changes:**
-- Most v1.x filters and actions have been replaced, sorry.
-- Admin interface completely redesigned
-- File structure significantly changed
-- Settings format updated (automatic migration included)
-
-**Migration Path:**
-- Backup your site before upgrading
-- Old settings will be automatically migrated
-- Test all customisations in staging first
-
-### v1.3.0 (2025-01-15) - Performance Optimisations
-- Improved flower delivery disabling
-- Enhanced script loading optimisation
-- Better tribute page detection
 
 ---
 
