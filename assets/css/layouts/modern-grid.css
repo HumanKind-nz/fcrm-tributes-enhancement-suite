@@ -1,0 +1,570 @@
+/**
+ * FCRM Layouts - Modern Grid Layout
+ * 
+ * Clean, card-based grid layout with modern spacing and typography
+ * Image-focused design with subtle shadows and responsive behaviour
+ * 
+ * @package FCRM_Enhancement_Suite
+ * @subpackage Layouts
+ * @since 1.0.0
+ */
+
+/* Modern Grid Container */
+.fcrm-modern-grid {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--fcrm-space-4);
+}
+
+/* Modern Search Interface */
+.fcrm-modern-search, .fcrm-unified-search.fcrm-modern-search {
+    background: var(--fcrm-surface-color, #ffffff);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.fcrm-modern-search .search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .fcrm-modern-search .search-container {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+/* Input Groups */
+.fcrm-modern-search .input-group {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    min-width: 0;
+    flex: 1;
+}
+
+.fcrm-modern-search .input-group:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.fcrm-modern-search .input-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    color: var(--fcrm-ui-secondary, #6b7280);
+    flex-shrink: 0;
+}
+
+.fcrm-modern-search .modern-input {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+    color: #111827;
+    outline: none;
+    min-width: 0;
+}
+
+.fcrm-modern-search .modern-input::placeholder {
+    color: var(--fcrm-ui-secondary, #6b7280);
+}
+
+/* Buttons */
+.fcrm-modern-search .modern-reset,
+.fcrm-modern-search .modern-clear,
+.fcrm-modern-search .modern-search-btn {
+    border: none;
+    background: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fcrm-modern-search .modern-reset,
+.fcrm-modern-search .modern-clear {
+    color: var(--fcrm-ui-secondary, #6b7280);
+    margin-right: 0.25rem;
+}
+
+.fcrm-modern-search .modern-reset:hover,
+.fcrm-modern-search .modern-clear:hover {
+    color: #374151;
+}
+
+.fcrm-modern-search .modern-search-btn {
+    background: #3b82f6;
+    color: white;
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-left: 0.5rem;
+}
+
+.fcrm-modern-search .modern-search-btn:hover {
+    background: #2563eb;
+}
+
+/* Name Search - Primary and larger */
+.fcrm-modern-search .name-search-modern {
+    flex: 2;
+    min-width: 250px;
+}
+
+/* Date picker - Secondary and compact */
+.fcrm-modern-search .date-picker-modern {
+    flex: 1.5;
+    min-width: 200px;
+}
+
+/* Date Range Input Styling */
+.date-range-input {
+    cursor: pointer;
+}
+
+.date-range-input:focus {
+    cursor: text;
+}
+
+/* Flatpickr Custom Styling */
+.fcrm-date-picker {
+    font-family: inherit;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+}
+
+.fcrm-date-picker .flatpickr-day:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.fcrm-date-picker .flatpickr-day.selected {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.fcrm-date-picker .flatpickr-day.inRange {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Search form specific */
+.fcrm-modern-search .modern-search {
+    flex: 1.5;
+    min-width: 200px;
+}
+
+/* Grid Layout */
+.modern-tributes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+    min-height: 200px;
+}
+
+/* Ensure minimum 3 columns on larger screens */
+@media (min-width: 1024px) {
+    .modern-tributes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        max-width: none;
+    }
+    
+    /* Force minimum 3 columns even with fewer items */
+    .modern-tributes-grid:has(.fcrm-tribute-card:nth-child(-n+2)) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Column Configurations - Responsive */
+@media (min-width: 1200px) {
+    .fcrm-modern-grid.columns-2 .modern-tributes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fcrm-modern-grid.columns-3 .modern-tributes-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .fcrm-modern-grid.columns-4 .modern-tributes-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .fcrm-modern-grid.columns-3 .modern-tributes-grid,
+    .fcrm-modern-grid.columns-4 .modern-tributes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .fcrm-modern-grid.columns-2 .modern-tributes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.fcrm-modern-grid.columns-auto .modern-tributes-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Modern Tribute Cards */
+.fcrm-tribute-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: none;
+    cursor: pointer;
+}
+
+.fcrm-tribute-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Style Variations */
+.fcrm-modern-grid.card-style-standard .fcrm-tribute-card {
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.fcrm-modern-grid.card-style-standard .fcrm-tribute-card:hover {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-4px);
+}
+
+.fcrm-modern-grid.card-style-elevated .fcrm-tribute-card {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.fcrm-modern-grid.card-style-elevated .fcrm-tribute-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-6px);
+}
+
+.fcrm-modern-grid.card-style-outlined .fcrm-tribute-card {
+    border: 2px solid #e5e7eb;
+    box-shadow: none;
+}
+
+.fcrm-modern-grid.card-style-outlined .fcrm-tribute-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.fcrm-modern-grid.card-style-minimal .fcrm-tribute-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.fcrm-modern-grid.card-style-minimal .fcrm-tribute-card:hover {
+    background: #f9fafb;
+}
+
+/* Tribute Image */
+.tribute-image-container {
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+
+.tribute-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.fcrm-tribute-card[role="link"]:hover {
+    cursor: pointer;
+}
+
+.tribute-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fcrm-ui-secondary, #6b7280);
+    background: #f9fafb;
+}
+
+.tribute-image-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.fcrm-tribute-card:hover .tribute-image {
+    transform: scale(1.05);
+}
+
+/* Tribute Content */
+.tribute-content {
+    padding: 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tribute-name {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #111827;
+    letter-spacing: -0.025em;
+}
+
+.tribute-name-link {
+    color: #111827;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.tribute-name-link:hover {
+    color: #3b82f6;
+}
+
+.tribute-dates {
+    color: var(--fcrm-ui-secondary, #4b5563);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.date-separator {
+    margin: 0 0.5rem;
+    color: var(--fcrm-ui-secondary, #9ca3af);
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+/* Service Information */
+.tribute-service-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.service-datetime,
+.service-venue {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--fcrm-ui-secondary, #6b7280);
+    margin-bottom: 0.5rem;
+}
+
+.service-icon {
+    flex-shrink: 0;
+    color: #3b82f6;
+}
+
+/* Remove tribute actions section since cards are fully clickable */
+.tribute-actions {
+    display: none;
+}
+
+/* Loading States */
+.modern-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--fcrm-ui-secondary, #6b7280);
+}
+
+.empty-state-content h3 {
+    margin: 1rem 0 0.5rem 0;
+    color: #111827;
+}
+
+.empty-icon {
+    color: var(--fcrm-ui-secondary, #6b7280);
+    margin-bottom: 1rem;
+}
+
+/* Load More Button */
+.load-more-container {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 2rem 0;
+}
+
+.load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    background: #ffffff;
+    border: 2px solid #3b82f6;
+    color: #3b82f6;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.load-more-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+    .modern-tributes-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .fcrm-modern-search {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .fcrm-modern-search .search-container {
+        gap: 1rem;
+    }
+    
+    /* Hide date picker on mobile for better UX */
+    .fcrm-modern-search .date-picker-modern {
+        display: none !important;
+    }
+    
+    /* Make name search full width when date picker is hidden */
+    .fcrm-modern-search .name-search-modern {
+        flex: 1 !important;
+        min-width: auto !important;
+    }
+    
+    .tribute-content {
+        padding: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .modern-tributes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .fcrm-tribute-card {
+        border: 2px solid #111827;
+    }
+    
+    .tribute-service-info {
+        border: 1px solid #6b7280;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .fcrm-tribute-card,
+    .tribute-image,
+    .tribute-name-link,
+    .view-details-button,
+    .load-more-btn {
+        transition: none;
+    }
+    
+    .fcrm-tribute-card:hover {
+        transform: none;
+    }
+    
+    .fcrm-tribute-card:hover .tribute-image {
+        transform: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+}
+
+/* Dark Mode Support (if theme supports it) */
+@media (prefers-color-scheme: dark) {
+    .fcrm-modern-search {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .fcrm-modern-search .input-group {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .fcrm-modern-search .modern-input {
+        color: #f9fafb;
+    }
+    
+    .fcrm-tribute-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .tribute-name {
+        color: #f9fafb;
+    }
+    
+    .tribute-image-placeholder {
+        background: #374151;
+        color: #9ca3af;
+    }
+} 

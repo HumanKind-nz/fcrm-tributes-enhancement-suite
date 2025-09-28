@@ -1,0 +1,500 @@
+/**
+ * FCRM Layouts - List View Layout
+ * 
+ * Clean, typography-focused tribute listing with minimal visual elements.
+ * Emphasizes readability and essential information with generous white space.
+ * Perfect for clean, uncluttered presentation of tribute information.
+ * 
+ * @package FCRM_Enhancement_Suite
+ * @subpackage Layouts
+ * @since 1.0.0
+ */
+
+/* CSS Custom Properties - Minimal Design System */
+.fcrm-minimal-layout {
+    --minimal-grey-50: #fafafa;
+    --minimal-grey-100: #f5f5f5;
+    --minimal-grey-200: #e5e5e5;
+    --minimal-grey-300: #d4d4d4;
+    --minimal-grey-400: #a3a3a3;
+    --minimal-grey-500: #737373;
+    --minimal-grey-600: #525252;
+    --minimal-grey-700: #404040;
+    --minimal-grey-800: #262626;
+    --minimal-grey-900: #171717;
+    
+    --minimal-white: #ffffff;
+    --minimal-black: #000000;
+    
+    --minimal-primary: #404040;
+    --minimal-primary-light: #525252;
+    --minimal-primary-dark: #262626;
+    
+    --minimal-border: #e5e5e5;
+    --minimal-border-light: #f5f5f5;
+    
+    --minimal-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --minimal-shadow-soft: 0 2px 4px rgba(0, 0, 0, 0.06);
+    
+    --minimal-radius: 6px;
+    --minimal-radius-sm: 4px;
+}
+
+/* Minimal Layout Container */
+.fcrm-minimal-layout {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    background: var(--minimal-white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    color: var(--minimal-grey-800);
+}
+
+/* Modern Search Interface (reused for consistency) */
+.fcrm-minimal-layout .fcrm-modern-search, .fcrm-minimal-layout .fcrm-unified-search.fcrm-modern-search {
+    background: var(--minimal-grey-50);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--minimal-border);
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .fcrm-minimal-layout .fcrm-modern-search .search-container {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+/* Input Groups */
+.fcrm-minimal-layout .fcrm-modern-search .input-group {
+    display: flex;
+    align-items: center;
+    background: var(--minimal-white);
+    border: 1px solid var(--minimal-border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    min-width: 0;
+    flex: 1;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .input-group:focus-within {
+    border-color: var(--minimal-grey-400);
+    box-shadow: 0 0 0 3px rgba(64, 64, 64, 0.1);
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .input-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    color: var(--minimal-grey-500);
+    flex-shrink: 0;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-input {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+    color: var(--minimal-grey-800);
+    outline: none;
+    min-width: 0;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-input::placeholder {
+    color: var(--minimal-grey-500);
+}
+
+/* Buttons */
+.fcrm-minimal-layout .fcrm-modern-search .modern-reset,
+.fcrm-minimal-layout .fcrm-modern-search .modern-clear,
+.fcrm-minimal-layout .fcrm-modern-search .modern-search-btn {
+    border: none;
+    background: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-reset,
+.fcrm-minimal-layout .fcrm-modern-search .modern-clear {
+    color: var(--minimal-grey-500);
+    margin-right: 0.25rem;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-reset:hover,
+.fcrm-minimal-layout .fcrm-modern-search .modern-clear:hover {
+    color: var(--minimal-grey-700);
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-search-btn {
+    background: var(--minimal-primary);
+    color: var(--minimal-white);
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-left: 0.5rem;
+}
+
+.fcrm-minimal-layout .fcrm-modern-search .modern-search-btn:hover {
+    background: var(--minimal-primary-dark);
+}
+
+/* Name Search - Primary and larger */
+.fcrm-minimal-layout .fcrm-modern-search .name-search-modern {
+    flex: 2;
+    min-width: 250px;
+}
+
+/* Date picker - Secondary and compact */
+.fcrm-minimal-layout .fcrm-modern-search .date-picker-modern {
+    flex: 1.5;
+    min-width: 200px;
+}
+
+/* Date Range Input Styling */
+.fcrm-minimal-layout .date-range-input {
+    cursor: pointer;
+}
+
+.fcrm-minimal-layout .date-range-input:focus {
+    cursor: text;
+}
+
+/* Minimal Flatpickr Styling */
+.fcrm-minimal-layout .fcrm-date-picker {
+    font-family: inherit;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    border: 1px solid var(--minimal-border);
+}
+
+.fcrm-minimal-layout .fcrm-date-picker .flatpickr-day:hover {
+    background: var(--minimal-primary);
+    border-color: var(--minimal-primary);
+    color: var(--minimal-white);
+}
+
+.fcrm-minimal-layout .fcrm-date-picker .flatpickr-day.selected {
+    background: var(--minimal-primary);
+    border-color: var(--minimal-primary);
+    color: var(--minimal-white);
+}
+
+.fcrm-minimal-layout .fcrm-date-picker .flatpickr-day.inRange {
+    background: rgba(64, 64, 64, 0.1);
+    border-color: rgba(64, 64, 64, 0.3);
+}
+
+/* Responsive Design for Modern Search */
+@media (max-width: 767px) {
+    .fcrm-minimal-layout .fcrm-modern-search {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .fcrm-minimal-layout .fcrm-modern-search .search-container {
+        gap: 1rem;
+    }
+    
+    /* Hide date picker on mobile for better UX */
+    .fcrm-minimal-layout .fcrm-modern-search .date-picker-modern {
+        display: none !important;
+    }
+    
+    /* Make name search full width when date picker is hidden */
+    .fcrm-minimal-layout .fcrm-modern-search .name-search-modern {
+        flex: 1 !important;
+        min-width: auto !important;
+    }
+}
+
+/* Minimal Tributes Container */
+.minimal-tributes-container {
+    min-height: 200px;
+}
+
+/* Loading State */
+.minimal-loading {
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.minimal-loading .loading-text {
+    color: var(--minimal-grey-500);
+    font-size: 1rem;
+}
+
+/* Minimal Tributes List */
+.minimal-tributes-list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Minimal Tribute Item */
+.minimal-tribute-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--minimal-border-light);
+    gap: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.minimal-tribute-item:last-child {
+    border-bottom: none;
+}
+
+.minimal-tribute-item:hover {
+    background: var(--minimal-grey-50);
+    margin: 0 -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: var(--minimal-radius-sm);
+}
+
+/* Tribute Photo */
+.minimal-tribute-item .tribute-photo {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--minimal-grey-100);
+}
+
+.minimal-tribute-item .tribute-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.minimal-tribute-item .tribute-photo-placeholder {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--minimal-grey-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--minimal-grey-400);
+}
+
+/* Tribute Content */
+.minimal-tribute-item .tribute-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.minimal-tribute-item .tribute-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+@media (min-width: 640px) {
+    .minimal-tribute-item .tribute-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+    }
+}
+
+/* Tribute Name */
+.minimal-tribute-item .tribute-name {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--minimal-grey-900);
+}
+
+.minimal-tribute-item .tribute-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.minimal-tribute-item .tribute-link:hover {
+    color: var(--minimal-primary);
+}
+
+/* Tribute Dates */
+.minimal-tribute-item .tribute-dates {
+    color: var(--minimal-grey-600);
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Tribute Service Info */
+.minimal-tribute-item .tribute-service {
+    margin-top: 0.75rem;
+    color: var(--minimal-grey-600);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-state-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--minimal-grey-700);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.empty-state-content p {
+    margin: 0;
+    color: var(--minimal-grey-500);
+    font-size: 0.95rem;
+}
+
+/* Load More Button */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--minimal-border-light);
+}
+
+.load-more-btn.minimal-load-more {
+    padding: 0.875rem 2rem;
+    background: transparent;
+    border: 1px solid var(--minimal-border);
+    color: var(--minimal-grey-700);
+    border-radius: var(--minimal-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.load-more-btn.minimal-load-more:hover {
+    background: var(--minimal-grey-50);
+    border-color: var(--minimal-grey-300);
+}
+
+.load-more-btn.minimal-load-more:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 639px) {
+    .fcrm-minimal-layout {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .fcrm-minimal-search {
+        padding: 1.5rem;
+    }
+    
+    /* Hide date picker on mobile for better UX */
+    .fcrm-minimal-search .input-group.date-search {
+        display: none !important;
+    }
+    
+    /* Make name search full width when date picker is hidden */
+    .fcrm-minimal-search .input-group.name-search {
+        flex: 1 !important;
+        min-width: auto !important;
+    }
+
+    .minimal-tribute-item {
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .minimal-tribute-item .tribute-photo,
+    .minimal-tribute-item .tribute-photo-placeholder {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .minimal-tribute-item .tribute-name {
+        font-size: 1rem;
+    }
+    
+    .minimal-tribute-item .tribute-dates {
+        font-size: 0.85rem;
+    }
+    
+    .minimal-tribute-item .tribute-service {
+        font-size: 0.8rem;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+    .minimal-tribute-item .tribute-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .minimal-tribute-item .tribute-dates {
+        white-space: normal;
+    }
+}
+
+/* Focus states for accessibility */
+.minimal-tribute-item .tribute-link:focus {
+    outline: 2px solid var(--minimal-primary);
+    outline-offset: 2px;
+    border-radius: var(--minimal-radius-sm);
+}
+
+.load-more-btn.minimal-load-more:focus {
+    outline: 2px solid var(--minimal-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .fcrm-minimal-layout {
+        --minimal-border: #000000;
+        --minimal-grey-400: #666666;
+        --minimal-grey-500: #555555;
+        --minimal-grey-600: #444444;
+    }
+    
+    .minimal-tribute-item {
+        border-bottom-color: var(--minimal-grey-300);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .minimal-tribute-item,
+    .minimal-input,
+    .minimal-search-btn,
+    .minimal-clear,
+    .tribute-link {
+        transition: none;
+    }
+} 

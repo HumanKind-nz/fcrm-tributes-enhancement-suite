@@ -1,366 +1,958 @@
 <?php
 /**
- * Plugin Name: FireHawkCRM Tributes - Enhancement Suite
- * Plugin URI:  https://github.com/weavedigitalstudio/fcrm-tributes-enhancement-suite/
- * Description: An enhancement suite for the FireHawkCRM Tributes plugin, including performance optimisations, custom styling from admin, and loading animations.
- * Version:     1.3.0
- * Author:      Weave Digital Studio, Gareth Bissland
- * Author URI:  https://weave.co.nz/
- * License:     GPL-2.0+
- * Copyright (C) 2024 Weave Digital Studio Ltd
- * GitHub Plugin URI: weavedigitalstudio/fcrm-tributes-enhancement-suite/
+ * Plugin Name: FireHawkCRM Tributes Enhancement Suite
+ * Plugin URI: https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
+ * Description: Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
+ * Version: 2.0.2
+ * Author: Weave Digital Studio, Gareth Bissland
+ * Author URI: https://weave.co.nz/
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: fcrm-enhancement-suite
- * Requires at least: 6.0
- * Requires PHP: 8.0
+ * Domain Path: /languages
+ * Requires at least: 5.0
+ * Tested up to: 6.4
+ * Requires PHP: 7.4
+ * Network: false
  */
- 
-namespace FCRM\EnhancementSuite;
- 
- use FCRM\EnhancementSuite\PluginUpdateChecker;
- 
- // Prevent direct access
- if (!defined('ABSPATH')) {
-	 exit;
- }
- 
-// Plugin constants
-define('FCRM_ENHANCEMENT_VERSION', '1.3.0');
-define('FCRM_ENHANCEMENT_FILE', __FILE__);
-define('FCRM_ENHANCEMENT_PATH', plugin_dir_path(__FILE__));
-define('FCRM_ENHANCEMENT_URL', plugin_dir_url(__FILE__));
-define('FCRM_ENHANCEMENT_BASENAME', plugin_basename(__FILE__));
 
-// Load the updater class
-require_once FCRM_ENHANCEMENT_PATH . 'includes/class-update-checker.php';
-
-// Initialize the updater on init hook
-function fcrm_init_updater() {
-    if (is_admin() && class_exists('FCRM\EnhancementSuite\PluginUpdateChecker')) {
-        // Use the static init method instead of constructor for singleton pattern
-        \FCRM\EnhancementSuite\PluginUpdateChecker::init(
-            FCRM_ENHANCEMENT_FILE,
-            'weavedigitalstudio/fcrm-tributes-enhancement-suite'
-        );
-    }
+// Prevent direct access
+if (!defined('ABSPATH')) {
+	exit;
 }
-add_action('init', 'fcrm_init_updater');
-  
- /**
-  * Main plugin class
-  */
- class EnhancementSuite {
-	 /**
-	  * Plugin instance
-	  *
-	  * @var EnhancementSuite|null
-	  */
-	 private static $instance = null;
- 
-	 /**
-	  * Active modules
-	  *
-	  * @var array
-	  */
-	 private $modules = [];
- 
-	 /**
-	  * Settings tabs
-	  *
-	  * @var array
-	  */
-	 private $tabs = [
-		  'optimisation' => 'Performance Improvements',
-		  'styling' => 'Custom Tribute Styles',
-		  'loader' => 'Enable Loading Animation'
-	  ];
- 
-	 /**
-	  * Get plugin instance
-	  *
-	  * @return EnhancementSuite
-	  */
-	 public static function get_instance(): EnhancementSuite {
-		 if (null === self::$instance) {
-			 self::$instance = new self();
-		 }
-		 return self::$instance;
-	 }
- 
-	 /**
-	  * Constructor
-	  */
-	 private function __construct() {
-		 $this->check_requirements();
-		 $this->load_dependencies();
-		 $this->init_modules();
-		 $this->setup_hooks();
-	 }
- 
-	 /**
-	  * Check if required plugins are active
-	  */
-	 private function check_requirements(): void {
-		 if (!function_exists('is_plugin_active')) {
-			 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-		 }
- 
-		 if (!is_plugin_active('fcrm-tributes/fcrm-tributes.php')) {
-			 add_action('admin_notices', [$this, 'requirement_notice']);
-			 return;
-		 }
-	 }
- 
-	 /**
-	  * Load required files
-	  */
-	 private function load_dependencies(): void {
-		 require_once FCRM_ENHANCEMENT_PATH . 'includes/class-fcrm-enhancement-base.php';
-		 require_once FCRM_ENHANCEMENT_PATH . 'includes/class-fcrm-optimisation.php';
-		 require_once FCRM_ENHANCEMENT_PATH . 'includes/class-fcrm-styling.php';
-		 require_once FCRM_ENHANCEMENT_PATH . 'includes/class-fcrm-loader.php';
-		 require_once FCRM_ENHANCEMENT_PATH . 'includes/class-fcrm-flower-delivery-disabler.php';
-	 }
- 
-	 /**
-	  * Initialise modules
-	  */
-	 private function init_modules(): void {
-		 $this->modules['optimisation'] = new Optimisation();
-		 $this->modules['styling'] = new Styling();
-		 $this->modules['loader'] = new Loader();
-	 }
- 
-	 /**
-	  * Setup WordPress hooks
-	  */
-	 private function setup_hooks(): void {
-		 add_action('init', [$this, 'register_module_settings']);
-		 add_action('admin_init', [$this, 'handle_resets']);
-		 add_action('admin_menu', [$this, 'add_admin_menu']);
-		 add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
-		 add_action('admin_notices', [$this, 'admin_notices']);
-		 add_filter('plugin_action_links_' . FCRM_ENHANCEMENT_BASENAME, [$this, 'add_plugin_links']);
-	 }
- 
-	 /**
-	  * Register settings for all modules
-	  */
-	 public function register_module_settings(): void {
-		 if (!is_admin()) {
-			 return;
-		 }
-		 
-		 foreach ($this->modules as $module) {
-			 $module->register_settings();
-		 }
-	 }
- 
-	 /**
-	  * Handle module resets
-	  */
-	 public function handle_resets(): void {
-		 if (!isset($_POST['fcrm_reset_nonce']) || 
-			 !wp_verify_nonce($_POST['fcrm_reset_nonce'], 'fcrm_reset_settings')) {
-			 return;
-		 }
- 
-		 if (isset($_POST['module']) && isset($this->modules[$_POST['module']])) {
-			 $module = $this->modules[$_POST['module']];
-			 if (method_exists($module, 'handle_reset')) {
-				 $module->handle_reset();
-			 }
-		 }
-	 }
- 
-	 /**
-	  * Get menu icon as base64
-	  *
-	  * @return string
-	  */
-	 private function get_menu_icon(): string {
-		 return 'data:image/svg+xml;base64,' . 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIyLjEuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEwMDAgMTAwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNGRkZGRkY7fQoJLnN0MXtvcGFjaXR5OjAuODU7ZmlsbDp1cmwoI1NWR0lEXzFfKTt9Cgkuc3Qye29wYWNpdHk6MC41NTtmaWxsOiNGRkZGRkY7fQoJLnN0M3tvcGFjaXR5OjAuNjU7ZmlsbDojRkZGRkZGO30KCS5zdDR7ZmlsbDp1cmwoI1NWR0lEXzJfKTt9Cgkuc3Q1e29wYWNpdHk6MC41OTtmaWxsOiNGRkZGRkY7fQoJLnN0NntvcGFjaXR5OjAuNzY7ZmlsbDojRkZGRkZGO30KCS5zdDd7ZmlsbDp1cmwoI1NWR0lEXzNfKTt9Cgkuc3Q4e2ZpbGw6dXJsKCNTVkdJRF80Xyk7fQoJLnN0OXtmaWxsOnVybCgjU1ZHSURfNV8pO30KCS5zdDEwe2ZpbGw6dXJsKCNTVkdJRF82Xyk7fQoJLnN0MTF7ZmlsbDp1cmwoI1NWR0lEXzdfKTt9Cgkuc3QxMntmaWxsOnVybCgjU1ZHSURfOF8pO30KCS5zdDEze2ZpbGw6dXJsKCNTVkdJRF85Xyk7fQoJLnN0MTR7ZmlsbDp1cmwoI1NWR0lEXzEwXyk7fQoJLnN0MTV7ZmlsbDp1cmwoI1NWR0lEXzExXyk7fQoJLnN0MTZ7ZmlsbDp1cmwoI1NWR0lEXzEyXyk7fQoJLnN0MTd7ZmlsbDp1cmwoI1NWR0lEXzEzXyk7fQoJLnN0MTh7ZmlsbDp1cmwoI1NWR0lEXzE0Xyk7fQoJLnN0MTl7ZmlsbDp1cmwoI1NWR0lEXzE1Xyk7fQoJLnN0MjB7b3BhY2l0eTowLjM1O2ZpbGw6I0ZGRkZGRjt9Cgkuc3QyMXtvcGFjaXR5OjAuODU7ZmlsbDp1cmwoI1NWR0lEXzE2Xyk7fQoJLnN0MjJ7b3BhY2l0eTowLjg1O2ZpbGw6dXJsKCNTVkdJRF8xN18pO30KCS5zdDIze29wYWNpdHk6MC41MTtmaWxsOiNGRkZGRkY7fQoJLnN0MjR7ZmlsbDp1cmwoI1NWR0lEXzE4Xyk7fQoJLnN0MjV7ZmlsbDp1cmwoI1NWR0lEXzE5Xyk7fQoJLnN0MjZ7ZmlsbDp1cmwoI1NWR0lEXzIwXyk7fQoJLnN0Mjd7ZmlsbDp1cmwoI1NWR0lEXzIxXyk7fQoJLnN0Mjh7ZmlsbDp1cmwoI1NWR0lEXzIyXyk7fQoJLnN0Mjl7ZmlsbDp1cmwoI1NWR0lEXzIzXyk7fQoJLnN0MzB7ZmlsbDp1cmwoI1NWR0lEXzI0Xyk7fQoJLnN0MzF7ZmlsbDp1cmwoI1NWR0lEXzI1Xyk7fQoJLnN0MzJ7ZmlsbDp1cmwoI1NWR0lEXzI2Xyk7fQoJLnN0MzN7ZmlsbDp1cmwoI1NWR0lEXzI3Xyk7fQoJLnN0MzR7ZmlsbDp1cmwoI1NWR0lEXzI4Xyk7fQoJLnN0MzV7ZmlsbDp1cmwoI1NWR0lEXzI5Xyk7fQoJLnN0MzZ7ZmlsbDp1cmwoI1NWR0lEXzMwXyk7fQoJLnN0Mzd7ZmlsbDp1cmwoI1NWR0lEXzMxXyk7fQoJLnN0Mzh7b3BhY2l0eTowLjg1O2ZpbGw6dXJsKCNTVkdJRF8zMl8pO30KPC9zdHlsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTQ2Ni4yLDU2Mi43Yy00NC44LTguNC03Ny4xLTQzLjEtMTA5LjktNzJjLTgzLjUtNzMuNy0xNTcuNS0xNTIuOS0yMjYuOC0yNDBsLTEuMiw5MC45bC0yNy44LTIyLjRsMjIsNzcuNgoJbC0zNS4zLTE3LjhsMzksNjkuNGwtNDIuOC0xMi45bDU2LjgsNjIuNGwtNDguMi00LjlsNjkuMiw1MC42bC01NS44LDMuOWw3NSwzMy41TDEzMSw1OTIuM2w4MC41LDIwLjhsLTQyLjcsMTcuNmw4MC42LDkuMQoJbC0yNy4xLDE2LjFsNzQuMS0xLjhsLTI3LjUsMjEuOWw3MC4xLTE0LjFMMzA1LDY5NS4ybDc2LjItMjUuOUwzNTUuNiw3MDVsNTYuMS0yOC4zbC0xNSwzNC4xbDYxLjktMzguNWw4LjMsMzguMWwxNi44LDE4LjMKCWwtNDIuNSw0My43bDQuNSwzNS44bDMzLTE0bDIxLjYsMjguOWwyMi4zLTI4LjNsMzIuNiwxNC45bDUuNy0zNS42bC00MS41LTQ0LjhsMTguNC0xOC45bDkuNS0zNy42bDYxLjQsMzguNWwtMTQuNC0zMy45bDU2LjEsMjguNwoJTDYyNC4xLDY3MGw3Ni4zLDI2LjFsLTM0LTMzLjVsNzAuMywxNGwtMjcuNi0yMmw3NC40LDJsLTI3LjUtMTYuMWw4MC45LTguOWwtNDMuMi0xNy43bDgwLjgtMjAuOGwtNTAtMTEuMWw3NS41LTMzLjdsLTU1LjktMy43CglsNjkuMi01MC44bC00OC44LDUuM2w1Ny45LTYyLjhsLTQzLjMsMTIuOGwzOS4xLTY5LjRsLTM1LjYsMThsMjIuNi03OGwtMjgsMjIuMmMwLDAtMS4xLTkwLjgtMS4xLTkwLjljMCwzLjctMTEsMTMuOC0xMy4yLDE2LjYKCWMtOC45LDExLjMtMTguMiwyMi4yLTI3LjEsMzMuNWMtNjgsODYuNi0xNTIuMiwxNzMuMS0yNDQuNSwyMzRjLTEwLjcsNy00NiwzNC01NS4yLDI0LjNjLTYuNC02LjctOC41LTI2LjgtMTEuMy0zNS45CgljMCwwLDEwLjctMy4zLDIxLDIuN2MwLDAsMC02LTUuOS0xMi4yYzAsMC0xNi45LTQtNjAtMS45Yy0yLjcsMC4xLTExLjgsNDUuNS0xMy4xLDUwLjhDNDY2LjgsNTYyLjgsNDY2LjUsNTYyLjcsNDY2LjIsNTYyLjd6Ii8+Cjwvc3ZnPgo=';
-	 }
- 
-	 /**
-	  * Add admin menu
-	  */
-	 public function add_admin_menu(): void {
-		 add_menu_page(
-			 __('FH Tributes Enhancements', 'fcrm-enhancement-suite'),
-			 __('FH Tributes Enhancements', 'fcrm-enhancement-suite'),
-			 'manage_options',
-			 'fcrm-enhancements',
-			 [$this, 'render_admin_page'],
-			 $this->get_menu_icon(),
-			 100 // Position at bottom
-		 );
-	 }
- 
-	 /**
-	  * Enqueue admin assets
-	  */
-	 public function enqueue_admin_assets($hook): void {
-		 if ('toplevel_page_fcrm-enhancements' !== $hook) {
-			 return;
-		 }
-	 
-		 // Enqueue alpha picker styles
-		 wp_enqueue_style(
-			 'fcrm-enhancement-admin',
-			 FCRM_ENHANCEMENT_URL . 'assets/css/admin/alpha-picker.css',
-			 [],
-			 FCRM_ENHANCEMENT_VERSION
-		 );
-	 
-		 // Enqueue custom admin styles
-		 wp_enqueue_style(
-			 'fcrm-enhancement-admin-styles',
-			 FCRM_ENHANCEMENT_URL . 'assets/css/admin/admin-styles.css',
-			 ['fcrm-enhancement-admin'],  // Make it load after alpha-picker styles
-			 FCRM_ENHANCEMENT_VERSION
-		 );
-	 
-		 foreach ($this->modules as $module) {
-			 $module->enqueue_admin_assets($hook);
-		 }
-	 }
- 
-	 /**
-	  * Add plugin action links
-	  */
-	 public function add_plugin_links($links): array {
-		 $plugin_links = [
-			 sprintf('<a href="%s">%s</a>', 
-				 admin_url('admin.php?page=fcrm-enhancements'), 
-				 __('Settings', 'fcrm-enhancement-suite')
-			 )
-		 ];
-		 return array_merge($plugin_links, $links);
-	 }
- 
-	 /**
-	  * Display requirement notice
-	  */
-	 public function requirement_notice(): void {
-		 ?>
-		 <div class="notice notice-error">
-			 <p><?php _e('FirehawkCRM Tributes Enhancement Suite requires the FireHawkCRM Tributes plugin to be installed and activated.', 'fcrm-enhancement-suite'); ?></p>
-		 </div>
-		 <?php
-	 }
- 
-	 /**
-	  * Display admin notices
-	  */
-	 public function admin_notices(): void {
-		 if (!isset($_GET['page']) || $_GET['page'] !== 'fcrm-enhancements') {
-			 return;
-		 }
-	 
-		 // Check for settings-updated
-		 if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
-			 ?>
-			 <div class="notice notice-success is-dismissible">
-				 <p><?php _e('Settings saved successfully.', 'fcrm-enhancement-suite'); ?></p>
-			 </div>
-			 <?php
-		 }
-	 
-		 // Check for reset
-		 if (isset($_GET['reset']) && $_GET['reset'] === 'true' && isset($_GET['tab'])) {
-			 ?>
-			 <div class="notice notice-success is-dismissible">
-				 <p><?php _e('Settings reset successfully.', 'fcrm-enhancement-suite'); ?></p>
-			 </div>
-			 <?php
-		 }
-	 }
- 
-	 /**
-	  * Render admin page
-	  */
-	 public function render_admin_page(): void {
-		 $current_tab = isset($_GET['tab']) && array_key_exists($_GET['tab'], $this->tabs)
-			 ? sanitize_key($_GET['tab'])
-			 : 'optimisation';
-		 ?>
-		 <div class="wrap">
-			 <h1><?php _e('Firehawk Tributes Enhancement Suite', 'fcrm-enhancement-suite'); ?></h1>
-			 <?php
-			 echo '<p class="plugin-description">';
-			 echo esc_html__('Originally developed for our internal use, this third-party plugin helps optimise and enhance your funeral website with the FireHawk Tributes plugin. It removes unnecessary scripts and styles to help improve site performance and includes colour styling UI options to help customise the tributes to better match your website styles. This plugin has no direct affiliation with FireHawkCRM or FireHawk Funerals.', 'fcrm-enhancement-suite');
-			 echo '</p>';
-			 ?>
-			 <nav class="nav-tab-wrapper">
-				 <?php 
-				 foreach ($this->tabs as $tab_key => $tab_label): 
-					 $tab_url = add_query_arg([
-						 'page' => 'fcrm-enhancements',
-						 'tab' => $tab_key
-					 ], admin_url('admin.php'));
-				 ?>
-					 <a href="<?php echo esc_url($tab_url); ?>" 
-						 class="nav-tab <?php echo $current_tab === $tab_key ? 'nav-tab-active' : ''; ?>">
-						 <?php echo esc_html($tab_label); ?>
-					 </a>
-				 <?php endforeach; ?>
-			 </nav>
-	 
-			 <form method="post" action="options.php">
-				 <?php
-				 // Only show the global save button on tabs where it's needed
-				 if ($current_tab === 'optimisation') {
-					 settings_fields('fcrm_enhancement_' . $current_tab);
-					 if (isset($this->modules[$current_tab])) {
-						 echo '<div class="tab-content">';
-						 $this->modules[$current_tab]->render_settings();
-						 echo '</div>';
-					 }
-					 submit_button(__('Save Changes', 'fcrm-enhancement-suite'));
-				 } elseif (isset($this->modules[$current_tab])) {
-					 // Render the module's settings for tabs with their own save button
-					 $this->modules[$current_tab]->render_settings();
-				 }
-				 ?>
-			 </form>
-	 
-			 <?php
-			 // Add reset button for specific tabs
-			 if (method_exists($this->modules[$current_tab], 'handle_reset')): ?>
-				 <form method="post" style="margin-top: 20px;">
-					 <?php wp_nonce_field('fcrm_reset_settings', 'fcrm_reset_nonce'); ?>
-					 <input type="hidden" name="module" value="<?php echo esc_attr($current_tab); ?>">
-					 <?php submit_button(__('Reset Settings', 'fcrm-enhancement-suite'), 'delete', 'reset', false); ?>
-				 </form>
-			 <?php endif; ?>
-	 
-			 <div class="plugin-support">
-				 <p>
-					 <?php
-					 printf(
-						 /* Translators: %1$s is a mailto link, %2$s is a GitHub link. */
-						 __('Need help or have a request? Contact our support team at %1$s or log an issue on %2$s.', 'fcrm-enhancement-suite'),
-						 '<a href="mailto:support@weave.co.nz?subject=FH Tribute Enhancement Plugin Support">support@weave.co.nz</a>',
-						 '<a href="https://github.com/weavedigitalstudio/fcrm-tributes-enhancement-suite/issues" target="_blank">GitHub</a>'
-					 );
-					 ?>
-				 </p>
-			 </div>
-		 </div>
-		 <?php
-	 }
- }
- 
- // Initialise plugin
- add_action('plugins_loaded', function() {
-	 EnhancementSuite::get_instance();
- });
- 
- // Register activation/deactivation hooks
- register_activation_hook(FCRM_ENHANCEMENT_FILE, function() {
-	 // Activation tasks if needed
- });
- 
- register_deactivation_hook(FCRM_ENHANCEMENT_FILE, function() {
-	 // Deactivation tasks if needed
- });
+
+// Define plugin constants
+define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.0.2');
+define('FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('FCRM_ENHANCEMENT_SUITE_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('FCRM_ENHANCEMENT_SUITE_PLUGIN_FILE', __FILE__);
+
+// Include required classes
+require_once plugin_dir_path(__FILE__) . 'includes/interface-fcrm-module.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-fcrm-enhancement-base.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-optimisation-module.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-styling-module.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-layouts-module.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-seo-analytics-module.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-update-checker.php';
+
+// Include cache-related classes if they exist
+if (file_exists(plugin_dir_path(__FILE__) . 'includes/class-fcrm-cache-manager.php')) {
+	require_once plugin_dir_path(__FILE__) . 'includes/class-fcrm-cache-manager.php';
+}
+if (file_exists(plugin_dir_path(__FILE__) . 'includes/class-fcrm-api-interceptor.php')) {
+	require_once plugin_dir_path(__FILE__) . 'includes/class-fcrm-api-interceptor.php';
+}
+
+// Include URL fixer for tribute detection
+require_once plugin_dir_path(__FILE__) . 'includes/class-tribute-url-fixer.php';
+
+/**
+ * Main plugin class
+ */
+class FCRM_Enhancement_Suite {
+	
+	private $modules = [];
+	private $tabs = [
+		'optimisation' => 'Performance Optimisation',
+		'layouts' => 'Modern Layouts',
+		'ui_styling' => 'UI Styling',
+		'seo_analytics' => 'SEO & Analytics',
+		'styling' => 'Style Overrides'
+	];
+
+	public function __construct() {
+		add_action('init', [$this, 'init']);
+		add_action('admin_menu', [$this, 'add_admin_menu']);
+		add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+		add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
+		
+		// Initialize critical performance optimisations (always enabled, regardless of module state)
+		$this->init_critical_optimisations();
+		
+		// Check for plugin dependencies and conflicts
+		add_action('admin_notices', [$this, 'check_plugin_dependencies']);
+		add_action('admin_notices', [$this, 'check_plugin_conflicts']);
+		
+		// Initialize cache system if available
+		if (class_exists('FCRM\\EnhancementSuite\\API_Interceptor')) {
+			add_action('init', ['FCRM\\EnhancementSuite\\API_Interceptor', 'init']);
+		}
+
+		// Initialize tribute URL fixer (always needed for proper tribute detection)
+		if (class_exists('FCRM\\EnhancementSuite\\Tribute_URL_Fixer')) {
+			add_action('init', ['FCRM\\EnhancementSuite\\Tribute_URL_Fixer', 'init'], 5);
+		}
+		
+		// Add AJAX handlers for cache management
+		add_action('wp_ajax_fcrm_clear_cache', [$this, 'ajax_clear_cache']);
+		add_action('wp_ajax_fcrm_get_cache_stats', [$this, 'ajax_get_cache_stats']);
+		
+		// Load text domain
+		add_action('plugins_loaded', [$this, 'load_textdomain']);
+		
+		// Register activation/deactivation hooks
+		register_activation_hook(__FILE__, [$this, 'activate']);
+		register_deactivation_hook(__FILE__, [$this, 'deactivate']);
+		
+		// Handle module enable/disable
+		add_action('admin_init', [$this, 'handle_module_toggles']);
+		
+		// Register settings for all modules (so they can be saved even when disabled)
+		add_action('admin_init', [$this, 'register_all_module_settings']);
+		
+		// Initialize GitHub update checker
+		if (class_exists('FCRM\\EnhancementSuite\\PluginUpdateChecker')) {
+			FCRM\EnhancementSuite\PluginUpdateChecker::init(__FILE__, 'HumanKind-nz/fcrm-tributes-enhancement-suite');
+		}
+	}
+
+	/**
+	 * Initialize critical performance optimisations that should always be available
+	 * These work regardless of module enable/disable state
+	 */
+	private function init_critical_optimisations(): void {
+		// Register the setting so it can be saved
+		add_action('admin_init', function() {
+			register_setting('fcrm_enhancement_optimisation', 'fcrm_conditional_asset_loading');
+		});
+
+		// Initialize conditional asset loading if enabled (default: enabled)
+		$conditional_loading_enabled = get_option('fcrm_conditional_asset_loading', 1);
+		
+		if ($conditional_loading_enabled) {
+			// Hook late to dequeue FCRM assets after they're enqueued
+			add_action('wp_enqueue_scripts', [$this, 'conditional_fcrm_assets'], 999);
+		}
+	}
+
+	public function init(): void {
+		// Load modules
+		$this->load_modules();
+	}
+
+	public function load_textdomain(): void {
+		load_plugin_textdomain(
+			'fcrm-enhancement-suite',
+			false,
+			dirname(plugin_basename(__FILE__)) . '/languages/'
+		);
+	}
+
+	private function load_modules(): void {
+		$module_files = [
+			'optimisation' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-optimisation-module.php',
+			'layouts' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-layouts-module.php',
+			'ui_styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-ui-styling-module.php',
+			'styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-styling-module.php',
+			'seo_analytics' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-seo-analytics-module.php'
+		];
+
+		foreach ($module_files as $key => $file) {
+			// Check if module is enabled (default to false for new installations)
+			$enabled = get_option('fcrm_module_' . $key . '_enabled', false);
+			
+			// Debug logging
+			
+			// Only load if module is enabled
+			if (!$enabled) {
+				continue;
+			}
+			
+			if (file_exists($file)) {
+				require_once $file;
+				
+				// Handle special naming for modules
+				if ($key === 'seo_analytics') {
+					$class_name = 'FCRM_SEO_Analytics_Module';
+				} else {
+					$class_name = 'FCRM_' . ucfirst($key) . '_Module';
+				}
+				
+				
+				if (class_exists($class_name)) {
+					$this->modules[$key] = new $class_name();
+				} else {
+				}
+			}
+		}
+		
+		// Load external modules
+		$this->load_external_modules();
+	}
+	
+	private function load_external_modules(): void {
+		$external_modules = get_option('fcrm_external_modules', []);
+		
+		foreach ($external_modules as $module_key => $module_data) {
+			if (!isset($module_data['enabled']) || !$module_data['enabled']) {
+				continue;
+			}
+			
+			if (isset($module_data['file']) && file_exists($module_data['file'])) {
+				require_once $module_data['file'];
+				
+				if (isset($module_data['class']) && class_exists($module_data['class'])) {
+					$this->modules[$module_key] = new $module_data['class']();
+				}
+			}
+		}
+	}
+
+	public function add_admin_menu(): void {
+		add_menu_page(
+			__('FH Enhancement Suite', 'fcrm-enhancement-suite'),
+			__('FH Enhancement Suite', 'fcrm-enhancement-suite'),
+			'manage_options',
+			'fcrm-enhancements',
+			[$this, 'render_admin_page'],
+			'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0ibm9uZSIgdmlld0JveD0iMCAwIDEyMiAxMDYiPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02LjQgMTguN2MwIDE1LjUgNi41IDI5LjUgMTcgMzkuNSAyLTEuNiA0LjItMyA2LjQtNC40YTQ2LjcgNDYuNyAwIDAgMS0xNS44LTM1aDYuNWE0MC40IDQwLjQgMCAwIDAgMjIgMzYgNTEuOCA1MS44IDAgMCAwLTE5LjEgMTEuOGMtMTAuNSA5LjktMTcgMjQtMTcgMzkuNEgwYzAtMTcuMSA3LjEtMzIuNiAxOC41LTQzLjZBNjAuNiA2MC42IDAgMCAxIDAgMTguN2g2LjRabTEwMS42IDBhNDYuNyA0Ni43IDAgMCAxLTQ3IDQ2LjkgNDAuMiA0MC4yIDAgMCAwLTI1IDguNkE0MC40IDQwLjQgMCAwIDAgMjAuNSAxMDZIMTRhNDYuNyA0Ni43IDAgMCAxIDQ3LTQ2LjggNDAuMiA0MC4yIDAgMCAwIDI1LTguNyA0MC4xIDQwLjEgMCAwIDAgMTUuNS0zMS44aDYuNVpNNjEgNzMuMmM1LjkgMCAxMS40IDEuNSAxNi4xIDQuMmguMUEzMi45IDMyLjkgMCAwIDEgOTQgMTA2aC02LjVhMjYuNSAyNi41IDAgMCAwLTUzIDBoLTYuNEEzMi44IDMyLjggMCAwIDEgNjEgNzMuMlptNjEtNTQuNWMwIDE3LjEtNy4xIDMyLjYtMTguNSA0My43QTYwLjYgNjAuNiAwIDAgMSAxMjIgMTA2aC02LjRhNTQuMyA1NC4zIDAgMCAwLTIyLTQzLjYgNTQuMyA1NC4zIDAgMCAwIDIyLTQzLjZoNi40Wm0tMzUuNCA0OEE0Ni43IDQ2LjcgMCAwIDEgMTA4IDEwNmgtNi40YTQwLjQgNDAuNCAwIDAgMC0yMi0zNmMyLjQtLjggNC44LTIgNy4xLTMuMVptLTUyLjEtNDhhMjYuNSAyNi41IDAgMCAwIDUzIDBoNi40YTMyLjggMzIuOCAwIDAgMS00OSAyOC42aC0uMUEzMi45IDMyLjkgMCAwIDEgMjggMTguN2g2LjVaTTYxIDBhMTcuMiAxNy4yIDAgMSAxIDAgMzQuNEExNy4yIDE3LjIgMCAwIDEgNjEgMFptMCA2LjRhMTAuOCAxMC44IDAgMSAwIDEwLjggMTAuOGMwLTYtNC45LTEwLjgtMTAuOC0xMC44WiIvPjwvc3ZnPgo=',
+			91
+		);
+	}
+
+	public function enqueue_admin_assets($hook): void {
+		// Debug: Always enqueue on admin pages for testing
+		
+		// Temporarily disable hook check for testing
+		// if ($hook !== 'settings_page_fcrm-enhancements') {
+		// 	return;
+		// }
+
+		wp_enqueue_style(
+			'fcrm-enhancement-admin',
+			FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/admin/module-pages.css',
+			[],
+			FCRM_ENHANCEMENT_SUITE_VERSION
+		);
+
+		wp_enqueue_script(
+			'fcrm-enhancement-admin',
+			FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/admin/admin-scripts.js',
+			['jquery'],
+			FCRM_ENHANCEMENT_SUITE_VERSION,
+			true
+		);
+		
+		// Enqueue UI styling admin assets when on UI styling tab
+		$current_tab = $_GET['tab'] ?? 'dashboard';
+		if ($current_tab === 'ui_styling' && isset($this->modules['ui_styling'])) {
+			$this->modules['ui_styling']->enqueue_admin_assets();
+		}
+		
+	}
+
+	public function enqueue_frontend_assets(): void {
+		// Only enqueue cache controls on tribute-related pages for admin users
+		if (current_user_can('manage_options') && $this->is_tribute_related_page()) {
+			wp_enqueue_script(
+				'fcrm-cache-controls',
+				FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/admin/cache-controls.js',
+				['jquery'],
+				FCRM_ENHANCEMENT_SUITE_VERSION,
+				true
+			);
+			
+			// Localize script with nonce
+			wp_localize_script('fcrm-cache-controls', 'fcrmCacheNonce', wp_create_nonce('fcrm_clear_cache'));
+		}
+		
+		// NOTE: Individual modules handle their own asset loading via wp_enqueue_scripts hooks
+		// This prevents unnecessary function calls on non-tribute pages
+	}
+
+	/**
+	 * Standardised tribute page detection method
+	 * Used by all modules for consistent page detection
+	 * Based on user's proven working logic
+	 */
+	private static $is_tribute_page_cache = null;
+	
+	public static function is_tribute_page(): bool {
+		// Use caching like the original working method
+		if (self::$is_tribute_page_cache !== null) {
+			return self::$is_tribute_page_cache;
+		}
+
+		$is_tribute = false;
+
+		// Check for tribute single post type (user's proven working logic)
+		if (isset($_GET['id']) && is_singular() && get_post_type() === 'tribute') {
+			$is_tribute = true;
+		}
+
+		// Check if we're on the designated tribute search page (user's working logic)
+		$search_page_id = get_option('fcrm_tributes_search_page_id');
+		if (!$is_tribute && $search_page_id && is_page($search_page_id)) {
+			// Additional validation: prevent common WordPress pages from being treated as tribute search pages
+			$current_page = get_post($search_page_id);
+			$page_slug = $current_page ? $current_page->post_name : '';
+			
+			// Don't treat default WordPress pages as tribute search pages
+			$excluded_pages = ['sample-page', 'hello-world', 'privacy-policy'];
+			if (!in_array($page_slug, $excluded_pages)) {
+				$is_tribute = true;
+			}
+		}
+
+		// Check for tribute shortcodes (user's working logic)
+		if (!$is_tribute && self::has_tribute_shortcode()) {
+			$is_tribute = true;
+		}
+
+		// Cache the result like the original working method
+		self::$is_tribute_page_cache = $is_tribute;
+		return $is_tribute;
+	}
+
+	/**
+	 * Check if current post contains tribute shortcodes
+	 * Based on user's proven working logic
+	 */
+	private static function has_tribute_shortcode(): bool {
+		global $post;
+		if (!$post || !is_a($post, 'WP_Post')) {
+			return false;
+		}
+
+		$shortcodes = [
+			'show_crm_tribute',
+			'show_crm_tributes_grid',
+			'show_crm_tributes_large_grid',
+			'show_crm_tributes_carousel',
+			'show_crm_tribute_search',
+			'show_crm_tribute_search_bar'
+		];
+
+		$pattern = get_shortcode_regex($shortcodes);
+		$has_shortcode = preg_match('/' . $pattern . '/', $post->post_content);
+		
+		return $has_shortcode;
+	}
+
+	private function is_tribute_related_page(): bool {
+		// Use the standardised method
+		return self::is_tribute_page();
+	}
+
+	public function render_admin_page(): void {
+		$current_tab = $_GET['tab'] ?? 'dashboard';
+		
+		if ($current_tab === 'dashboard') {
+			$this->render_dashboard();
+		} elseif (array_key_exists($current_tab, $this->tabs)) {
+			$this->render_legacy_tab_view($current_tab);
+		} else {
+			$this->render_dashboard();
+		}
+	}
+
+	private function render_dashboard(): void {
+		?>
+		<div class="wrap">
+			<!-- Modern Header for Dashboard -->
+			<div class="fcrm-module-header">
+				<div class="header-content">
+					<div class="header-left">
+						<h1><?php _e('FireHawk Tributes Enhancement Suite', 'fcrm-enhancement-suite'); ?></h1>
+						<p class="plugin-description">
+							<?php _e('Optimise and enhance your funeral website with performance improvements, custom styling, and modern layouts for the FireHawk Tributes plugin.', 'fcrm-enhancement-suite'); ?>
+						</p>
+					</div>
+					<div class="header-right">
+						<div class="plugin-logo">
+							<img src="<?php echo esc_url(FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/images/icon-256x256.png'); ?>" 
+								 alt="<?php esc_attr_e('HumanKind - Funeral Websites by Weave', 'fcrm-enhancement-suite'); ?>" 
+								 class="logo-image" />
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="fcrm-module-content">
+				<div class="dashboard-section" style="padding-top: 3rem;">
+					<h2><?php _e('Enhancement Modules', 'fcrm-enhancement-suite'); ?></h2>
+					<p class="section-description"><?php _e('Manage your tribute enhancements and integrations. Each module can be configured independently to match your website\'s needs.', 'fcrm-enhancement-suite'); ?></p>
+				</div>
+				
+				<!-- Module Cards -->
+				<div class="module-grid">
+					<?php $this->render_enhanced_module_card('optimisation', 'Performance Optimisations', 'Improve site speed by optimising scripts, enabling caching, and optimising asset loading.', ['API Response Caching', 'Script Optimisation', 'Flower Delivery Disabling', 'Redis Cache Support']); ?>
+					
+					<?php $this->render_enhanced_module_card('layouts', 'Modern Layout Templates', 'Replace the default FireHawk tribute layout with modern, card-based designs that are mobile-responsive and accessible.', ['Modern Grid Layout', 'Card-Based Design', 'Mobile Responsive', 'WCAG 2.1 AA Compliant']); ?>
+					
+					<?php $this->render_enhanced_module_card('ui_styling', 'Universal UI Styling', 'Professional styling system with colour schemes, typography, and layout customisation for all tribute layouts.', ['5 Professional Color Schemes', 'Typography Control', 'Layout-Specific Options', 'Live CSS Generation']); ?>
+					
+					<?php $this->render_enhanced_module_card('seo_analytics', 'SEO & Analytics', 'Privacy-focused analytics and enhanced SEO integration for tribute pages with Plausible and SEOPress.', ['Plausible Analytics Integration', 'SEOPress SEO Support', 'Social Media Meta Tags', 'GDPR Compliant Analytics']); ?>
+					
+					<?php $this->render_enhanced_module_card('styling', 'Change Default Styling', 'Customise the tribute colours, borders, and visual elements to match your website design.', ['Colour Customisation', 'Button Styling', 'Border Radius Control', 'Live Preview']); ?>
+				</div>
+				
+				<!-- External Modules Section -->
+				<?php if (empty($external_modules)): ?>
+					<div class="external-modules-section">
+						<h3>🔧 Extensible Framework</h3>
+						<div class="no-external-modules">
+							<p class="framework-description">
+								This Enhancement Suite is built as an extensible framework for developers who want to create additional 
+								enhancements for FireHawkCRM Tributes plugin. The modular architecture allows for seamless integration of custom functionality.
+							</p>
+							<p class="contact-info">
+								<strong>Need a custom enhancement for your funeral website or Firehawk tribute display?</strong><br>
+								Our team at Human Kind Funeral Websites specialises in funeral website development and can create bespoke 
+								enhancements tailored to your specific requirements.
+							</p>
+							<div class="contact-actions">
+								<a href="mailto:support@humankindwebsites.com" class="contact-button" target="_blank">
+									Contact Human Kind Funeral Websites
+								</a>
+								<a href="https://humankindwebsites.com" class="learn-more-button" target="_blank">
+									Learn More About Our Services
+								</a>
+							</div>
+						</div>
+					</div>
+				<?php else: ?>
+					<div class="external-modules-section">
+						<h3>🔧 External Modules</h3>
+						<div class="external-modules-grid">
+							<?php foreach ($external_modules as $key => $module): ?>
+								<div class="module-card external">
+									<div class="module-header">
+										<h4><?php echo esc_html($module['name']); ?></h4>
+										<span class="module-version"><?php echo esc_html($module['version']); ?></span>
+									</div>
+									<div class="module-description">
+										<p><?php echo esc_html($module['description']); ?></p>
+									</div>
+									<div class="module-toggle">
+										<form method="post" style="display: inline;">
+											<?php wp_nonce_field('fcrm_toggle_external_module', 'fcrm_external_toggle_nonce'); ?>
+											<input type="hidden" name="external_module_key" value="<?php echo esc_attr($key); ?>">
+											<input type="hidden" name="action" value="<?php echo $module['enabled'] ? 'disable' : 'enable'; ?>">
+											<button type="submit" class="external-module-toggle <?php echo $module['enabled'] ? 'enabled' : 'disabled'; ?>">
+												<?php echo $module['enabled'] ? 'Disable' : 'Enable'; ?>
+											</button>
+										</form>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				<?php endif; ?>
+				
+				<!-- Two Column Layout for About and Caching Compatibility -->
+				<div class="two-column-layout">
+					<div class="column">
+						<div class="info-card">
+							<h3>About This Plugin</h3>
+							<p>This enhancement suite is developed by <strong>Human Kind Funerals</strong> and <strong>Weave Digital Studio</strong> to extend the functionality of the FireHawkCRM Tributes plugin.</p>
+							<p>Features include modern responsive layouts, performance optimisations, comprehensive caching, and integrated SEO & analytics tools.</p>
+							<ul class="feature-list">
+								<li>✅ Modern Grid Layouts with Mobile-First Design</li>
+								<li>✅ API Response Caching (Redis Support)</li>
+								<li>✅ Integrated Plausible Analytics</li>
+								<li>✅ Enhanced SEOPress Integration</li>
+								<li>✅ Performance Optimisations</li>
+								<li>✅ Professional Admin Interface</li>
+							</ul>
+						</div>
+					</div>
+					<div class="column">
+						<div class="info-card">
+							<h3>Caching Compatibility</h3>
+							<p>Our intelligent API caching system is designed to work with various hosting environments:</p>
+							<ul class="compatibility-list">
+								<li>✅ <strong>Redis Object Cache</strong> - Optimal performance with Redis-enabled hosting</li>
+								<li>✅ <strong>WordPress Transients</strong> - Reliable fallback for standard hosting</li>
+								<li>✅ <strong>VPS & Cloud Hosts</strong> - Full Redis integration with NGINX page & object cache</li>
+								<li>⚠️ <strong>Managed WordPress Hosts</strong> - May work with their caching systems (untested)</li>
+								<li>✅ <strong>Standard WordPress</strong> - Works on any WordPress installation</li>
+								<li>✅ <strong>Multisite Networks</strong> - Fully compatible with WordPress multisite</li>
+							</ul>
+							<p class="performance-note">
+								<strong>Performance:</strong> Experience significant page load improvements with our caching system when properly configured.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Full Width Support Section -->
+			<div class="plugin-support-full">
+				<div class="support-content">
+					<h3><?php _e('Need Help?', 'fcrm-enhancement-suite'); ?></h3>
+					<p>
+						<?php
+						printf(
+							/* Translators: %1$s is a mailto link, %2$s is a GitHub link. */
+							__('Contact our support team at %1$s or log an issue on %2$s for technical assistance.', 'fcrm-enhancement-suite'),
+							'<a href="mailto:support@weave.co.nz?subject=FH Tribute Enhancement Plugin Support">support@weave.co.nz</a>',
+							'<a href="https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite/issues" target="_blank">GitHub</a>'
+						);
+						?>
+					</p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+	
+	private function render_enhanced_module_card(string $module_key, string $module_name, string $description, array $features): void {
+		$enabled = get_option('fcrm_module_' . $module_key . '_enabled', false);
+		$module_url = add_query_arg([
+			'page' => 'fcrm-enhancements',
+			'tab' => $module_key
+		], admin_url('admin.php'));
+		
+		// Get appropriate icon
+		$icons = [
+			'optimisation' => '⚡',
+			'styling' => '🎨', 
+			'ui_styling' => '🎛️',
+			'layouts' => '📱',
+			'seo_analytics' => '📊'
+		];
+		$icon = $icons[$module_key] ?? '⚙️';
+		
+		?>
+		<div class="enhanced-module-card <?php echo $enabled ? 'active' : ''; ?>">
+			<div class="module-status">
+				<?php echo $enabled ? 'ACTIVE' : 'INACTIVE'; ?>
+			</div>
+			<div class="module-icon">
+				<?php echo $icon; ?>
+			</div>
+			<div class="module-content">
+				<h3><?php echo esc_html($module_name); ?></h3>
+				<p class="module-description"><?php echo esc_html($description); ?></p>
+				
+				<ul class="module-features">
+					<?php foreach ($features as $feature): ?>
+						<li>✓ <?php echo esc_html($feature); ?></li>
+					<?php endforeach; ?>
+				</ul>
+				
+				<div class="module-actions">
+					<form method="post" class="module-toggle-form">
+						<?php wp_nonce_field('fcrm_toggle_module', 'fcrm_toggle_nonce'); ?>
+						<input type="hidden" name="module_key" value="<?php echo esc_attr($module_key); ?>">
+						<input type="hidden" name="action" value="<?php echo $enabled ? 'disable' : 'enable'; ?>">
+						<label class="toggle-switch">
+							<input type="checkbox" <?php checked($enabled); ?> onchange="this.form.submit();">
+							<span class="toggle-slider"></span>
+						</label>
+					</form>
+					
+					<?php if ($enabled): ?>
+						<a href="<?php echo esc_url($module_url); ?>" class="button button-primary">
+							<?php _e('Configure', 'fcrm-enhancement-suite'); ?>
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	public function activate(): void {
+		// Activation logic
+		flush_rewrite_rules();
+	}
+
+	public function deactivate(): void {
+		// Deactivation logic
+		flush_rewrite_rules();
+	}
+
+	/**
+	 * Register settings for all modules (even if disabled)
+	 * This ensures settings can be saved when configuring modules
+	 */
+	public function register_all_module_settings(): void {
+		// Prevent duplicate registration
+		static $registered = false;
+		if ($registered) {
+			return;
+		}
+		$registered = true;
+		
+		// Create instances for ALL modules to register settings (regardless of enabled status)
+		$module_files = [
+			'optimisation' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-optimisation-module.php',
+			'layouts' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-layouts-module.php',
+			'ui_styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-ui-styling-module.php',
+			'styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-styling-module.php',
+			'seo_analytics' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-seo-analytics-module.php'
+		];
+
+		foreach ($module_files as $key => $file) {
+			if (file_exists($file)) {
+				require_once $file;
+				
+				// Handle special naming for modules
+				if ($key === 'seo_analytics') {
+					$class_name = 'FCRM_SEO_Analytics_Module';
+				} else {
+					$class_name = 'FCRM_' . ucfirst($key) . '_Module';
+				}
+				
+				if (class_exists($class_name)) {
+					// Create instance just for settings registration
+					$temp_instance = new $class_name();
+					// The constructor will handle registering settings via admin_init hook
+				}
+			}
+		}
+	}
+
+	/**
+	 * Render settings for a module even if not enabled
+	 */
+	private function render_module_settings_fallback(string $module_key): void {
+		echo "<!-- Debug: Fallback rendering for module: $module_key -->\n";
+		
+		$module_files = [
+			'optimisation' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-optimisation-module.php',
+			'layouts' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-layouts-module.php',
+			'ui_styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-ui-styling-module.php',
+			'styling' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-styling-module.php',
+			'seo_analytics' => FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'includes/class-seo-analytics-module.php'
+		];
+
+		if (isset($module_files[$module_key]) && file_exists($module_files[$module_key])) {
+			echo "<!-- Debug: Module file found: " . $module_files[$module_key] . " -->\n";
+			require_once $module_files[$module_key];
+			
+			// Handle special naming for modules
+			if ($module_key === 'seo_analytics') {
+				$class_name = 'FCRM_SEO_Analytics_Module';
+			} else {
+				$class_name = 'FCRM_' . ucfirst($module_key) . '_Module';
+			}
+			
+			echo "<!-- Debug: Looking for class: $class_name -->\n";
+			echo "<!-- Debug: Class exists: " . (class_exists($class_name) ? 'YES' : 'NO') . " -->\n";
+			
+			if (class_exists($class_name)) {
+				$temp_instance = new $class_name();
+				echo "<!-- Debug: Instance created -->\n";
+				if (method_exists($temp_instance, 'render_settings')) {
+					echo "<!-- Debug: Calling render_settings -->\n";
+					$temp_instance->render_settings();
+					echo "<!-- Debug: render_settings completed -->\n";
+				} else {
+					echo "<!-- Debug: render_settings method not found -->\n";
+				}
+			} else {
+				echo "<!-- Debug: Class not found -->\n";
+			}
+		} else {
+			echo "<!-- Debug: Module file not found or doesn't exist -->\n";
+		}
+	}
+
+	public function handle_module_toggles(): void {
+		// Debug logging
+		if (isset($_POST['fcrm_toggle_nonce'])) {
+		}
+		
+		// Handle core module toggles
+		if (isset($_POST['fcrm_toggle_nonce']) && wp_verify_nonce($_POST['fcrm_toggle_nonce'], 'fcrm_toggle_module')) {
+			$module_key = sanitize_text_field($_POST['module_key']);
+			$action = sanitize_text_field($_POST['action']);
+			
+			
+			if (array_key_exists($module_key, $this->tabs)) {
+				$enabled = ($action === 'enable');
+				$result = update_option('fcrm_module_' . $module_key . '_enabled', $enabled);
+				
+				
+				// Add success message
+				add_action('admin_notices', function() use ($module_key, $enabled) {
+					$status = $enabled ? 'enabled' : 'disabled';
+					echo '<div class="notice notice-success is-dismissible"><p>Module "' . esc_html($this->tabs[$module_key]) . '" has been ' . $status . '.</p></div>';
+				});
+				
+				wp_redirect(admin_url('admin.php?page=fcrm-enhancements&updated=1'));
+				exit;
+			}
+		}
+		
+		// Handle external module toggles
+		if (isset($_POST['fcrm_external_toggle_nonce']) && wp_verify_nonce($_POST['fcrm_external_toggle_nonce'], 'fcrm_toggle_external_module')) {
+			$module_key = sanitize_text_field($_POST['external_module_key']);
+			$action = sanitize_text_field($_POST['action']);
+			
+			$external_modules = get_option('fcrm_external_modules', []);
+			if (isset($external_modules[$module_key])) {
+				$external_modules[$module_key]['enabled'] = ($action === 'enable');
+				update_option('fcrm_external_modules', $external_modules);
+				
+				wp_redirect(admin_url('admin.php?page=fcrm-enhancements&updated=1'));
+				exit;
+			}
+		}
+	}
+
+	private function render_legacy_tab_view(string $current_tab): void {
+		?>
+		<div class="wrap">
+			<!-- Modern Header for Module Pages -->
+			<div class="fcrm-module-header">
+				<div class="header-content">
+					<div class="header-left">
+						<h1><?php echo esc_html($this->tabs[$current_tab]); ?></h1>
+						<p class="plugin-description">
+							<?php _e('Configure the settings for this specific module. Changes will be saved automatically.', 'fcrm-enhancement-suite'); ?>
+						</p>
+						<a href="<?php echo esc_url(admin_url('admin.php?page=fcrm-enhancements')); ?>" class="back-to-dashboard">
+							← <?php _e('Back to Dashboard', 'fcrm-enhancement-suite'); ?>
+						</a>
+					</div>
+					<div class="header-right">
+						<div class="plugin-logo">
+							<img src="<?php echo esc_url(FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/images/icon-256x256.png'); ?>" 
+								 alt="<?php esc_attr_e('HumanKind - Funeral Websites by Weave', 'fcrm-enhancement-suite'); ?>" 
+								 class="logo-image" />
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="fcrm-module-content">
+				<!-- Tab Content -->
+				<div class="tab-content">
+					<form method="post" action="options.php">
+						<?php
+						settings_fields('fcrm_enhancement_' . $current_tab);
+						
+						// Load module for settings rendering even if not enabled
+						if (isset($this->modules[$current_tab])) {
+							$this->modules[$current_tab]->render_settings();
+						} else {
+							// Create temporary instance for settings rendering
+							$this->render_module_settings_fallback($current_tab);
+						}
+						submit_button(__('Save Changes', 'fcrm-enhancement-suite'));
+						?>
+					</form>
+			
+					<?php
+					// Add reset button for styling tab outside the main form
+					if ($current_tab === 'styling'): ?>
+						<form method="post" style="margin-top: 20px;">
+							<?php wp_nonce_field('fcrm_reset_colors', 'fcrm_reset_colors_nonce'); ?>
+							<input type="hidden" name="fcrm_reset_colors" value="1" />
+							<?php submit_button(__('Reset All Colors to Defaults', 'fcrm-enhancement-suite'), 'secondary', 'reset_colors', false); ?>
+						</form>
+					<?php endif; ?>
+				</div>
+				
+				<!-- Support Section -->
+				<div class="plugin-support">
+					<h3><?php _e('Need Help?', 'fcrm-enhancement-suite'); ?></h3>
+					<p>
+						<?php
+						printf(
+							/* Translators: %1$s is a mailto link, %2$s is a GitHub link. */
+							__('Need help or have a request? Contact our support team at %1$s or log an issue on %2$s.', 'fcrm-enhancement-suite'),
+							'<a href="mailto:support@weave.co.nz?subject=FH Tribute Enhancement Plugin Support">support@weave.co.nz</a>',
+							'<a href="https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite/issues" target="_blank">GitHub</a>'
+						);
+						?>
+					</p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	public function ajax_clear_cache(): void {
+		// Verify nonce and permissions
+		if (!current_user_can('manage_options') || !wp_verify_nonce($_POST['nonce'], 'fcrm_clear_cache')) {
+			wp_die('Unauthorised');
+		}
+
+		$success = false;
+		if (class_exists('FCRM\\EnhancementSuite\\Cache_Manager')) {
+			$success = \FCRM\EnhancementSuite\Cache_Manager::clear_all_cache();
+		}
+
+		wp_send_json([
+			'success' => $success,
+			'message' => $success ? 'Cache cleared successfully' : 'Failed to clear cache'
+		]);
+	}
+
+	public function ajax_get_cache_stats(): void {
+		if (!current_user_can('manage_options')) {
+			wp_die(__('Insufficient permissions'));
+		}
+
+		if (!class_exists('FCRM\\EnhancementSuite\\Cache_Manager')) {
+			wp_send_json_error('Cache manager not available');
+		}
+
+		$stats = \FCRM\EnhancementSuite\Cache_Manager::get_cache_stats();
+		wp_send_json_success($stats);
+	}
+
+	/**
+	 * Conditionally remove FCRM assets on non-tribute pages
+	 */
+	public function conditional_fcrm_assets(): void {
+		$is_tribute_page = self::is_tribute_page();
+		$current_url = $_SERVER['REQUEST_URI'] ?? 'unknown';
+		
+		
+		// Only run on non-tribute pages
+		if (!$is_tribute_page) {
+			$this->dequeue_fcrm_assets();
+		} else {
+		}
+	}
+
+	/**
+	 * Dequeue all FCRM plugin assets
+	 */
+	private function dequeue_fcrm_assets(): void {
+		// FCRM CSS files (from class-fcrm-tributes-public.php)
+		$fcrm_styles = [
+			'fcrm-tributes-glidejs-core',
+			'fcrm-tributes-glidejs-theme', 
+			'jquery-slick-nav',
+			'select2',
+			'add-to-calendar-button',
+			'fcrm-tributes-jquery-modal',
+			'fcrm-tributes-lightgallery-css',
+			'fcrm-tributes'
+		];
+
+		// FCRM JavaScript files (from class-fcrm-tributes-public.php)
+		$fcrm_scripts = [
+			'fcrm-tributes-popperjs',
+			'fcrm-tributes-tippyjs',
+			'fontawesome',
+			'bootstrap',
+			'shufflejs',
+			'jquery-history',
+			'jquery-validate',
+			'select2',
+			'jquery-slick-carousel',
+			'fcrm-tributes-clipboard',
+			'fcrm-tributes-textFit',
+			'fcrm-tributes-glidejs',
+			'fcrm-tributes-jquery-modal',
+			'fcrm-tributes-litepicker',
+			'add-to-calendar-button',
+			'fcrm-tributes', // This handle appears twice in FCRM code
+			'_', // Lodash
+			'momentScript',
+			'fcrm-tributes-lightgallerys',
+			'fcrm-tributes-tribute-messages',
+			'fcrm-tributes-tributes-page',
+			'fcrm-tributes-tribute-trees',
+			'fcrm-tributes-tribute-donations',
+			'fcrm-tributes-tributes-grid',
+			'fcrm-tributes-verify-input',
+			'lg-pager',
+			'lg-zoom',
+			'fcrm-tributes-flower-delivery'
+		];
+
+		// Dequeue all FCRM styles
+		$dequeued_styles = [];
+		foreach ($fcrm_styles as $handle) {
+			if (wp_style_is($handle, 'enqueued')) {
+				wp_dequeue_style($handle);
+				$dequeued_styles[] = $handle;
+			}
+		}
+
+		// Dequeue all FCRM scripts  
+		$dequeued_scripts = [];
+		foreach ($fcrm_scripts as $handle) {
+			if (wp_script_is($handle, 'enqueued')) {
+				wp_dequeue_script($handle);
+				$dequeued_scripts[] = $handle;
+			}
+		}
+	}
+
+	/**
+	 * Check for required plugin dependencies
+	 */
+	public function check_plugin_dependencies(): void {
+		// Check if FCRM Tributes plugin is active
+		$fcrm_tributes_active = is_plugin_active('fcrm-tributes/fcrm-tributes.php');
+		
+		if (!$fcrm_tributes_active) {
+			// Check if it's installed but not activated
+			$fcrm_tributes_installed = file_exists(WP_PLUGIN_DIR . '/fcrm-tributes/fcrm-tributes.php');
+			
+			if ($fcrm_tributes_installed) {
+				// Installed but not activated
+				$activation_url = wp_nonce_url(
+					admin_url('plugins.php?action=activate&plugin=fcrm-tributes/fcrm-tributes.php'),
+					'activate-plugin_fcrm-tributes/fcrm-tributes.php'
+				);
+				
+				echo '<div class="notice notice-warning is-dismissible">';
+				echo '<p><strong>FireHawk Tributes Enhancement Suite:</strong> The required FireHawkCRM Tributes plugin is installed but not activated.</p>';
+				echo '<p><a href="' . esc_url($activation_url) . '" class="button button-primary">Activate FireHawkCRM Tributes</a></p>';
+				echo '</div>';
+			} else {
+				// Not installed at all
+				echo '<div class="notice notice-error is-dismissible">';
+				echo '<p><strong>FireHawk Tributes Enhancement Suite:</strong> This plugin requires the FireHawkCRM Tributes plugin to function.</p>';
+				echo '<p>Please install and activate the FireHawkCRM Tributes plugin first. Without it, this enhancement suite will not work.</p>';
+				echo '<p><a href="' . esc_url(admin_url('plugin-install.php')) . '" class="button button-primary">Install Plugins</a></p>';
+				echo '</div>';
+			}
+		}
+	}
+
+	/**
+	 * Check for conflicts with standalone plugins
+	 */
+	public function check_plugin_conflicts(): void {
+		$conflicts = [];
+
+		// Check for standalone Plausible plugin
+		if (in_array('fcrm-plausible-analytics/fcrm-plausible-analytics.php', 
+					apply_filters('active_plugins', get_option('active_plugins')))) {
+			$conflicts[] = [
+				'plugin' => 'FCRM Plausible Analytics',
+				'message' => 'The standalone FCRM Plausible Analytics plugin is active. Please deactivate it to avoid conflicts with the integrated SEO & Analytics module.'
+			];
+		}
+
+		// Check for standalone SEOPress plugin
+		if (in_array('fcrm-seopress/fcrm-seopress.php', 
+					apply_filters('active_plugins', get_option('active_plugins')))) {
+			$conflicts[] = [
+				'plugin' => 'FCRM SEOPress Integration',
+				'message' => 'The standalone FCRM SEOPress Integration plugin is active. Please deactivate it to avoid conflicts with the integrated SEO & Analytics module.'
+			];
+		}
+
+		// Display conflict notices
+		foreach ($conflicts as $conflict) {
+			?>
+			<div class="notice notice-warning is-dismissible">
+				<p>
+					<strong><?php echo esc_html($conflict['plugin']); ?> Conflict:</strong>
+					<?php echo esc_html($conflict['message']); ?>
+				</p>
+			</div>
+			<?php
+		}
+	}
+}
+
+// Create instance and class alias for backward compatibility
+new FCRM_Enhancement_Suite();
+
+// Alias for modules to reference standardised methods
+class_alias('FCRM_Enhancement_Suite', 'FCRM_Tributes_Enhancement_Suite'); 
