@@ -282,20 +282,30 @@ $container_classes = [
         
         renderTributes(tributes) {
             const grid = $(`#tributes-grid-${this.elementId}`);
-            
-            tributes.forEach(tribute => {
-                const card = this.createTributeCard(tribute);
+
+            tributes.forEach((tribute, index) => {
+                // Pass absolute index to track position across pages
+                const absoluteIndex = this.totalLoaded + index;
+                const card = this.createTributeCard(tribute, absoluteIndex);
                 grid.append(card);
             });
-            
+
             this.hideEmptyState();
         }
-        
-        createTributeCard(tribute) {
+
+        createTributeCard(tribute, absoluteIndex) {
             const detailUrl = tribute.permalink || '#';
             const imageUrl = tribute.displayImage || this.config.defaultImageUrl || '';
             const hasImage = imageUrl && imageUrl.trim() !== '';
-            
+
+            // Performance optimization: Don't lazy load first 9 images (3 rows of 3)
+            // This prevents LCP degradation by ensuring above-the-fold images load immediately
+            const shouldLazyLoad = absoluteIndex >= 9;
+            const loadingAttr = shouldLazyLoad ? 'loading="lazy"' : '';
+
+            // Performance optimization: Add fetch priority to first image (LCP element)
+            const fetchPriorityAttr = absoluteIndex === 0 ? 'fetchpriority="high"' : '';
+
             // Format dates display
             let datesHtml = '';
             if (tribute.dateOfBirth && !this.config.hideDateOfBirth) {
@@ -315,8 +325,8 @@ $container_classes = [
             const card = $(`
                 <article class="fcrm-tribute-card gallery-photo-card" data-tribute-id="${tribute.id || ''}" ${detailUrl !== '#' ? `data-detail-url="${detailUrl}"` : ''} style="height: ${cardHeight}px;">
                     <div class="gallery-image-container">
-                        ${hasImage ? 
-                            `<img src="${imageUrl}" alt="${tribute.fullName || 'Memorial photo'}" class="gallery-image" loading="lazy">` :
+                        ${hasImage ?
+                            `<img src="${imageUrl}" alt="${tribute.fullName || 'Memorial photo'}" class="gallery-image" ${loadingAttr} ${fetchPriorityAttr}>` :
                             `<div class="gallery-image-placeholder">
                                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" stroke=\"currentColor\" stroke-width=\"2\"/>

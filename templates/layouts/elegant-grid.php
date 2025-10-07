@@ -280,20 +280,30 @@ $container_classes = [
         
         renderTributes(tributes) {
             const grid = $(`#tributes-grid-${this.elementId}`);
-            
-            tributes.forEach(tribute => {
-                const card = this.createTributeCard(tribute);
+
+            tributes.forEach((tribute, index) => {
+                // Pass absolute index to track position across pages
+                const absoluteIndex = this.totalLoaded + index;
+                const card = this.createTributeCard(tribute, absoluteIndex);
                 grid.append(card);
             });
-            
+
             this.hideEmptyState();
         }
-        
-        createTributeCard(tribute) {
+
+        createTributeCard(tribute, absoluteIndex) {
             const detailUrl = tribute.permalink || '#';
             const imageUrl = tribute.displayImage || this.config.defaultImageUrl || '';
             const hasImage = imageUrl && imageUrl.trim() !== '';
-            
+
+            // Performance optimization: Don't lazy load first 9 images (3 rows of 3)
+            // This prevents LCP degradation by ensuring above-the-fold images load immediately
+            const shouldLazyLoad = absoluteIndex >= 9;
+            const loadingAttr = shouldLazyLoad ? 'loading="lazy"' : '';
+
+            // Performance optimization: Add fetch priority to first image (LCP element)
+            const fetchPriorityAttr = absoluteIndex === 0 ? 'fetchpriority="high"' : '';
+
             // Format dates display
             let datesHtml = '';
             if (tribute.dateOfBirth && !this.config.hideDateOfBirth) {
@@ -321,8 +331,8 @@ $container_classes = [
                 <article class="fcrm-tribute-card elegant-memorial-card" data-tribute-id="${tribute.id || ''}" ${detailUrl !== '#' ? `data-detail-url="${detailUrl}"` : ''}>
                     <div class="elegant-image-container">
                         <div class="elegant-image-frame">
-                            ${hasImage ? 
-                                `<img src="${imageUrl}" alt="${tribute.fullName || 'Memorial photo'}" class="elegant-portrait" loading="lazy">` :
+                            ${hasImage ?
+                                `<img src="${imageUrl}" alt="${tribute.fullName || 'Memorial photo'}" class="elegant-portrait" ${loadingAttr} ${fetchPriorityAttr}>` :
                                 `<div class="elegant-image-placeholder">
                                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="2"/>

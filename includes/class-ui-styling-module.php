@@ -22,6 +22,8 @@ class FCRM_UI_Styling_Module {
     protected $default_settings = [
         // Global Colors
         'fcrm_ui_primary_color' => '#2563eb',
+        'fcrm_ui_primary_text_color' => '#ffffff',
+        'fcrm_ui_primary_button_text_color' => '#ffffff',
         'fcrm_ui_secondary_color' => '#64748b',
         'fcrm_ui_accent_color' => '#d4af37',
         'fcrm_ui_background_color' => '#ffffff',
@@ -53,73 +55,15 @@ class FCRM_UI_Styling_Module {
         'fcrm_ui_color_scheme' => 'default'
     ];
 
-    /**
-     * Color scheme presets
-     */
-    protected $color_schemes = [
-        'default' => [
-            'name' => 'Default Blue',
-            'primary' => '#2563eb',
-            'secondary' => '#64748b',
-            'accent' => '#d4af37',
-            'background' => '#ffffff',
-            'card_background' => '#ffffff',
-            'text' => '#1e293b',
-            'border' => '#e2e8f0'
-        ],
-        'warm' => [
-            'name' => 'Warm Professional',
-            'primary' => '#b45309',
-            'secondary' => '#78716c',
-            'accent' => '#d97706',
-            'background' => '#fefdf8',
-            'card_background' => '#ffffff',
-            'text' => '#292524',
-            'border' => '#e7e5e4'
-        ],
-        'elegant' => [
-            'name' => 'Elegant Traditional',
-            'primary' => '#581c87',
-            'secondary' => '#6b7280',
-            'accent' => '#c7a96b',
-            'background' => '#fefefe',
-            'card_background' => '#ffffff',
-            'text' => '#111827',
-            'border' => '#e5e7eb'
-        ],
-        'modern' => [
-            'name' => 'Modern Minimal',
-            'primary' => '#059669',
-            'secondary' => '#4b5563',
-            'accent' => '#10b981',
-            'background' => '#f9fafb',
-            'card_background' => '#ffffff',
-            'text' => '#111827',
-            'border' => '#d1d5db'
-        ],
-        'traditional' => [
-            'name' => 'Traditional Navy',
-            'primary' => '#1e3a8a',
-            'secondary' => '#64748b',
-            'accent' => '#dc2626',
-            'background' => '#ffffff',
-            'card_background' => '#ffffff',
-            'text' => '#1e293b',
-            'border' => '#cbd5e1'
-        ]
-    ];
 
     public function __construct() {
         // Initialize styling if module is enabled
         if ($this->is_enabled()) {
-            add_action('wp_head', [$this, 'output_custom_css'], 20);
+            add_action('wp_enqueue_scripts', [$this, 'output_custom_css'], 100);
         }
-        
+
         // Register admin settings
         add_action('admin_init', [$this, 'register_settings']);
-        
-        // AJAX handlers for color scheme changes
-        add_action('wp_ajax_fcrm_apply_color_scheme', [$this, 'apply_color_scheme']);
     }
 
     /**
@@ -142,26 +86,81 @@ class FCRM_UI_Styling_Module {
      * Enqueue custom styling scripts for admin
      */
     public function enqueue_admin_assets(): void {
-        wp_enqueue_script('wp-color-picker');
         wp_enqueue_style('wp-color-picker');
-        
-        wp_enqueue_script(
-            'fcrm-ui-styling-admin',
-            FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/ui-styling-admin.js',
-            ['jquery', 'wp-color-picker'],
-            FCRM_ENHANCEMENT_SUITE_VERSION,
-            true
-        );
-        
-        wp_localize_script('fcrm-ui-styling-admin', 'fcrm_ui_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fcrm_ui_styling'),
-            'schemes' => $this->color_schemes
-        ]);
+        wp_enqueue_script('wp-color-picker');
+
+        // Get GeneratePress Global Colors if available
+        $gp_colors = $this->get_generatepress_colors();
+
+        // Initialize color pickers with palette
+        $palette_js = '';
+        if (!empty($gp_colors)) {
+            $palette_js = 'palettes: ' . json_encode($gp_colors) . ',';
+        }
+
+        wp_add_inline_script('wp-color-picker', '
+            jQuery(document).ready(function($) {
+                $(".fcrm-color-picker").wpColorPicker({
+                    ' . $palette_js . '
+                    change: function(event, ui) {
+                        $(this).val(ui.color.toString()).trigger("change");
+                    }
+                });
+            });
+        ');
+    }
+
+    /**
+     * Get GeneratePress Global Colors for color picker palette
+     */
+    private function get_generatepress_colors(): array {
+        $colors = [];
+
+        // Check if GeneratePress is active and has global colors
+        if (function_exists('generate_get_option')) {
+            // Get GeneratePress color settings
+            $gp_settings = get_option('generate_settings', []);
+
+            // Common GeneratePress color options
+            $color_options = [
+                'accent_color' => generate_get_option('accent_color'),
+                'contrast_color' => generate_get_option('contrast_color'),
+                'header_background_color' => generate_get_option('header_background_color'),
+                'header_text_color' => generate_get_option('header_text_color'),
+                'navigation_background_color' => generate_get_option('navigation_background_color'),
+                'navigation_text_color' => generate_get_option('navigation_text_color'),
+                'footer_background_color' => generate_get_option('footer_background_color'),
+                'footer_text_color' => generate_get_option('footer_text_color'),
+            ];
+
+            // Filter out empty values and duplicates
+            foreach ($color_options as $color) {
+                if (!empty($color) && $color !== '#' && !in_array($color, $colors)) {
+                    $colors[] = $color;
+                }
+            }
+        }
+
+        // Fallback: Check for GeneratePress Premium global colors (stored differently)
+        if (empty($colors) && function_exists('generatepress_get_color_setting')) {
+            $premium_colors = get_option('generate_secondary_nav_settings', []);
+            if (isset($premium_colors['colors']) && is_array($premium_colors['colors'])) {
+                foreach ($premium_colors['colors'] as $color) {
+                    if (!empty($color) && $color !== '#' && !in_array($color, $colors)) {
+                        $colors[] = $color;
+                    }
+                }
+            }
+        }
+
+        return $colors;
     }
 
     /**
      * Generate and output custom CSS
+     *
+     * Uses wp_add_inline_style() to ensure our CSS comes AFTER the layout CSS files,
+     * allowing our color overrides to properly cascade.
      */
     public function output_custom_css(): void {
         if (!$this->should_output_styles()) {
@@ -170,7 +169,16 @@ class FCRM_UI_Styling_Module {
 
         $css = $this->generate_custom_css();
         if (!empty($css)) {
-            echo "<style id='fcrm-ui-custom-styles'>\n" . $css . "\n</style>\n";
+            // Check if the shared stylesheet is registered/enqueued
+            if (wp_style_is('fcrm-layouts-shared', 'registered') || wp_style_is('fcrm-layouts-shared', 'enqueued')) {
+                // Attach inline CSS to the shared base stylesheet to ensure it loads after all layout CSS
+                wp_add_inline_style('fcrm-layouts-shared', $css);
+            } else {
+                // Fallback: output as inline style tag if shared CSS isn't loaded yet
+                add_action('wp_head', function() use ($css) {
+                    echo "<style id='fcrm-ui-custom-styles'>\n" . $css . "\n</style>\n";
+                }, 999);
+            }
         }
     }
 
@@ -188,12 +196,14 @@ class FCRM_UI_Styling_Module {
      */
     private function generate_custom_css(): string {
         $settings = $this->get_all_settings();
-        
+
         $css = "/* FCRM UI Custom Styling */\n";
         $css .= ":root {\n";
-        
+
         // Global CSS Custom Properties
         $css .= "  --fcrm-ui-primary: " . $settings['fcrm_ui_primary_color'] . ";\n";
+        $css .= "  --fcrm-ui-primary-text: " . $settings['fcrm_ui_primary_text_color'] . ";\n";
+        $css .= "  --fcrm-ui-primary-button-text: " . $settings['fcrm_ui_primary_button_text_color'] . ";\n";
         $css .= "  --fcrm-ui-secondary: " . $settings['fcrm_ui_secondary_color'] . ";\n";
         $css .= "  --fcrm-ui-accent: " . $settings['fcrm_ui_accent_color'] . ";\n";
         $css .= "  --fcrm-ui-background: " . $settings['fcrm_ui_background_color'] . ";\n";
@@ -319,11 +329,12 @@ class FCRM_UI_Styling_Module {
         $css .= ".load-more-btn, .view-details-button {\n";
         $css .= "  background-color: var(--fcrm-ui-primary) !important;\n";
         $css .= "  border-radius: var(--fcrm-ui-radius) !important;\n";
-        $css .= "  color: white !important;\n";
+        $css .= "  color: var(--fcrm-ui-primary-button-text) !important;\n";
         $css .= "}\n";
         $css .= ".modern-search-btn:hover, .elegant-search-btn:hover, .gallery-search-btn:hover, .minimal-search-btn:hover,\n";
         $css .= ".load-more-btn:hover, .view-details-button:hover {\n";
         $css .= "  background-color: color-mix(in srgb, var(--fcrm-ui-primary) 80%, black) !important;\n";
+        $css .= "  color: var(--fcrm-ui-primary-button-text) !important;\n";
         $css .= "}\n\n";
         
         // Links
@@ -353,13 +364,43 @@ class FCRM_UI_Styling_Module {
             $css .= "  height: {$size}px !important;\n";
             $css .= "}\n\n";
         }
-        
+
         // Grid gaps
         $css .= "/* Grid Gap Overrides */\n";
         $css .= ".tributes-grid, .gallery-tributes-grid {\n";
         $css .= "  gap: var(--fcrm-ui-grid-gap) !important;\n";
         $css .= "}\n\n";
-        
+
+        // Single Tribute Button Styling (Enhanced Classic & Modern Hero)
+        // Only add if we're on a single tribute page
+        if (isset($_GET['id'])) {
+            $css .= "/* Single Tribute Enhanced Classic Button Styling */\n";
+            $css .= ".fcrm-enhanced-classic {\n";
+            $css .= "  --enhanced-primary: var(--fcrm-ui-primary) !important;\n";
+            $css .= "  --enhanced-primary-hover: color-mix(in srgb, var(--fcrm-ui-primary) 80%, black) !important;\n";
+            $css .= "  --enhanced-border: var(--fcrm-ui-border) !important;\n";
+            $css .= "  --enhanced-border-hover: color-mix(in srgb, var(--fcrm-ui-border) 70%, var(--fcrm-ui-text)) !important;\n";
+            $css .= "  --enhanced-nav-bg: color-mix(in srgb, var(--fcrm-ui-background) 98%, var(--fcrm-ui-border)) !important;\n";
+            $css .= "  --enhanced-nav-hover: color-mix(in srgb, var(--fcrm-ui-background) 95%, var(--fcrm-ui-border)) !important;\n";
+            $css .= "  --enhanced-nav-active: var(--fcrm-ui-primary) !important;\n";
+            $css .= "  /* Override ALL FireHawk CSS variables for complete control */\n";
+            $css .= "  --fcrm-link-color: var(--fcrm-ui-primary) !important;\n";
+            $css .= "  --fcrm-primary-button: var(--fcrm-ui-primary) !important;\n";
+            $css .= "  --fcrm-primary-button-text: var(--fcrm-ui-primary-button-text) !important;\n";
+            $css .= "  --fcrm-primary-button-hover: color-mix(in srgb, var(--fcrm-ui-primary) 85%, black) !important;\n";
+            $css .= "  --fcrm-primary-button-hover-text: var(--fcrm-ui-primary-button-text) !important;\n";
+            $css .= "  --fcrm-focus-shadow-color: color-mix(in srgb, var(--fcrm-ui-primary) 25%, transparent) !important;\n";
+            $css .= "  --fcrm-focus-border-color: color-mix(in srgb, var(--fcrm-ui-primary) 50%, white) !important;\n";
+            $css .= "}\n\n";
+
+            $css .= "/* Modern Hero Button Styling */\n";
+            $css .= ".fcrm-modern-hero {\n";
+            $css .= "  --hero-primary: var(--fcrm-ui-primary) !important;\n";
+            $css .= "  --hero-primary-hover: color-mix(in srgb, var(--fcrm-ui-primary) 80%, black) !important;\n";
+            $css .= "  --hero-accent: var(--fcrm-ui-accent) !important;\n";
+            $css .= "}\n\n";
+        }
+
         return $css;
     }
 
@@ -429,22 +470,18 @@ class FCRM_UI_Styling_Module {
         $css .= "  color: var(--fcrm-ui-text);\n";
         $css .= "}\n\n";
         
-        // Content containers with max-width
+        // Content containers with max-width (no padding - page builder handles this)
         $css .= "/* Content Container Max Width */\n";
         $css .= ".fcrm-modern-grid-container, .fcrm-elegant-grid-container, .fcrm-gallery-grid-container, .minimal-tributes-list {\n";
         $css .= "  max-width: var(--fcrm-ui-grid-max-width) !important;\n";
         $css .= "  margin: 0 auto !important;\n";
-        $css .= "  padding-left: 2rem !important;\n";
-        $css .= "  padding-right: 2rem !important;\n";
         $css .= "}\n\n";
-        
-        // Search containers with reasonable max-width
+
+        // Search containers with reasonable max-width (no padding - page builder handles this)
         $css .= "/* Search Container Max Width */\n";
         $css .= ".fcrm-modern-search, .fcrm-elegant-search, .fcrm-gallery-search, .fcrm-minimal-search {\n";
         $css .= "  max-width: 1000px !important;\n";
         $css .= "  margin: 0 auto 2rem auto !important;\n";
-        $css .= "  padding-left: 2rem !important;\n";
-        $css .= "  padding-right: 2rem !important;\n";
         $css .= "}\n\n";
 
         // Card styles - different handling for different layout types
@@ -471,11 +508,12 @@ class FCRM_UI_Styling_Module {
         $css .= ".load-more-btn, .view-details-button {\n";
         $css .= "  background-color: var(--fcrm-ui-primary) !important;\n";
         $css .= "  border-radius: var(--fcrm-ui-radius) !important;\n";
-        $css .= "  color: white !important;\n";
+        $css .= "  color: var(--fcrm-ui-primary-button-text) !important;\n";
         $css .= "}\n";
         $css .= ".modern-search-btn:hover, .elegant-search-btn:hover, .gallery-search-btn:hover, .minimal-search-btn:hover,\n";
         $css .= ".load-more-btn:hover, .view-details-button:hover {\n";
         $css .= "  background-color: color-mix(in srgb, var(--fcrm-ui-primary) 80%, black) !important;\n";
+        $css .= "  color: var(--fcrm-ui-primary-button-text) !important;\n";
         $css .= "}\n\n";
         
         // Links
@@ -535,36 +573,6 @@ class FCRM_UI_Styling_Module {
         return FCRM_Enhancement_Suite::is_tribute_page();
     }
 
-    /**
-     * Apply color scheme via AJAX
-     */
-    public function apply_color_scheme(): void {
-        if (!current_user_can('manage_options')) {
-            wp_die('Unauthorized');
-        }
-        
-        check_ajax_referer('fcrm_ui_styling', 'nonce');
-        
-        $scheme = sanitize_text_field($_POST['scheme']);
-        
-        if (!isset($this->color_schemes[$scheme])) {
-            wp_send_json_error('Invalid color scheme');
-        }
-        
-        $colors = $this->color_schemes[$scheme];
-        
-        // Update all color settings
-        update_option('fcrm_ui_primary_color', $colors['primary']);
-        update_option('fcrm_ui_secondary_color', $colors['secondary']);
-        update_option('fcrm_ui_accent_color', $colors['accent']);
-        update_option('fcrm_ui_background_color', $colors['background']);
-        update_option('fcrm_ui_card_background', $colors['card_background']);
-        update_option('fcrm_ui_text_color', $colors['text']);
-        update_option('fcrm_ui_border_color', $colors['border']);
-        update_option('fcrm_ui_color_scheme', $scheme);
-        
-        wp_send_json_success(['message' => 'Color scheme applied successfully']);
-    }
 
     /**
      * Render admin settings
@@ -573,104 +581,90 @@ class FCRM_UI_Styling_Module {
         $settings = $this->get_all_settings();
         ?>
         <div class="fcrm-ui-styling-settings">
-            
-            <!-- Color Scheme Presets -->
-            <div class="settings-section">
-                <h3>🎨 Color Scheme Presets</h3>
-                <div class="section-content">
-                    <p><strong>Quick apply professional color schemes, then customize individual colors below.</strong></p>
-                    <div class="color-scheme-presets">
-                        <?php foreach ($this->color_schemes as $key => $scheme): ?>
-                            <div class="scheme-preset" data-scheme="<?php echo esc_attr($key); ?>">
-                                <div class="scheme-preview">
-                                    <div class="color-swatch" style="background-color: <?php echo esc_attr($scheme['primary']); ?>"></div>
-                                    <div class="color-swatch" style="background-color: <?php echo esc_attr($scheme['secondary']); ?>"></div>
-                                    <div class="color-swatch" style="background-color: <?php echo esc_attr($scheme['accent']); ?>"></div>
-                                    <div class="color-swatch" style="background-color: <?php echo esc_attr($scheme['background']); ?>"></div>
-                                </div>
-                                <h4><?php echo esc_html($scheme['name']); ?></h4>
-                                <button type="button" class="button apply-scheme" data-scheme="<?php echo esc_attr($key); ?>">
-                                    Apply Scheme
-                                </button>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Global Colors -->
+            <!-- Global Colours -->
             <div class="settings-section">
-                <h3>🌈 Color Customization</h3>
+                <h3>🌈 Colour Customisation</h3>
                 <div class="section-content">
                     <table class="form-table">
                         <tr>
-                            <th scope="row">Primary Color</th>
+                            <th scope="row">Primary Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_primary_color" 
+                                <input type="text"
+                                       name="fcrm_ui_primary_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_primary_color']); ?>"
                                        class="fcrm-color-picker" />
                                 <p class="description">Used for buttons, links, and interactive elements.</p>
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Secondary Color</th>
+                            <th scope="row">Primary Button Text Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_secondary_color" 
+                                <input type="text"
+                                       name="fcrm_ui_primary_button_text_color"
+                                       value="<?php echo esc_attr($settings['fcrm_ui_primary_button_text_color']); ?>"
+                                       class="fcrm-color-picker" />
+                                <p class="description">Text colour for primary buttons (search buttons, Write Message, Plant Tree, Make Donation buttons). Default: white.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Secondary Colour</th>
+                            <td>
+                                <input type="text"
+                                       name="fcrm_ui_secondary_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_secondary_color']); ?>"
                                        class="fcrm-color-picker" />
                                 <p class="description">Used for secondary text and subtle elements.</p>
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Accent Color</th>
+                            <th scope="row">Accent Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_accent_color" 
+                                <input type="text"
+                                       name="fcrm_ui_accent_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_accent_color']); ?>"
                                        class="fcrm-color-picker" />
                                 <p class="description">Used for special highlights and featured elements.</p>
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Background Color</th>
+                            <th scope="row">Background Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_background_color" 
+                                <input type="text"
+                                       name="fcrm_ui_background_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_background_color']); ?>"
                                        class="fcrm-color-picker" />
-                                <p class="description">Main background color for tribute pages.</p>
+                                <p class="description">Main background colour for tribute pages.</p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">Card Background</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_card_background" 
+                                <input type="text"
+                                       name="fcrm_ui_card_background"
                                        value="<?php echo esc_attr($settings['fcrm_ui_card_background']); ?>"
                                        class="fcrm-color-picker" />
-                                <p class="description">Background color for tribute cards.</p>
+                                <p class="description">Background colour for tribute cards.</p>
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Text Color</th>
+                            <th scope="row">Text Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_text_color" 
+                                <input type="text"
+                                       name="fcrm_ui_text_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_text_color']); ?>"
                                        class="fcrm-color-picker" />
-                                <p class="description">Main text color.</p>
+                                <p class="description">Main text colour.</p>
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Border Color</th>
+                            <th scope="row">Border Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_border_color" 
+                                <input type="text"
+                                       name="fcrm_ui_border_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_border_color']); ?>"
                                        class="fcrm-color-picker" />
-                                <p class="description">Color for borders and dividers.</p>
+                                <p class="description">Colour for borders and dividers.</p>
                             </td>
                         </tr>
                     </table>
@@ -823,13 +817,13 @@ class FCRM_UI_Styling_Module {
                 <div class="section-content">
                     <table class="form-table">
                         <tr>
-                            <th scope="row">Elegant Gold Color</th>
+                            <th scope="row">Elegant Gold Colour</th>
                             <td>
-                                <input type="text" 
-                                       name="fcrm_ui_elegant_gold_color" 
+                                <input type="text"
+                                       name="fcrm_ui_elegant_gold_color"
                                        value="<?php echo esc_attr($settings['fcrm_ui_elegant_gold_color']); ?>"
                                        class="fcrm-color-picker" />
-                                <p class="description">Gold accent color specifically for the Elegant layout.</p>
+                                <p class="description">Gold accent colour specifically for the Elegant layout.</p>
                             </td>
                         </tr>
                         <tr>
@@ -873,64 +867,45 @@ class FCRM_UI_Styling_Module {
             </div>
 
             <div class="info-card">
-                <h4>🎨 UI Styling Active</h4>
-                <p>Custom styling will override the default layout colors and spacing. All changes are applied using CSS custom properties for optimal performance.</p>
+                <h4>🎨 UI Styling for Grid & Single Tribute Layouts</h4>
+                <p><strong>Grid Layouts:</strong> These colour and typography settings are applied to all modern grid layouts (Modern Grid, Elegant Grid, Gallery Grid, List View).</p>
+                <p><strong>Single Tribute Pages:</strong> When using Enhanced Classic or Modern Hero single tribute layouts, button colours automatically inherit from the Primary Colour setting above. This ensures consistent branding across grid and detail pages.</p>
+                <p><strong>Performance:</strong> All styling is applied via CSS custom properties and inline styles - zero additional HTTP requests.</p>
             </div>
         </div>
 
         <style>
-        .fcrm-ui-styling-settings .color-scheme-presets {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        
-        .scheme-preset {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            background: #fff;
-        }
-        
-        .scheme-preview {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 0.5rem;
-            justify-content: center;
-        }
-        
-        .color-swatch {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1px solid #ddd;
-        }
-        
-        .scheme-preset h4 {
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
-        }
-        
-        .apply-scheme {
-            font-size: 0.8rem;
-        }
-        
         .fcrm-range-slider {
             width: 200px;
             margin-right: 1rem;
         }
-        
+
         .range-value {
             font-weight: bold;
             color: #0073aa;
         }
-        
+
         .font-family-row {
             transition: opacity 0.3s ease;
         }
         </style>
+
+        <script>
+        jQuery(document).ready(function($) {
+            // Update range slider values in real-time
+            $('.fcrm-range-slider').on('input', function() {
+                const value = $(this).val();
+                const $valueSpan = $(this).siblings('.range-value');
+
+                // Get the unit from the current text (px, rem, %)
+                const currentText = $valueSpan.text();
+                const unit = currentText.match(/[a-z%]+$/i)?.[0] || '';
+
+                // Update the display value
+                $valueSpan.text(value + unit);
+            });
+        });
+        </script>
         <?php
     }
 } 

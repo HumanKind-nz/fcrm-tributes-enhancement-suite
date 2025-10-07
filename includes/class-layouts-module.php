@@ -19,7 +19,6 @@ class FCRM_Layouts_Module {
      * Available layout options
      */
     protected $available_layouts = [
-        'firehawk' => 'Default FCRM Layout',
         'modern-grid' => 'Modern Grid Layout',
         'elegant-grid' => 'Elegant Grid Layout',
         'minimal' => 'List View Layout',
@@ -39,8 +38,8 @@ class FCRM_Layouts_Module {
      * Module settings
      */
     protected $settings = [
-        'fcrm_active_layout' => 'firehawk',
-        'fcrm_active_single_layout' => 'default',
+        'fcrm_active_layout' => 'modern-grid',
+        'fcrm_active_single_layout' => 'enhanced-classic',
         'fcrm_layout_grid_columns' => '3',
         'fcrm_layout_card_style' => 'standard',
         'fcrm_layout_header_style' => 'standard',
@@ -76,17 +75,15 @@ class FCRM_Layouts_Module {
      */
     private function init_shortcode_overrides(): void {
         // Override based on both grid and single layout settings
-        $active_layout = get_option('fcrm_active_layout', 'firehawk');
-        $active_single_layout = get_option('fcrm_active_single_layout', 'default');
+        $active_layout = get_option('fcrm_active_layout', 'modern-grid');
+        $active_single_layout = get_option('fcrm_active_single_layout', 'enhanced-classic');
 
-        // Override if either grid layout or single layout is custom
-        if ($active_layout !== 'firehawk' || $active_single_layout !== 'default') {
-            // Simple check - just ensure FCRM is available since we use their JS system
-            if (class_exists('Fcrm_Tributes_Api')) {
-                add_action('init', [$this, 'override_fcrm_shortcodes'], 20);
-            } else {
-                // Note: Dependency warnings are now handled centrally by the main plugin class
-            }
+        // Always override if layouts module is enabled (no more 'firehawk' option)
+        // Simple check - just ensure FCRM is available since we use their JS system
+        if (class_exists('Fcrm_Tributes_Api')) {
+            add_action('init', [$this, 'override_fcrm_shortcodes'], 20);
+        } else {
+            // Note: Dependency warnings are now handled centrally by the main plugin class
         }
     }
 
@@ -94,37 +91,33 @@ class FCRM_Layouts_Module {
      * Override FCRM shortcodes with our modern layouts
      */
     public function override_fcrm_shortcodes(): void {
-        $active_layout = get_option('fcrm_active_layout', 'firehawk');
-        $active_single_layout = get_option('fcrm_active_single_layout', 'default');
+        $active_layout = get_option('fcrm_active_layout', 'modern-grid');
+        $active_single_layout = get_option('fcrm_active_single_layout', 'enhanced-classic');
 
-        // Only override grid shortcode if grid layout is custom
-        if ($active_layout !== 'firehawk') {
-            remove_shortcode('show_crm_tributes_grid');
-            add_shortcode('show_crm_tributes_grid', [$this, 'render_modern_tributes_grid']);
-        }
+        // Always override grid shortcode (no 'firehawk' option anymore)
+        remove_shortcode('show_crm_tributes_grid');
+        add_shortcode('show_crm_tributes_grid', [$this, 'render_modern_tributes_grid']);
 
-        // Only override single tribute shortcode if single layout is custom
-        if ($active_single_layout !== 'default') {
-            remove_shortcode('show_crm_tribute');
-            add_shortcode('show_crm_tribute', [$this, 'render_modern_single_tribute']);
-        }
+        // Always override single tribute shortcode (always use enhanced layouts)
+        remove_shortcode('show_crm_tribute');
+        add_shortcode('show_crm_tribute', [$this, 'render_modern_single_tribute']);
     }
 
     /**
      * Disable styling module when layouts are enabled to prevent conflicts
      */
     private function disable_styling_module(): void {
-        // Only disable styling module if we're actually using a custom layout
-        $active_layout = get_option('fcrm_active_layout', 'firehawk');
-        
-        if ($active_layout !== 'firehawk' && get_option('fcrm_module_styling_enabled', false)) {
+        // Always disable styling module when Layouts module is enabled (no 'firehawk' option anymore)
+        if (get_option('fcrm_module_styling_enabled', false)) {
             update_option('fcrm_module_styling_enabled', false);
-            
+
             // Add admin notice about auto-disable
             add_action('admin_notices', function() {
-                echo '<div class="notice notice-info is-dismissible">';
-                echo '<p><strong>FCRM Enhancement Suite:</strong> Styling module has been automatically disabled because a custom layout is active. When using default layout, you can re-enable the Styling module.</p>';
-                echo '</div>';
+                ?>
+                <div class="notice notice-info is-dismissible">
+                    <p><strong>FCRM Enhancement Suite:</strong> "FireHawk Layout Styling" module has been automatically disabled because the Modern Layouts module is active. To style the original FireHawk layout, please disable the Modern Layouts module first.</p>
+                </div>
+                <?php
             });
         }
     }
@@ -136,11 +129,11 @@ class FCRM_Layouts_Module {
         // Simple test to see if this method is being called
         if (current_user_can('manage_options')) {
         }
-        
+
         $attributes = shortcode_atts([
             'name-format' => null,
             'detail-page' => null,
-            'layout' => 'basic',
+            'layout' => get_option('fcrm_active_layout', 'modern-grid'), // Use global setting as default
             'limit' => 6,
             'image-style' => 'basic',
             'click-action' => 'open',
@@ -156,6 +149,10 @@ class FCRM_Layouts_Module {
             'hide-dob' => false
         ], $atts);
 
+        // Check if explicitly requesting FireHawk passthrough layout (shortcode-only, for demos/testing)
+        if ($attributes['layout'] === 'firehawk') {
+            return $this->render_firehawk_passthrough_grid($atts);
+        }
 
         // Process attributes the same way FCRM does
         $team = get_option('fcrm_team');
@@ -180,10 +177,10 @@ class FCRM_Layouts_Module {
 
         // Use template approach like FCRM does
         ob_start();
-        
-        // Get the active layout setting
-        $active_layout = get_option('fcrm_active_layout', 'modern-grid');
-        
+
+        // Use layout from shortcode attribute (overrides global setting)
+        $active_layout = $attributes['layout'];
+
         // Include our template
         $template_file = $this->get_template_file($active_layout);
         if (file_exists($template_file)) {
@@ -198,9 +195,52 @@ class FCRM_Layouts_Module {
                 return $this->fallback_to_fcrm_grid($atts);
             }
         }
-        
+
         $content = ob_get_clean();
         return $content;
+    }
+
+
+    /**
+     * Render FireHawk passthrough grid layout (for demos/testing)
+     *
+     * This is a special passthrough mode that allows using layout="firehawk" in shortcodes
+     * for side-by-side comparisons and demos. It's NOT available in the admin dropdown -
+     * only via explicit shortcode parameter.
+     *
+     * @param array $atts Shortcode attributes
+     * @return string Rendered HTML from FireHawk
+     */
+    private function render_firehawk_passthrough_grid($atts): string {
+        // Temporarily remove our override
+        remove_shortcode('show_crm_tributes_grid');
+
+        // Re-register FireHawk's original shortcode
+        if (class_exists('Fcrm_Tributes_Public')) {
+            $fcrm_public = new Fcrm_Tributes_Public('fcrm-tributes', defined('PLUGIN_NAME_VERSION') ? PLUGIN_NAME_VERSION : '2.3.1');
+            add_shortcode('show_crm_tributes_grid', [$fcrm_public, 'shortcode_crm_tributes_grid_display']);
+        } else {
+            return '<div class="fcrm-error">FireHawk CRM Tributes plugin not found.</div>';
+        }
+
+        // Build shortcode string from attributes
+        $shortcode = '[show_crm_tributes_grid';
+        foreach ($atts as $key => $value) {
+            // Exclude 'layout' attribute (no longer needed)
+            if ($key !== 'layout' && $value !== null && $value !== '') {
+                $shortcode .= ' ' . $key . '="' . esc_attr($value) . '"';
+            }
+        }
+        $shortcode .= ']';
+
+        // Execute FireHawk's original shortcode
+        $output = do_shortcode($shortcode);
+
+        // Restore our override for subsequent shortcodes
+        remove_shortcode('show_crm_tributes_grid');
+        add_shortcode('show_crm_tributes_grid', [$this, 'render_modern_tributes_grid']);
+
+        return $output;
     }
 
     /**
@@ -224,24 +264,18 @@ class FCRM_Layouts_Module {
                 error_log('[FCRM_ES] render_modern_single_tribute start');
             }
 
-            // Check if single tribute layouts are enabled (not default)
-            $active_single_layout = get_option('fcrm_active_single_layout', 'default');
+            // Check if single tribute layouts are enabled
+            $active_single_layout = get_option('fcrm_active_single_layout', 'enhanced-classic');
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('[FCRM_ES] active_single_layout=' . $active_single_layout);
             }
-
-
-            if ($active_single_layout === 'default') {
-                // Use original FCRM single tribute
-                return $this->fallback_to_fcrm_single($atts);
-            }
-
 
         // Process attributes the same way FCRM does
         $attributes = shortcode_atts([
             'id' => null,
             'name-format' => null,
             'detail-page' => null,
+            'layout' => get_option('fcrm_active_single_layout', 'enhanced-classic'),
             'image-style' => 'basic',
             'click-action' => 'open',
             'display-service' => true,
@@ -253,6 +287,8 @@ class FCRM_Layouts_Module {
         ob_start();
 
         // Include our modern single tribute template
+        // Use layout from shortcode attribute (overrides global setting)
+        $active_single_layout = $attributes['layout'];
         $template_file = $this->get_single_template_file($active_single_layout);
 
         if (file_exists($template_file)) {
@@ -309,6 +345,7 @@ class FCRM_Layouts_Module {
             return $this->fallback_to_fcrm_single($atts);
         }
     }
+
 
     /**
      * Render modern layout template
@@ -480,34 +517,21 @@ class FCRM_Layouts_Module {
             return;
         }
 
-        $active_layout = get_option('fcrm_active_layout', 'firehawk');
-        $active_single_layout = get_option('fcrm_active_single_layout', 'default');
-        
-        // Base shared styles
-        if ($active_layout !== 'firehawk' || $active_single_layout !== 'default') {
-            wp_enqueue_style(
-                'fcrm-layouts-shared',
-                FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/layouts/shared-base.css',
-                [],
-                FCRM_ENHANCEMENT_SUITE_VERSION
-            );
-        }
+        $active_layout = get_option('fcrm_active_layout', 'modern-grid');
+        $active_single_layout = get_option('fcrm_active_single_layout', 'enhanced-classic');
 
-        // Loading spinner (always enqueue on tribute pages)
+        // Always enqueue shared styles (no 'firehawk' option anymore)
         wp_enqueue_style(
-            'fcrm-loading-spinner',
-            FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/frontend/loading-spinner.css',
+            'fcrm-layouts-shared',
+            FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/layouts/shared-base.css',
             [],
             FCRM_ENHANCEMENT_SUITE_VERSION
         );
 
-        wp_enqueue_script(
-            'fcrm-loading-spinner',
-            FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/frontend/loading-spinner.js',
-            ['jquery'],
-            FCRM_ENHANCEMENT_SUITE_VERSION,
-            true
-        );
+        // Loading spinner removed - now handled inline by Optimisation Module (v2.1.1)
+        // This eliminates 2 HTTP requests and prevents render-blocking
+        // The spinner is now inlined with user-configurable settings (color, size, style)
+        // See: class-optimisation-module.php enqueue_frontend_assets() for implementation
 
         // Grid layout styles
         if ($active_layout === 'modern-grid') {
@@ -546,8 +570,10 @@ class FCRM_Layouts_Module {
             );
         }
 
-        // Single tribute layout styles
-        if ($active_single_layout === 'enhanced-classic') {
+        // Single tribute layout styles - ONLY load on single tribute pages (has ?id parameter)
+        $is_single_tribute = isset($_GET['id']);
+
+        if ($is_single_tribute && $active_single_layout === 'enhanced-classic') {
             wp_enqueue_style(
                 'fcrm-enhanced-classic',
                 FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/layouts/enhanced-classic.css',
@@ -556,7 +582,7 @@ class FCRM_Layouts_Module {
             );
         }
 
-        if ($active_single_layout === 'modern-hero') {
+        if ($is_single_tribute && $active_single_layout === 'modern-hero') {
             wp_enqueue_style(
                 'fcrm-modern-hero',
                 FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/layouts/modern-hero.css',
@@ -565,20 +591,18 @@ class FCRM_Layouts_Module {
             );
         }
 
-        // Enqueue JavaScript for layouts with AJAX functionality (if not default layout)
-        if ($active_layout !== 'firehawk') {
-            // Enqueue unified search component for all layouts
-            wp_enqueue_script(
-                'fcrm-unified-search',
-                FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/frontend/unified-search.js',
-                ['jquery'],
-                FCRM_ENHANCEMENT_SUITE_VERSION,
-                true
-            );
-            
-            // NOTE: We rely on FCRM's own AJAX variable localization (ajax_var)
-            // No need to localize our own variables since we use FCRM's handlers
-        }
+        // Always enqueue JavaScript for layouts with AJAX functionality
+        // Enqueue unified search component for all layouts
+        wp_enqueue_script(
+            'fcrm-unified-search',
+            FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/js/frontend/unified-search.js',
+            ['jquery'],
+            FCRM_ENHANCEMENT_SUITE_VERSION,
+            true
+        );
+
+        // NOTE: We rely on FCRM's own AJAX variable localization (ajax_var)
+        // No need to localize our own variables since we use FCRM's handlers
     }
 
     /**
@@ -611,7 +635,7 @@ class FCRM_Layouts_Module {
                         <td>
                             <select name="fcrm_active_layout">
                                 <?php foreach ($this->available_layouts as $key => $label): ?>
-                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_option('fcrm_active_layout', 'firehawk'), $key); ?>>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_option('fcrm_active_layout', 'modern-grid'), $key); ?>>
                                         <?php echo esc_html($label); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -690,7 +714,7 @@ class FCRM_Layouts_Module {
                         <td>
                             <select name="fcrm_active_single_layout">
                                 <?php foreach ($this->available_single_layouts as $key => $label): ?>
-                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_option('fcrm_active_single_layout', 'default'), $key); ?>>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_option('fcrm_active_single_layout', 'enhanced-classic'), $key); ?>>
                                         <?php echo esc_html($label); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -705,17 +729,7 @@ class FCRM_Layouts_Module {
         <div class="settings-section">
             <h3>🖼️ Layout Previews</h3>
             <div class="section-content">
-                <div class="layout-previews-grid" style="margin-top: 1rem;">
-                    
-                    <div class="layout-preview" style="border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem; text-align: center;">
-                        <div style="background: #f5f5f5; height: 300px; border-radius: 4px; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666; background-image: url('<?php echo FCRM_ENHANCEMENT_SUITE_PLUGIN_URL; ?>assets/images/layout-previews/firehawk.png'); background-size: contain; background-repeat: no-repeat; background-position: center;">
-                            <?php if (!file_exists(FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR . 'assets/images/layout-previews/firehawk.png')): ?>
-                                Default FCRM Preview
-                            <?php endif; ?>
-                        </div>
-                        <h4 style="margin: 0.5rem 0; font-size: 0.9rem;">Default FCRM Layout</h4>
-                        <p style="font-size: 0.8rem; color: #666; margin: 0;">Original FireHawk tribute layout</p>
-                    </div>
+                <div class="layout-previews-grid" style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
 
                     <div class="layout-preview" style="border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem; text-align: center;">
                         <div style="background: #f5f5f5; height: 300px; border-radius: 4px; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666; background-image: url('<?php echo FCRM_ENHANCEMENT_SUITE_PLUGIN_URL; ?>assets/images/layout-previews/modern.png'); background-size: contain; background-repeat: no-repeat; background-position: center;">
@@ -762,7 +776,7 @@ class FCRM_Layouts_Module {
         </div>
 
         <div class="alert alert-info">
-            <strong>Note:</strong> Modern layouts automatically disable the Styling module to prevent conflicts. Layout-specific styling is handled by individual CSS files for optimal performance.
+            <strong>Note:</strong> When the Layouts module is enabled, the "Change Default Styling" module is automatically disabled to prevent conflicts. To style the original FireHawk layout, disable the Layouts module first.
         </div>
 
         <?php

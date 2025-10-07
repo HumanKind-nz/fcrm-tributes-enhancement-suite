@@ -38,6 +38,14 @@ class API_Interceptor {
 	 * @return false|array|WP_Error Modified response or false to continue
 	 */
 	public static function intercept_api_request($preempt, $args, $url) {
+		// Debug: Log all HTTP requests to see if filter is working
+		$debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
+		if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+			if (strpos($url, 'api') !== false) {
+				error_log('[FCRM_ES] HTTP request detected: ' . $url);
+			}
+		}
+
 		// Only intercept FCRM API calls
 		if (!self::is_fcrm_api_url($url)) {
 			return $preempt;
@@ -45,6 +53,9 @@ class API_Interceptor {
 
 		// Skip caching if disabled
 		if (!Cache_Manager::is_caching_enabled()) {
+			if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+				error_log('[FCRM_ES] Caching is DISABLED - skipping cache for: ' . $url);
+			}
 			return $preempt;
 		}
 
@@ -138,18 +149,190 @@ class API_Interceptor {
 	 * @return bool Whether this is an FCRM API URL
 	 */
 	private static function is_fcrm_api_url($url) {
-		$fcrm_endpoints = [
-			'api.firehawkcrm.com',
-			'us-central1-fcrm-e17b0.cloudfunctions.net'
-		];
+		static $cached_endpoints = null;
 
-		foreach ($fcrm_endpoints as $endpoint) {
+		// Cache endpoint detection for performance
+		if ($cached_endpoints === null) {
+			$cached_endpoints = self::detect_fcrm_endpoints();
+		}
+
+		foreach ($cached_endpoints as $endpoint) {
 			if (strpos($url, $endpoint) !== false) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Detect FCRM API endpoints from Firehawk plugin configuration
+	 *
+	 * Auto-detects endpoints by reading Firehawk's API configuration via reflection.
+	 * Falls back to known patterns if auto-detection fails.
+	 *
+	 * @return array Array of API endpoint hostnames
+	 */
+	private static function detect_fcrm_endpoints() {
+		$endpoints = [];
+		$detection_method = 'unknown';
+
+		// Method 1: Auto-detect from Firehawk plugin (PRIMARY)
+		if (class_exists('Fcrm_Tributes_Api')) {
+			try {
+				$reflection = new \ReflectionClass('Fcrm_Tributes_Api');
+
+				// Get main API URL
+				if ($reflection->hasProperty('apiUrl')) {
+					$apiUrl_prop = $reflection->getProperty('apiUrl');
+					$apiUrl_prop->setAccessible(true);
+					$apiUrl = $apiUrl_prop->getValue();
+
+					if ($apiUrl) {
+						$host = parse_url($apiUrl, PHP_URL_HOST);
+						if ($host) {
+							$endpoints[] = $host;
+						}
+					}
+				}
+
+				// Get services API URL (Google Cloud Functions)
+				if ($reflection->hasProperty('servicesApiUrl')) {
+					$servicesUrl_prop = $reflection->getProperty('servicesApiUrl');
+					$servicesUrl_prop->setAccessible(true);
+					$servicesUrl = $servicesUrl_prop->getValue();
+
+					if ($servicesUrl) {
+						$host = parse_url($servicesUrl, PHP_URL_HOST);
+						if ($host) {
+							$endpoints[] = $host;
+						}
+					}
+				}
+
+				if (!empty($endpoints)) {
+					$detection_method = 'reflection';
+				}
+			} catch (Exception $e) {
+				// Log error if debug enabled
+				$debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
+				if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+					error_log('[FCRM_ES] Failed to auto-detect API endpoints via reflection: ' . $e->getMessage());
+				}
+			}
+		}
+
+		// Method 2: Fallback to known patterns (SECONDARY)
+		if (empty($endpoints)) {
+			$endpoints = [
+				// v2.2.0 Production endpoints
+				'api.firehawkcrm.com',
+				'us-central1-fcrm-e17b0.cloudfunctions.net',
+
+				// v2.3.1 UAT endpoints
+				'api.ivcuat.firehawkfunerals.com',
+				'australia-southeast1-firehawk-ivc-test.cloudfunctions.net',
+
+				// v2.3.1 Dev endpoints
+				'api.ivcdev.firehawkfunerals.com',
+				'australia-southeast1-firehawk-ivc-dev.cloudfunctions.net',
+
+				// Broad pattern for future Google Cloud Functions
+				'cloudfunctions.net'
+			];
+			$detection_method = 'fallback';
+		}
+
+		// Remove duplicates and empty values
+		$endpoints = array_unique(array_filter($endpoints));
+
+		// Debug logging
+		$debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
+		if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('[FCRM_ES] API endpoints detected: ' . implode(', ', $endpoints) . ' (source: ' . $detection_method . ')');
+		}
+
+		return $endpoints;
+	}
+
+	/**
+	 * Detect if FireHawk is using new API structure
+	 *
+	 * Detection strategy: Check if the API supports the new sitemap-count endpoint.
+	 * Falls back to checking for known endpoint patterns as a secondary method.
+	 *
+	 * New API structure: /api/tributes/sitemap-count (returns number of sitemap pages)
+	 * Old API structure: /api/tributes/count (returns total number of tributes)
+	 *
+	 * @return bool True if using new API structure, false if using old
+	 */
+	public static function is_new_api_structure() {
+		static $cached_result = null;
+
+		// Return cached result if already detected
+		if ($cached_result !== null) {
+			return $cached_result;
+		}
+
+		// Method 1: Check if Fcrm_Tributes_Api has get_tributes_sitemap_count method
+		if (class_exists('Fcrm_Tributes_Api')) {
+			// Check if the new sitemap-count method exists
+			if (method_exists('Fcrm_Tributes_Api', 'get_tributes_sitemap_count')) {
+				$cached_result = true;
+				return $cached_result;
+			}
+
+			// Method 2: Check API URL patterns as fallback
+			// This catches cases where the method might have a different name
+			try {
+				$reflection = new \ReflectionClass('Fcrm_Tributes_Api');
+
+				if ($reflection->hasProperty('apiUrl')) {
+					$apiUrl_prop = $reflection->getProperty('apiUrl');
+					$apiUrl_prop->setAccessible(true);
+					$apiUrl = $apiUrl_prop->getValue();
+
+					if ($apiUrl) {
+						// Known new API patterns (will expand as we discover more)
+						$new_api_patterns = [
+							'ivcuat.firehawkfunerals.com',
+							'ivcdev.firehawkfunerals.com',
+							'australia-southeast1-',
+						];
+
+						foreach ($new_api_patterns as $pattern) {
+							if (strpos($apiUrl, $pattern) !== false) {
+								$cached_result = true;
+								return $cached_result;
+							}
+						}
+
+						// Known old API patterns
+						$old_api_patterns = [
+							'api.firehawkcrm.com',
+							'us-central1-fcrm-e17b0',
+						];
+
+						foreach ($old_api_patterns as $pattern) {
+							if (strpos($apiUrl, $pattern) !== false) {
+								$cached_result = false;
+								return $cached_result;
+							}
+						}
+					}
+				}
+			} catch (Exception $e) {
+				// Log error if debug enabled
+				$debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
+				if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+					error_log('[FCRM_ES] Failed to detect API structure via reflection: ' . $e->getMessage());
+				}
+			}
+		}
+
+		// Default to old API structure for safety (works with existing production sites)
+		$cached_result = false;
+		return $cached_result;
 	}
 
 	/**
@@ -221,15 +404,32 @@ class API_Interceptor {
 		if (preg_match('/\/api\/client\/([^\/]+)\/messages/', $url, $matches)) {
 			$client_id = $matches[1];
 			$body_params = [];
-			
+
 			if (isset($args['body'])) {
 				$body_params = is_string($args['body']) ? json_decode($args['body'], true) : $args['body'];
 			}
-			
+
 			return [
 				'type' => 'tribute_messages',
 				'client_id' => $client_id,
 				'params' => $body_params ?: []
+			];
+		}
+
+		// Tributes sitemap count: /api/tributes/sitemap-count (new API - returns sitemap page count)
+		// Check this FIRST before regular count, since it also contains "count"
+		if (strpos($url, '/api/tributes/sitemap-count') !== false) {
+			return [
+				'type' => 'tributes_sitemap_count',
+				'params' => []
+			];
+		}
+
+		// Tributes count: /api/tributes/count (old API - returns total tribute count)
+		if (strpos($url, '/api/tributes/count') !== false) {
+			return [
+				'type' => 'tributes_count',
+				'params' => []
 			];
 		}
 
@@ -258,6 +458,12 @@ class API_Interceptor {
 
 			case 'tribute_messages':
 				return Cache_Manager::get_tribute_messages($api_info['client_id'], $api_info['params']);
+
+			case 'tributes_count':
+				return Cache_Manager::get_tributes_count();
+
+			case 'tributes_sitemap_count':
+				return Cache_Manager::get_tributes_sitemap_count();
 
 			default:
 				return false;
@@ -289,6 +495,14 @@ class API_Interceptor {
 
 			case 'tribute_messages':
 				Cache_Manager::set_tribute_messages($api_info['client_id'], $data, $api_info['params']);
+				break;
+
+			case 'tributes_count':
+				Cache_Manager::set_tributes_count($data);
+				break;
+
+			case 'tributes_sitemap_count':
+				Cache_Manager::set_tributes_sitemap_count($data);
 				break;
 		}
 	}

@@ -92,6 +92,9 @@
     transition: var(--enhanced-transition) !important;
     text-decoration: none !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    display: inline-flex !important; /* Override theme's display:inline */
+    align-items: center !important;
+    background-image: none !important; /* Remove theme's underline effect */
 }
 
 .fcrm-enhanced-classic .nav-pills .nav-link:hover,
@@ -102,16 +105,16 @@
     text-decoration: none !important;
     border-color: #9ca3af !important; /* Darker hover border */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-1px) !important;
+    /* Removed transform animation for consistency with Write a Message button */
 }
 
 .fcrm-enhanced-classic .nav-pills .nav-link.active,
 .fcrm-enhanced-classic .enhanced-nav-link.active,
 .fcrm-enhanced-classic.firehawk-crm.firehawk-tributes .nav-pills .nav-link.active {
     background: var(--enhanced-nav-active) !important;
-    color: #1e293b !important;
-    border-color: #9ca3af !important; /* Darker active border */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    color: var(--fcrm-ui-primary-button-text, #ffffff) !important;
+    border-color: var(--enhanced-primary) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* External Link Pills - More Distinctive Styling */

@@ -280,24 +280,35 @@ $container_classes = [
         
         renderTributes(tributes) {
             const grid = $(`#tributes-grid-${this.elementId}`);
-            
-            tributes.forEach(tribute => {
-                const card = this.createTributeCard(tribute);
+
+            tributes.forEach((tribute, index) => {
+                // Pass absolute index to track position across pages
+                const absoluteIndex = this.totalLoaded + index;
+                const card = this.createTributeCard(tribute, absoluteIndex);
                 grid.append(card);
             });
-            
+
             this.hideEmptyState();
         }
-        
-        createTributeCard(tribute) {
+
+        createTributeCard(tribute, absoluteIndex) {
             const imageUrl = tribute.displayImage || this.config.defaultImageUrl;
             const hasImage = !!imageUrl;
-            
+
+            // Performance optimization: Don't lazy load first 9 images (3 rows of 3)
+            // This prevents LCP degradation by ensuring above-the-fold images load immediately
+            const shouldLazyLoad = absoluteIndex >= 9;
+            const loadingAttr = shouldLazyLoad ? 'loading="lazy"' : '';
+
+            // Performance optimization: Add fetch priority to first image (LCP element)
+            // This hints to the browser to prioritize loading the most important image
+            const fetchPriorityAttr = absoluteIndex === 0 ? 'fetchpriority="high"' : '';
+
             const card = $(`
                 <article class="fcrm-tribute-card modern-card" data-tribute-id="${tribute.id || ''}" ${tribute.permalink ? `data-detail-url="${tribute.permalink}"` : ''}>
                     <div class="tribute-image-container">
-                        ${hasImage ? 
-                            `<img src="${imageUrl}" alt="${tribute.fullName || 'Tribute photo'}" class="tribute-image" loading="lazy" />` :
+                        ${hasImage ?
+                            `<img src="${imageUrl}" alt="${tribute.fullName || 'Tribute photo'}" class="tribute-image" ${loadingAttr} ${fetchPriorityAttr} />` :
                             `<div class="tribute-image-placeholder">
                                 <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d=\"M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z\" stroke=\"currentColor\" stroke-width=\"2\"/>

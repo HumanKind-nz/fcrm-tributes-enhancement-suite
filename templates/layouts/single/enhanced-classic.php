@@ -28,15 +28,35 @@ if (!class_exists('Single_Tribute')) {
     return;
 }
 
-// Use FCRM's proven client detection method
-$single_tribute = new Single_Tribute();
-$single_tribute->detectClient();
+// Use Firehawk's client caching if available (v2.3.1+)
+global $activeTribute;
+$cache_source = 'new_instance';
+
+if (isset($activeTribute) && method_exists($activeTribute, 'get_active_page_id')) {
+    $activePageId = $activeTribute->get_active_page_id();
+    $activeClient = $activeTribute->getClient();
+
+    // Verify cache matches requested tribute
+    if ($activePageId == $activeTribute->client_page_id && isset($activeClient)) {
+        $single_tribute = $activeTribute;  // Reuse cached instance
+        $cache_source = 'firehawk_global';
+    }
+}
+
+// Fallback: create new instance if cache not available
+if (!isset($single_tribute)) {
+    $single_tribute = new Single_Tribute();
+    $activeTribute = $single_tribute;  // Set global for subsequent requests
+    $single_tribute->detectClient();
+}
+
 $tribute_data = $single_tribute->client;
 $tribute_id = $tribute_data->id ?? null;
 
-// Debug: log resolved identifiers for enhanced-classic
+// Debug: log resolved identifiers and cache source for enhanced-classic
 $debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
 if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('[FCRM_ES] enhanced-classic cache source: ' . $cache_source . ' for ID: ' . ($tribute_id ?? 'null'));
     $qv_id = get_query_var('id');
     $qv_tid = get_query_var('tid');
     $get_id = $_GET['id'] ?? null;
