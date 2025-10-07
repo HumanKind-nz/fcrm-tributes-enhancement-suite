@@ -40,17 +40,35 @@
                 ...options
             };
             this.flatpickrInstance = null;
+            this.flatpickrLoaded = false;
             this.startDate = null;
             this.endDate = null;
             this.searchQuery = null;
-            
+
             this.init();
         }
 
         init() {
-            loadFlatpickr(() => {
-                this.initDateRangePicker();
-                this.bindEvents();
+            // Performance optimization: Don't load Flatpickr until user needs it
+            // This saves ~45KB of CDN requests on initial page load
+            this.bindEvents();
+            this.setupDatePickerOnDemand();
+        }
+
+        setupDatePickerOnDemand() {
+            const dateInput = $(`#date-range-${this.elementId}`);
+            if (!dateInput.length) return;
+
+            // Only load Flatpickr when user focuses on date input
+            dateInput.one('focus click', () => {
+                if (!this.flatpickrLoaded) {
+                    loadFlatpickr(() => {
+                        this.initDateRangePicker();
+                        this.flatpickrLoaded = true;
+                        // Trigger focus again so datepicker opens
+                        dateInput.trigger('focus');
+                    });
+                }
             });
         }
 

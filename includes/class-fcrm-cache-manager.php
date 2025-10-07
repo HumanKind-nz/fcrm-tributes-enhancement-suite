@@ -29,6 +29,8 @@ class Cache_Manager {
 	const PREFIX_MESSAGES = 'messages_';
 	const PREFIX_TREES = 'trees_';
 	const PREFIX_DONATIONS = 'donations_';
+	const PREFIX_TRIBUTES_COUNT = 'tributes_count_';
+	const PREFIX_TRIBUTES_SITEMAP_COUNT = 'tributes_sitemap_count_';
 
 	/**
 	 * Get cached client data
@@ -147,6 +149,72 @@ class Cache_Manager {
 	}
 
 	/**
+	 * Get cached tributes count
+	 *
+	 * @return mixed|false Cached count or false if not found
+	 */
+	public static function get_tributes_count() {
+		$cache_key = self::PREFIX_TRIBUTES_COUNT . 'total';
+
+		$cached_data = wp_cache_get($cache_key, self::CACHE_GROUP);
+
+		if (false === $cached_data) {
+			$cached_data = get_transient($cache_key);
+		}
+
+		return $cached_data;
+	}
+
+	/**
+	 * Set cached tributes count
+	 *
+	 * @param mixed $data Count data to cache
+	 * @return bool Success status
+	 */
+	public static function set_tributes_count($data) {
+		$cache_key = self::PREFIX_TRIBUTES_COUNT . 'total';
+		$duration = self::get_cache_duration('static_content'); // 2 hours - counts don't change frequently
+
+		wp_cache_set($cache_key, $data, self::CACHE_GROUP, $duration);
+		set_transient($cache_key, $data, $duration);
+
+		return true;
+	}
+
+	/**
+	 * Get cached tributes sitemap count
+	 *
+	 * @return mixed|false Cached sitemap count or false if not found
+	 */
+	public static function get_tributes_sitemap_count() {
+		$cache_key = self::PREFIX_TRIBUTES_SITEMAP_COUNT . 'total';
+
+		$cached_data = wp_cache_get($cache_key, self::CACHE_GROUP);
+
+		if (false === $cached_data) {
+			$cached_data = get_transient($cache_key);
+		}
+
+		return $cached_data;
+	}
+
+	/**
+	 * Set cached tributes sitemap count
+	 *
+	 * @param mixed $data Sitemap count data to cache
+	 * @return bool Success status
+	 */
+	public static function set_tributes_sitemap_count($data) {
+		$cache_key = self::PREFIX_TRIBUTES_SITEMAP_COUNT . 'total';
+		$duration = self::get_cache_duration('static_content'); // 2 hours - sitemap counts don't change frequently
+
+		wp_cache_set($cache_key, $data, self::CACHE_GROUP, $duration);
+		set_transient($cache_key, $data, $duration);
+
+		return true;
+	}
+
+	/**
 	 * Clear all FCRM caches
 	 *
 	 * @return bool Success status
@@ -219,6 +287,19 @@ class Cache_Manager {
 	public static function get_cache_stats() {
 		global $wpdb;
 
+		$redis_available = function_exists('wp_cache_supports') && wp_cache_supports('flush_group');
+
+		// If using object cache (Redis), we can't easily count items
+		// So we show a status message instead of a count
+		if ($redis_available) {
+			return [
+				'transient_count' => 'Redis', // Special value to indicate Redis is active
+				'cache_group' => self::CACHE_GROUP,
+				'redis_available' => true
+			];
+		}
+
+		// Count database transients (when Redis is not available)
 		$transient_count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s",
@@ -226,10 +307,20 @@ class Cache_Manager {
 			)
 		);
 
+		// Also count client transients
+		$client_count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s",
+				'_transient_' . self::PREFIX_CLIENT . '%'
+			)
+		);
+
+		$total_count = (int) $transient_count + (int) $client_count;
+
 		return [
-			'transient_count' => (int) $transient_count,
+			'transient_count' => $total_count,
 			'cache_group' => self::CACHE_GROUP,
-			'redis_available' => function_exists('wp_cache_supports') && wp_cache_supports('flush_group')
+			'redis_available' => false
 		];
 	}
 

@@ -133,10 +133,10 @@ class FCRM_Styling_Module {
         $settings = $this->get_all_settings();
         ?>
         <div class="settings-section">
-            <h3>🎨 Style Override System</h3>
+            <h3>🎨 FireHawk Layout Styling</h3>
             <div class="section-content">
-                <p><strong>Override the default colours and styles of the standard FireHawk Tributes layout.</strong></p>
-                <p><em>Note: These overrides are only needed when using the standard FireHawk layout. They will be automatically disabled when using custom layouts.</em></p>
+                <p><strong>Customize colors and styles for the original FireHawk Tributes layout.</strong></p>
+                <p><em>Note: This module only works when the "Modern Layout Templates" module is disabled. When using modern layouts, please use the "Universal UI Styling" module instead.</em></p>
             </div>
         </div>
 

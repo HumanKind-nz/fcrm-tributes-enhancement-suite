@@ -199,7 +199,7 @@ class FCRM_Optimisation_Module {
                                 <input type="checkbox" name="fcrm_conditional_asset_loading" value="1" <?php checked(get_option('fcrm_conditional_asset_loading', 1), 1); ?>>
                                 <span class="toggle-slider"></span>
                             </label>
-                            <p class="description"><strong>🎯 Major Performance Fix:</strong> Prevents FCRM plugin from loading 28+ CSS/JS files (Bootstrap, Moment, Lodash, etc.) on non-tribute pages. <strong>Saves 1-2MB+ per page load.</strong> Only loads assets where actually needed.</p>
+                            <p class="description"><strong>🎯 Major Performance Fix:</strong> Prevents FCRM plugin from loading 28+ CSS/JS files (Bootstrap, Moment, Lodash, etc.) on non-tribute pages. <strong>Saves ~430KB per page load.</strong> Only loads assets where actually needed.</p>
                         </td>
                     </tr>
                     <tr>
@@ -338,42 +338,194 @@ class FCRM_Optimisation_Module {
             return;
         }
 
-        // Load spinner styles if animations are enabled
-        if (get_option('fcrm_smooth_animations', 1)) {
+        // Only load spinner on grid pages (not single tribute pages)
+        $is_single_tribute = isset($_GET['id']);
+        $is_grid_page = !$is_single_tribute; // Works on all tribute grid pages including FireHawk passthrough
+
+        if ($is_grid_page && get_option('fcrm_smooth_animations', 1)) {
+            // Inline spinner CSS with user settings (respects color, size, style)
             wp_add_inline_style('wp-block-library', $this->generate_spinner_css());
+
+            // Inline spinner JavaScript
+            wp_add_inline_script('jquery', $this->get_spinner_javascript());
         }
     }
 
     /**
      * Generate spinner CSS based on settings
+     * Includes navigation spinner overlay for tribute card clicks
      */
     private function generate_spinner_css(): string {
-        $spinner_color = get_option('fcrm_spinner_color', '#667eea');
+        $spinner_color = get_option('fcrm_spinner_color', '#3498db');
         $spinner_size = get_option('fcrm_spinner_size', 'default');
-        
+        $spinner_style = get_option('fcrm_spinner_style', 'primary');
+        $smooth_animations = get_option('fcrm_smooth_animations', 1);
+
         $sizes = [
-            'sm' => '20px',
-            'default' => '30px',
-            'lg' => '40px',
-            'xl' => '50px'
+            'sm' => '30px',
+            'default' => '50px',
+            'lg' => '60px',
+            'xl' => '80px'
         ];
-        
+
         $size = $sizes[$spinner_size] ?? $sizes['default'];
-        
-        return "
-        .fcrm-loading-spinner {
+        $border_width = $spinner_size === 'sm' ? '3px' : '4px';
+        $animation_duration = $smooth_animations ? '0.8s' : '0.6s';
+        $transition_speed = $smooth_animations ? '0.3s ease' : '0.15s ease';
+
+        $css = "
+        /* FCRM Navigation Spinner - Shows when clicking tribute cards */
+        .fcrm-navigating {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity {$transition_speed}, visibility {$transition_speed};
+        }
+
+        .fcrm-navigating.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fcrm-navigating::after {
+            content: '';
             width: {$size};
             height: {$size};
-            border: 3px solid rgba(0,0,0,0.1);
-            border-top: 3px solid {$spinner_color};
+            border: {$border_width} solid rgba(0, 0, 0, 0.1);
+            border-top: {$border_width} solid {$spinner_color};
             border-radius: 50%;
-            animation: fcrm-spin 1s linear infinite;
+            animation: fcrm-spin {$animation_duration} linear infinite;
         }
-        
+        ";
+
+        // Add style-specific variations
+        switch ($spinner_style) {
+            case 'modern':
+                $css .= "
+                .fcrm-navigating::after {
+                    border-color: rgba(0, 0, 0, 0.05);
+                    border-top-color: {$spinner_color};
+                    border-right-color: {$spinner_color};
+                }
+                ";
+                break;
+
+            case 'minimal':
+                $css .= "
+                .fcrm-navigating::after {
+                    border-color: transparent;
+                    border-top-color: {$spinner_color};
+                }
+                ";
+                break;
+
+            case 'pulse':
+                $css .= "
+                .fcrm-navigating::after {
+                    border-color: {$spinner_color};
+                    animation: fcrm-pulse {$animation_duration} ease-in-out infinite;
+                }
+                @keyframes fcrm-pulse {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.5; transform: scale(0.9); }
+                }
+                ";
+                break;
+
+            case 'dots':
+                $css .= "
+                .fcrm-navigating::after {
+                    border: none;
+                    width: calc({$size} / 5);
+                    height: calc({$size} / 5);
+                    background: {$spinner_color};
+                    animation: fcrm-dots {$animation_duration} ease-in-out infinite;
+                    box-shadow:
+                        calc({$size} / 3) 0 0 {$spinner_color},
+                        calc({$size} / 1.5) 0 0 {$spinner_color};
+                }
+                @keyframes fcrm-dots {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.3; }
+                }
+                ";
+                break;
+        }
+
+        $css .= "
         @keyframes fcrm-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
+        ";
+
+        return $css;
+    }
+
+    /**
+     * Generate spinner JavaScript for grid layouts
+     */
+    public function get_spinner_javascript(): string {
+        return "
+        // Create spinner overlay once
+        let spinnerOverlay = null;
+
+        function showNavigationSpinner() {
+            if (!spinnerOverlay) {
+                spinnerOverlay = jQuery('<div class=\"fcrm-navigating\"></div>');
+                jQuery('body').append(spinnerOverlay);
+            }
+            // Small delay prevents flashing on fast connections
+            setTimeout(() => {
+                if (spinnerOverlay) {
+                    spinnerOverlay.addClass('active');
+                    jQuery('body').css('overflow', 'hidden');
+                }
+            }, 100);
+        }
+
+        function hideNavigationSpinner() {
+            if (spinnerOverlay) {
+                spinnerOverlay.removeClass('active');
+                jQuery('body').css('overflow', '');
+            }
+        }
+
+        // Show spinner when clicking tribute cards
+        jQuery(document).on('click', '.fcrm-tribute-card[data-detail-url], .minimal-tribute-item[data-detail-url]', function(e) {
+            const url = jQuery(this).attr('data-detail-url');
+            if (url && url !== '#' && !e.target.closest('a')) {
+                showNavigationSpinner();
+            }
+        });
+
+        // Also show spinner when clicking tribute links directly
+        jQuery(document).on('click', 'a[href*=\"?id=\"], a.tribute-name-link, a.tribute-image-link, a.elegant-name-link, a.gallery-name-link', function(e) {
+            if (!e.ctrlKey && !e.metaKey) {
+                showNavigationSpinner();
+            }
+        });
+
+        // Hide spinner when navigating back with browser back button (bfcache)
+        jQuery(window).on('pageshow', function(e) {
+            if (e.originalEvent && e.originalEvent.persisted) {
+                // Page was restored from bfcache, hide spinner
+                hideNavigationSpinner();
+            }
+        });
+
+        // Also hide spinner on page load (safety fallback)
+        jQuery(window).on('load', function() {
+            setTimeout(hideNavigationSpinner, 100);
+        });
         ";
     }
 

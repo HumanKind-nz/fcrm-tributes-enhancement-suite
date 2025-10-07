@@ -43,7 +43,7 @@
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 0;
     background: var(--elegant-grey-50);
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -51,12 +51,10 @@
 
 /* Elegant Search Interface */
 .fcrm-elegant-search, .fcrm-unified-search.fcrm-elegant-search {
-    background: var(--elegant-white);
+    background: transparent;
     border-radius: var(--elegant-border-radius-lg);
     padding: 2rem;
     margin-bottom: 4rem;
-    box-shadow: var(--elegant-shadow-card);
-    border: 1px solid var(--elegant-grey-200);
 }
 
 .fcrm-elegant-search .search-container {

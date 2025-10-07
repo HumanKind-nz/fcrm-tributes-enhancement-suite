@@ -3,9 +3,11 @@
 
   ],
   "eablokker.tabsSidebar.config.customKindGroupsOrder" : [
-    "yaml"
+    "yaml",
+    "plaintext"
   ],
   "eablokker.tabsSidebar.config.customTabOrder" : [
-    "file:\/\/\/Users\/garethbissland\/Documents\/GitHub\/fcrm-tributes-enhancement-suite\/.github\/workflows\/release.yml"
+    "file:\/\/\/Users\/garethbissland\/Documents\/GitHub\/fcrm-tributes-enhancement-suite\/.github\/workflows\/release.yml",
+    "file:\/\/\/Users\/garethbissland\/Documents\/GitHub\/fcrm-tributes-enhancement-suite\/.gitignore"
   ]
 }

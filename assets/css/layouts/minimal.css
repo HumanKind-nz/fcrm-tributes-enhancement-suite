@@ -45,7 +45,7 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0;
     background: var(--minimal-white);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     line-height: 1.6;
@@ -54,12 +54,10 @@
 
 /* Modern Search Interface (reused for consistency) */
 .fcrm-minimal-layout .fcrm-modern-search, .fcrm-minimal-layout .fcrm-unified-search.fcrm-modern-search {
-    background: var(--minimal-grey-50);
+    background: transparent;
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--minimal-border);
 }
 
 .fcrm-minimal-layout .fcrm-modern-search .search-container {

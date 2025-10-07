@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes Enhancement Suite
  * Plugin URI: https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
  * Description: Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
- * Version: 2.0.2
+ * Version: 2.1.3
  * Author: Weave Digital Studio, Gareth Bissland
  * Author URI: https://weave.co.nz/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.0.2');
+define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.1.3');
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_FILE', __FILE__);
@@ -379,13 +379,13 @@ class FCRM_Enhancement_Suite {
 				<div class="module-grid">
 					<?php $this->render_enhanced_module_card('optimisation', 'Performance Optimisations', 'Improve site speed by optimising scripts, enabling caching, and optimising asset loading.', ['API Response Caching', 'Script Optimisation', 'Flower Delivery Disabling', 'Redis Cache Support']); ?>
 					
-					<?php $this->render_enhanced_module_card('layouts', 'Modern Layout Templates', 'Replace the default FireHawk tribute layout with modern, card-based designs that are mobile-responsive and accessible.', ['Modern Grid Layout', 'Card-Based Design', 'Mobile Responsive', 'WCAG 2.1 AA Compliant']); ?>
-					
-					<?php $this->render_enhanced_module_card('ui_styling', 'Universal UI Styling', 'Professional styling system with colour schemes, typography, and layout customisation for all tribute layouts.', ['5 Professional Color Schemes', 'Typography Control', 'Layout-Specific Options', 'Live CSS Generation']); ?>
-					
+					<?php $this->render_enhanced_module_card('layouts', 'Modern Layout Templates', 'Modern, card-based grid and single tribute layouts that are mobile-responsive and accessible. Enables our enhanced layouts system.', ['4 Grid Layouts', '2 Single Tribute Layouts', 'Mobile Responsive', 'WCAG 2.1 AA Compliant']); ?>
+
+					<?php $this->render_enhanced_module_card('ui_styling', 'Universal UI Styling', 'Professional styling system for modern layouts with typography, colours, and spacing controls. Only works when Layouts module is enabled.', ['Custom Colour Controls', 'Typography Settings', 'Layout-Specific Options', 'Live CSS Generation']); ?>
+
 					<?php $this->render_enhanced_module_card('seo_analytics', 'SEO & Analytics', 'Privacy-focused analytics and enhanced SEO integration for tribute pages with Plausible and SEOPress.', ['Plausible Analytics Integration', 'SEOPress SEO Support', 'Social Media Meta Tags', 'GDPR Compliant Analytics']); ?>
-					
-					<?php $this->render_enhanced_module_card('styling', 'Change Default Styling', 'Customise the tribute colours, borders, and visual elements to match your website design.', ['Colour Customisation', 'Button Styling', 'Border Radius Control', 'Live Preview']); ?>
+
+					<?php $this->render_enhanced_module_card('styling', 'FireHawk Layout Styling', 'Style the original FireHawk tribute layout with custom colours and borders. Only works when Layouts module is disabled.', ['Colour Customisation', 'Button Styling', 'Border Radius Control', 'Grid & Card Styling']); ?>
 				</div>
 				
 				<!-- External Modules Section -->
@@ -637,6 +637,11 @@ class FCRM_Enhancement_Suite {
 			if (class_exists($class_name)) {
 				$temp_instance = new $class_name();
 				echo "<!-- Debug: Instance created -->\n";
+				// Register settings for this module if method exists
+				if (method_exists($temp_instance, 'register_settings')) {
+					$temp_instance->register_settings();
+					echo "<!-- Debug: Settings registered -->\n";
+				}
 				if (method_exists($temp_instance, 'render_settings')) {
 					echo "<!-- Debug: Calling render_settings -->\n";
 					$temp_instance->render_settings();
@@ -799,22 +804,187 @@ class FCRM_Enhancement_Suite {
 	}
 
 	/**
-	 * Conditionally remove FCRM assets on non-tribute pages
+	 * Check if current page content contains layout="firehawk" passthrough
+	 *
+	 * @return bool True if page has FireHawk passthrough shortcode
 	 */
-	public function conditional_fcrm_assets(): void {
-		$is_tribute_page = self::is_tribute_page();
-		$current_url = $_SERVER['REQUEST_URI'] ?? 'unknown';
-		
-		
-		// Only run on non-tribute pages
-		if (!$is_tribute_page) {
-			$this->dequeue_fcrm_assets();
-		} else {
+	private function page_has_firehawk_passthrough(): bool {
+		global $post;
+
+		if (!$post) {
+			return false;
 		}
+
+		// Check if post content contains layout="firehawk" or layout='firehawk'
+		if (stripos($post->post_content, 'layout="firehawk"') !== false ||
+		    stripos($post->post_content, "layout='firehawk'") !== false) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
-	 * Dequeue all FCRM plugin assets
+	 * Check if a page builder is currently active
+	 *
+	 * @return bool True if page builder frontend editor is active
+	 */
+	private function is_page_builder_active(): bool {
+		// Beaver Builder
+		if (isset($_GET['fl_builder']) || (class_exists('FLBuilderModel') && \FLBuilderModel::is_builder_active())) {
+			return true;
+		}
+
+		// Elementor
+		if (isset($_GET['elementor-preview']) || (defined('ELEMENTOR_VERSION') && \Elementor\Plugin::$instance->preview->is_preview_mode())) {
+			return true;
+		}
+
+		// Divi Builder
+		if (isset($_GET['et_fb']) || function_exists('et_fb_is_enabled') && et_fb_is_enabled()) {
+			return true;
+		}
+
+		// Oxygen Builder
+		if (isset($_GET['ct_builder']) || (defined('CT_VERSION') && isset($_GET['oxygen_iframe']))) {
+			return true;
+		}
+
+		// Bricks Builder
+		if (isset($_GET['bricks']) && $_GET['bricks'] === 'run') {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Conditionally remove FCRM assets
+	 *
+	 * Simple logic:
+	 * 1. NOT a tribute page (no shortcode, no ?id) → Dequeue ALL Firehawk assets
+	 * 2. Using Enhanced Grid layout → Dequeue redundant Firehawk grid assets
+	 * 3. Using Firehawk layout OR single tribute → Keep everything (passthrough)
+	 */
+	public function conditional_fcrm_assets(): void {
+		// Don't dequeue anything when page builders are active
+		if ($this->is_page_builder_active()) {
+			return;
+		}
+
+		$active_layout = get_option('fcrm_active_layout', 'modern-grid');
+		$is_single_tribute = isset($_GET['id']);
+
+		// Check if we're on a tribute page (includes shortcode check)
+		$is_tribute_page = self::is_tribute_page();
+
+		// NOT a tribute page → Remove ALL Firehawk assets
+		if (!$is_tribute_page) {
+			$this->dequeue_fcrm_assets();
+			return;
+		}
+
+		// Check if page content contains layout="firehawk" passthrough (for demos/testing)
+		$has_firehawk_passthrough = $this->page_has_firehawk_passthrough();
+
+		// If using FireHawk passthrough, keep ALL assets (don't optimize)
+		if ($has_firehawk_passthrough) {
+			return;
+		}
+
+		// Using Enhanced Grid layout (and NOT on single tribute) → Remove redundant grid assets
+		if (!$is_single_tribute) {
+			$this->dequeue_redundant_fcrm_assets();
+			return;
+		}
+
+		// Otherwise (single tribute) → Keep all Firehawk assets (passthrough)
+	}
+
+	/**
+	 * Dequeue redundant FCRM assets when Enhanced Layouts are active
+	 *
+	 * Performance optimization (v2.1.1): When using Enhanced Layouts, we have our own
+	 * self-contained grid system with custom CSS/JS. This removes Firehawk's redundant
+	 * assets while preserving critical dependencies (Moment.js, Lodash, jQuery, AJAX).
+	 *
+	 * Expected savings: ~150KB CSS + ~500KB JS = 650KB+ total reduction
+	 */
+	private function dequeue_redundant_fcrm_assets(): void {
+		// Redundant CSS files - Enhanced Layouts provide their own styling
+		$redundant_styles = [
+			'fcrm-tributes-glidejs-core',      // Carousel - not used in Enhanced Layouts
+			'fcrm-tributes-glidejs-theme',     // Carousel theme - not used
+			'jquery-slick-nav',                 // Mobile nav - not used
+			'select2',                          // Dropdown styling - we use Flatpickr
+			'add-to-calendar-button',           // Calendar widget - not in grid layouts
+			'fcrm-tributes-jquery-modal',       // Modal styles - not used in grids
+			'fcrm-tributes-lightgallery-css',   // Lightbox - not in grid layouts
+			'fcrm-tributes'                     // Main Firehawk CSS (46.3KB) - we have our own
+		];
+
+		// Redundant JavaScript files - Enhanced Layouts implement own functionality
+		$redundant_scripts = [
+			'fcrm-tributes-popperjs',           // Tooltips - not used
+			'fcrm-tributes-tippyjs',            // Tooltip library - not used
+			'fontawesome',                      // Icons - redundant
+			'bootstrap',                        // Grid system - we have CSS Grid
+			'shufflejs',                        // Grid filtering - we have own search
+			'jquery-history',                   // History API - not needed
+			'jquery-validate',                  // Form validation - no forms in grids
+			'select2',                          // Dropdown JS - we use Flatpickr instead
+			'jquery-slick-carousel',            // Carousel - not used
+			'fcrm-tributes-clipboard',          // Copy functionality - not in grids
+			'fcrm-tributes-textFit',            // Text fitting - not needed
+			'fcrm-tributes-glidejs',            // Carousel library - not used
+			'fcrm-tributes-jquery-modal',       // Modal JS - not used
+			'fcrm-tributes-litepicker',         // Datepicker - we use Flatpickr
+			'add-to-calendar-button',           // Calendar widget - not in grids
+			'_',                                // Lodash (25.8KB) - not used in grid layouts
+			// NOTE: 'fcrm-tributes' MUST be kept - it provides ajax_var localization we need
+			'fcrm-tributes-lightgallerys',      // Lightbox - not in grids
+			'fcrm-tributes-tribute-messages',   // Messages tab - single tribute only
+			'fcrm-tributes-tributes-page',      // Single tribute page - not grid
+			'fcrm-tributes-tribute-trees',      // Trees tab - single tribute only
+			'fcrm-tributes-tribute-donations',  // Donations tab - single tribute only
+			'fcrm-tributes-tributes-grid',      // Firehawk grid JS - we replace entirely
+			'fcrm-tributes-verify-input',       // Input verification - no forms
+			'lg-pager',                         // Lightbox pager - not used
+			'lg-zoom',                          // Lightbox zoom - not used
+			'fcrm-tributes-flower-delivery'     // Flowers - disabled separately
+		];
+
+		// NOTE: We KEEP these critical Firehawk dependencies for grid layouts:
+		// - momentScript (Moment.js) - REQUIRED: Date formatting, filtering, service date checks
+		// - fcrm-tributes (fcrm-tributes-public.js) - REQUIRED: Provides ajax_var localization
+		// - jquery - Core dependency
+		//
+		// We REMOVE on grid pages:
+		// - _ (Lodash) - Not used in Enhanced Grid layouts (saves 25.8KB)
+
+		// Dequeue redundant styles
+		foreach ($redundant_styles as $handle) {
+			if (wp_style_is($handle, 'enqueued')) {
+				wp_dequeue_style($handle);
+			}
+		}
+
+		// Dequeue redundant scripts
+		foreach ($redundant_scripts as $handle) {
+			if (wp_script_is($handle, 'enqueued')) {
+				wp_dequeue_script($handle);
+			}
+		}
+
+		// NOTE: We cannot remove sharer.min.js on grid pages because Firehawk uses
+		// the same handle 'fcrm-tributes' for both sharer.min.js and fcrm-tributes-public.js
+		// The second enqueue (fcrm-tributes-public.js) should overwrite the first,
+		// but if both are loading, we must keep them to preserve ajax_var localization.
+		// Attempted savings: 3.5KB (sharer.min.js) - cannot be achieved due to Firehawk's duplicate handle bug
+	}
+
+	/**
+	 * Dequeue all FCRM plugin assets (for non-tribute pages)
 	 */
 	private function dequeue_fcrm_assets(): void {
 		// FCRM CSS files (from class-fcrm-tributes-public.php)
@@ -884,32 +1054,25 @@ class FCRM_Enhancement_Suite {
 	 * Check for required plugin dependencies
 	 */
 	public function check_plugin_dependencies(): void {
-		// Check if FCRM Tributes plugin is active
-		$fcrm_tributes_active = is_plugin_active('fcrm-tributes/fcrm-tributes.php');
-		
-		if (!$fcrm_tributes_active) {
-			// Check if it's installed but not activated
-			$fcrm_tributes_installed = file_exists(WP_PLUGIN_DIR . '/fcrm-tributes/fcrm-tributes.php');
-			
-			if ($fcrm_tributes_installed) {
-				// Installed but not activated
-				$activation_url = wp_nonce_url(
-					admin_url('plugins.php?action=activate&plugin=fcrm-tributes/fcrm-tributes.php'),
-					'activate-plugin_fcrm-tributes/fcrm-tributes.php'
-				);
-				
-				echo '<div class="notice notice-warning is-dismissible">';
-				echo '<p><strong>FireHawk Tributes Enhancement Suite:</strong> The required FireHawkCRM Tributes plugin is installed but not activated.</p>';
-				echo '<p><a href="' . esc_url($activation_url) . '" class="button button-primary">Activate FireHawkCRM Tributes</a></p>';
-				echo '</div>';
-			} else {
-				// Not installed at all
-				echo '<div class="notice notice-error is-dismissible">';
-				echo '<p><strong>FireHawk Tributes Enhancement Suite:</strong> This plugin requires the FireHawkCRM Tributes plugin to function.</p>';
-				echo '<p>Please install and activate the FireHawkCRM Tributes plugin first. Without it, this enhancement suite will not work.</p>';
-				echo '<p><a href="' . esc_url(admin_url('plugin-install.php')) . '" class="button button-primary">Install Plugins</a></p>';
-				echo '</div>';
+		// Check if FCRM Tributes plugin is active by checking for required classes
+		// This works with any plugin slug (fcrm-tributes, fcrm-tributes-2.2.0, fcrm-tributes-2.3.1, etc.)
+		$required_classes = ['Fcrm_Tributes_Api', 'Single_Tribute'];
+		$fcrm_tributes_active = true;
+
+		foreach ($required_classes as $class) {
+			if (!class_exists($class)) {
+				$fcrm_tributes_active = false;
+				break;
 			}
+		}
+
+		if (!$fcrm_tributes_active) {
+			// Not installed or not activated
+			echo '<div class="notice notice-error is-dismissible">';
+			echo '<p><strong>FireHawk Tributes Enhancement Suite:</strong> This plugin requires the FireHawkCRM Tributes plugin to function.</p>';
+			echo '<p>Please install and activate a FireHawkCRM Tributes plugin (any version). Without it, this enhancement suite will not work.</p>';
+			echo '<p><a href="' . esc_url(admin_url('plugins.php')) . '" class="button button-primary">View Plugins</a></p>';
+			echo '</div>';
 		}
 	}
 

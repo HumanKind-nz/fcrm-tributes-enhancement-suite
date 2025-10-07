@@ -45,7 +45,7 @@
     width: 100%;
     max-width: 1600px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0;
     background: var(--gallery-grey-50);
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -53,12 +53,10 @@
 
 /* Gallery Search Interface */
 .fcrm-gallery-search, .fcrm-unified-search.fcrm-gallery-search {
-    background: var(--gallery-white);
+    background: transparent;
     border-radius: var(--gallery-border-radius-lg);
     padding: 1.5rem;
     margin-bottom: 3rem;
-    box-shadow: var(--gallery-shadow-card);
-    border: 1px solid var(--gallery-grey-200);
 }
 
 .fcrm-gallery-search .search-container {
