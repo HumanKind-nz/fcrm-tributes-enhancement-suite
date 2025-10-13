@@ -5,6 +5,22 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.1.7 (2025-10-14)
+
+### Fixes
+- Fixed missing gallery/slideshow HTML in enhanced-classic single tribute layout.
+- Added dynamic Firehawk plugin directory detection to work with any version naming convention.
+- Improved single tribute detection for proper asset loading (checks `$_GET['id']`, `get_query_var('id')`, and `$wp->query_vars['id']`).
+
+---
+
+## v2.1.4 (2025-10-07)
+
+### Fixes
+- Fixed hardcoded blue border on `.load-more-btn` in modern-grid layout to use `--fcrm-ui-primary` variable.
+
+---
+
 ## v2.1.3 (2025-10-06)
 
 - Adjusted UI styling controls and fixed inconsistent hover and font styles.

@@ -312,14 +312,38 @@ if (empty($fcrmShowLocation)) {
     <?php endif; ?>
 
     <?php
-      if (isset($client->tributeGallery) && count($client->tributeGallery) > 0) {
+      // Check what gallery data exists
+      $has_tribute_gallery = isset($client->tributeGallery) && is_array($client->tributeGallery) && count($client->tributeGallery) > 0;
+      $has_gallery = isset($client->gallery) && is_array($client->gallery) && count($client->gallery) > 0;
+
+      // Find the active FCRM Tributes plugin directory (works with any version)
+      $fcrm_gallery_path = null;
+      $plugin_dir = WP_PLUGIN_DIR;
+
+      // Check common FCRM plugin directory patterns
+      $possible_paths = [
+        $plugin_dir . '/fcrm-tributes/public/partials/tributes/fcrm-tribute-gallery.php',
+        $plugin_dir . '/fcrm-tributes-2.0.1.12/public/partials/tributes/fcrm-tribute-gallery.php',
+        $plugin_dir . '/fcrm-tributes-2.2.0/public/partials/tributes/fcrm-tribute-gallery.php',
+        $plugin_dir . '/fcrm-tributes-2.3.1/public/partials/tributes/fcrm-tribute-gallery.php',
+        $plugin_dir . '/fcrm-tributes-2.3.1-dev/public/partials/tributes/fcrm-tribute-gallery.php',
+      ];
+
+      foreach ($possible_paths as $path) {
+        if (file_exists($path)) {
+          $fcrm_gallery_path = $path;
+          break;
+        }
+      }
+
+      // Display gallery if we have images and found the template
+      if ($fcrm_gallery_path && ($has_tribute_gallery || $has_gallery)) {
         echo '<div class="page-divider enhanced-divider"></div>';
-        $gallery = $client->tributeGallery;
-        include( plugin_dir_path(__FILE__) . '../../../fcrm-tributes/public/partials/tributes/fcrm-tribute-gallery.php');
-      } else if (isset($client->gallery) && count($client->gallery) > 0) {
-        echo '<div class="page-divider enhanced-divider"></div>';
-        $gallery = $client->gallery;
-        include( plugin_dir_path(__FILE__) . '../../../fcrm-tributes/public/partials/tributes/fcrm-tribute-gallery.php');
+
+        // Set $gallery variable for the included template
+        $gallery = $has_tribute_gallery ? $client->tributeGallery : $client->gallery;
+
+        include($fcrm_gallery_path);
       }
     ?>
 
