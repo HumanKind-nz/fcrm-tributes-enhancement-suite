@@ -174,7 +174,22 @@
 
 /* Loading Spinner */
 .fcrm-tributes-container .spinner {
+    -webkit-animation: fcrm-spin 1s linear infinite;
     animation: fcrm-spin 1s linear infinite;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+@-webkit-keyframes fcrm-spin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
 }
 
 @keyframes fcrm-spin {
