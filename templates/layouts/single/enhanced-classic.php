@@ -290,7 +290,7 @@ if (empty($fcrmShowLocation)) {
       </div>
     <?php endif; ?>
 
-    <?php if (isset($client->events)): ?>
+    <?php if (isset($client->events) && is_array($client->events) && count($client->events) > 0): ?>
       <?php if (isset($client->tributeEventsHeadingText)) : ?>
         <div class="tribute-heading enhanced-section-heading">
           <h3 class="tribute-heading-text"><?php echo $client->tributeEventsHeadingText; ?></h3>
@@ -302,13 +302,47 @@ if (empty($fcrmShowLocation)) {
             <?php echo $client->tributeEventSectionMessage; ?>
         </div>
       <?php endif; ?>
-      <div class="tribute-row events-row enhanced-events-row">
-        <?php foreach ($client->events as $event): ?>
+
+      <?php
+      // Find the active FCRM Tributes plugin directory for event card template (version-agnostic)
+      $fcrm_event_card_path = null;
+      $plugin_dir = WP_PLUGIN_DIR;
+
+      // Check common FCRM plugin directory patterns
+      $possible_event_paths = [
+        $plugin_dir . '/fcrm-tributes/public/partials/tributes/tribute-event-card.php',
+        $plugin_dir . '/fcrm-tributes-2.0.1.12/public/partials/tributes/tribute-event-card.php',
+        $plugin_dir . '/fcrm-tributes-2.2.0/public/partials/tributes/tribute-event-card.php',
+        $plugin_dir . '/fcrm-tributes-2.3.1/public/partials/tributes/tribute-event-card.php',
+        $plugin_dir . '/fcrm-tributes-2.3.1-dev/public/partials/tributes/tribute-event-card.php',
+      ];
+
+      foreach ($possible_event_paths as $path) {
+        if (file_exists($path)) {
+          $fcrm_event_card_path = $path;
+          break;
+        }
+      }
+      ?>
+
+      <?php if ($fcrm_event_card_path): ?>
+        <div class="tribute-row events-row enhanced-events-row">
+          <?php foreach ($client->events as $event): ?>
+            <div class="tribute-row-col">
+                <?php include($fcrm_event_card_path); ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+          <?php error_log('[FCRM_ES] tribute-event-card.php template not found in any FireHawk directory'); ?>
+        <?php endif; ?>
+        <div class="tribute-row events-row">
           <div class="tribute-row-col">
-              <?php include(plugin_dir_path(__FILE__) . '../../../fcrm-tributes/public/partials/tributes/tribute-event-card.php'); ?>
+            <p class="fcrm-error">Service event information unavailable (FireHawk template not found).</p>
           </div>
-        <?php endforeach; ?>
-      </div>
+        </div>
+      <?php endif; ?>
     <?php endif; ?>
 
     <?php
