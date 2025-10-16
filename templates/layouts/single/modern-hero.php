@@ -94,9 +94,16 @@ if (isset($single_tribute) && isset($tribute_data)) {
 // Get other FCRM settings - PRESERVE ORIGINAL BEHAVIOR
 $fcrmDefaultImageUrl = get_option('fcrm_tributes_default_image');
 $dateFormat = get_option('fcrm_tributes_date_format', 'j M Y');
-$showLocation = get_option('fcrm_tributes_show_location');
+$fcrmShowLocation = get_option('fcrm_tributes_show_location');
+$showLocation = $fcrmShowLocation; // Alias for hero section
 $displayServiceInfo = isset($attributes) ? ($attributes['display-service'] ?? true) : true;
 $hideDateOfBirth = isset($attributes) ? ($attributes['hide-dob'] ?? false) : false;
+$eventDateFormat = get_option('fcrm_tributes_event_date_format');
+$eventEndDateFormat = get_option('fcrm_tributes_event_end_date_format');
+
+// Set $client for compatibility with FireHawk's event card template
+$client = $tribute_data;
+$teamGroupIndex = $single_tribute->client_team_index;
 
 // Build the unique ID for this tribute - PRESERVE FCRM's ID SYSTEM
 $uniqueElementId = 'fcrm-tribute-' . $tribute_id;
@@ -209,7 +216,64 @@ $uniqueElementId = 'fcrm-tribute-' . $tribute_id;
             </div>
         </div>
     </div>
-    
+
+    <!-- Service Event Cards Section -->
+    <?php if (isset($client->events) && is_array($client->events) && count($client->events) > 0): ?>
+      <div class="container events-section">
+        <?php if (isset($client->tributeEventsHeadingText)) : ?>
+          <div class="tribute-heading modern-section-heading">
+            <h2 class="tribute-heading-text"><?php echo esc_html($client->tributeEventsHeadingText); ?></h2>
+          </div>
+        <?php endif; ?>
+        <?php if (isset($client->tributeEventSectionMessage)):?>
+          <div class="tribute-content modern-content">
+              <?php echo wp_kses_post($client->tributeEventSectionMessage); ?>
+          </div>
+        <?php endif; ?>
+
+        <?php
+        // Find the active FCRM Tributes plugin directory for event card template (version-agnostic)
+        $fcrm_event_card_path = null;
+        $plugin_dir = WP_PLUGIN_DIR;
+
+        // Check common FCRM plugin directory patterns
+        $possible_event_paths = [
+          $plugin_dir . '/fcrm-tributes/public/partials/tributes/tribute-event-card.php',
+          $plugin_dir . '/fcrm-tributes-2.0.1.12/public/partials/tributes/tribute-event-card.php',
+          $plugin_dir . '/fcrm-tributes-2.2.0/public/partials/tributes/tribute-event-card.php',
+          $plugin_dir . '/fcrm-tributes-2.3.1/public/partials/tributes/tribute-event-card.php',
+          $plugin_dir . '/fcrm-tributes-2.3.1-dev/public/partials/tributes/tribute-event-card.php',
+        ];
+
+        foreach ($possible_event_paths as $path) {
+          if (file_exists($path)) {
+            $fcrm_event_card_path = $path;
+            break;
+          }
+        }
+        ?>
+
+        <?php if ($fcrm_event_card_path): ?>
+          <div class="tribute-row events-row modern-events-row">
+            <?php foreach ($client->events as $event): ?>
+              <div class="tribute-row-col">
+                  <?php include($fcrm_event_card_path); ?>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php else: ?>
+          <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+            <?php error_log('[FCRM_ES] modern-hero: tribute-event-card.php template not found in any FireHawk directory'); ?>
+          <?php endif; ?>
+          <div class="tribute-row events-row">
+            <div class="tribute-row-col">
+              <p class="fcrm-error">Service event information unavailable (FireHawk template not found).</p>
+            </div>
+          </div>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+
     <!--
     CRITICAL: Below this point we MUST include FCRM's original structure
     for messaging, service buttons, and interactive features to work.

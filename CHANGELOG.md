@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.1.8 (2025-10-17)
+
+### Fixed
+- Fixed Service event cards now display on modern-hero single tribute layout with date/time, venue, calendar download, and directions buttons.
+
+---
+
 ## v2.1.7 (2025-10-14)
 
 ### Fixes
