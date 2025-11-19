@@ -564,7 +564,7 @@ class FCRM_SEO_Analytics_Module {
 
         try {
             $sitemap_count = 1; // Default to 1 sitemap page
-            $is_new_api = API_Interceptor::is_new_api_structure();
+            $is_new_api = \FCRM\EnhancementSuite\API_Interceptor::is_new_api_structure();
 
             if ($is_new_api) {
                 // New API structure - sitemap-count endpoint returns page count directly

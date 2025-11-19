@@ -5,6 +5,14 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.1.9 (2025-11-19)
+
+### Fixed
+- Fixed SEOPress sitemap integration namespace error that prevented tribute sitemaps from generating.
+- Added support for FCRM Tributes v2.2.0 sitemap API detection in API Interceptor.
+
+---
+
 ## v2.1.8 (2025-10-17)
 
 ### Fixed
