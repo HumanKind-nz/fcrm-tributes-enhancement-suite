@@ -433,6 +433,22 @@ class API_Interceptor {
 			];
 		}
 
+		// Tributes sitemap data: /api/tributes/ POST (v2.2.0 - old API with sitemap params)
+		if (strpos($url, '/api/tributes/') !== false && strpos($url, '/count') === false && strpos($url, '/sitemap') === false) {
+			$body_params = [];
+			if (isset($args['body'])) {
+				$body_params = is_string($args['body']) ? json_decode($args['body'], true) : $args['body'];
+			}
+
+			// Check if this is a sitemap request
+			if (isset($body_params['sitemap']) && $body_params['sitemap'] === true) {
+				return [
+					'type' => 'tributes_sitemap_data',
+					'params' => $body_params
+				];
+			}
+		}
+
 		return false;
 	}
 
