@@ -508,11 +508,113 @@ if (empty($fcrmShowLocation)) {
                 </li>
               <?php } ?>
 
-              <!-- Continue with rest of FCRM navigation tabs with similar enhancements... -->
-              <?php 
-              // Include the rest of the FCRM navigation tabs here
-              // This preserves all functionality while adding enhanced styling
-              ?>
+              <?php if (isset($client->fragmentTributeUrl)) { ?>
+                <li class="nav-item">
+                  <a class="nav-link enhanced-nav-link" href="#" data-page="social-tributes">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Social Tribute
+                  </a>
+                </li>
+              <?php } else if (isset($client->tributeVideoEmbedCode)) { ?>
+                <li class="nav-item">
+                  <a class="nav-link enhanced-nav-link" href="#" data-page="social-tribute-embed">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Social Tribute
+                  </a>
+                </li>
+              <?php } ?>
+
+              <?php if (($client->displayLiveStream && $client->liveStreamEmbedUrl) || isset($client->tributeLiveStreamEmbedCode)): ?>
+                <li class="nav-item live-stream-link">
+                  <a class="nav-link enhanced-nav-link" href="#" data-page="view-funeral-stream">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="11" cy="12" r="2" fill="currentColor"/>
+                    </svg>
+                    Livestream
+                  </a>
+                </li>
+              <?php elseif (isset($client->liveStreamUrl)): ?>
+                <li class="nav-item live-stream-link">
+                  <a class="nav-link enhanced-nav-link" href="<?php echo $client->liveStreamUrl; ?>" target="_blank">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="11" cy="12" r="2" fill="currentColor"/>
+                    </svg>
+                    Livestream
+                  </a>
+                </li>
+              <?php endif; ?>
+
+              <li class="nav-item lazy-live-stream-link" style="<?php echo $client->displayLiveStream ? "" : "display: none;" ?>">
+                <a class="nav-link enhanced-nav-link loading" href="#">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="11" cy="12" r="2" fill="currentColor"/>
+                  </svg>
+                  Livestream
+                </a>
+              </li>
+
+              <?php if (isset($client->additionalLiveStreams)): ?>
+                <?php foreach ($client->additionalLiveStreams as $key=>$liveStream): ?>
+                  <?php if ($liveStream->type == "url" && $liveStream->url): ?>
+                    <li class="nav-item live-stream-link">
+                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="<?php echo $liveStream->url; ?>" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <?php echo $liveStream->name ?>
+                      </a>
+                    </li>
+                  <?php elseif ($liveStream->type == "embed"): ?>
+                    <li class="nav-item live-stream-link">
+                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="#" data-page="funeral-stream-<?php echo $key?>">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <?php echo $liveStream->name ?>
+                      </a>
+                    </li>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+              <?php endif ?>
+
+              <?php if (isset($client->slideshowUrl)): ?>
+                <li class="nav-item">
+                  <a class="nav-link enhanced-nav-link" href="<?php echo $client->slideshowUrl; ?>" target="_blank">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                      <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                      <path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Photo Tribute
+                  </a>
+                </li>
+              <?php endif; ?>
+
+              <?php if (isset($client->tributePaymentTypeContribute) && $client->tributePaymentTypeContribute == true): ?>
+                <li class="nav-item contribute-link">
+                  <a class="nav-link enhanced-nav-link" href="#" data-page="view-funeral-contribute">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                      <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Contribute
+                  </a>
+                </li>
+              <?php endif; ?>
 
               <?php if (isset($shareUrl)) { ?>
                 <li class="nav-item">
