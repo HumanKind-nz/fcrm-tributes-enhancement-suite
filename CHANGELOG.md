@@ -5,6 +5,14 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.0 (2025-11-21)
+
+### Fixed
+- Fixed missing livestream navigation buttons in enhanced-classic single tribute layout. Livestream buttons (including OneRoom embeds and external URLs) now appear when livestream data is present in the API response.
+- Added missing Social Tribute, Photo Tribute, and Contribute navigation buttons for feature parity with FireHawk core.
+
+---
+
 ## v2.1.9 (2025-11-19)
 
 ### Fixed
