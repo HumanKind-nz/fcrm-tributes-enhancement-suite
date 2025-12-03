@@ -104,11 +104,11 @@ class FCRM_SEO_Analytics_Module {
         // Get the Plausible Analytics script URL
         $script_url = \Plausible\Analytics\WP\Helpers::get_js_url(true);
         
-        // Get the version
+        // Get the version - match Plausible plugin's approach (v2.4.2+)
         $version = \Plausible\Analytics\WP\Helpers::proxy_enabled() && 
                    file_exists(\Plausible\Analytics\WP\Helpers::get_js_path()) 
                    ? filemtime(\Plausible\Analytics\WP\Helpers::get_js_path()) 
-                   : PLAUSIBLE_ANALYTICS_VERSION;
+                   : $this->get_plausible_plugin_version();
         
         // Enqueue the Plausible Analytics script
         wp_enqueue_script(
@@ -124,6 +124,46 @@ class FCRM_SEO_Analytics_Module {
             'plausible-analytics',
             'window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }'
         );
+    }
+
+    /**
+     * Get Plausible Analytics plugin version
+     * 
+     * Matches the approach used in Plausible plugin v2.4.2+
+     * Checks for constant first (backward compatibility), then falls back to plugin data
+     * 
+     * @return string|null Plugin version or null if not found
+     */
+    private function get_plausible_plugin_version(): ?string {
+        // Check for constant first (backward compatibility with older versions)
+        if (defined('PLAUSIBLE_ANALYTICS_VERSION')) {
+            return PLAUSIBLE_ANALYTICS_VERSION;
+        }
+
+        // Use the same approach as Plausible plugin v2.4.2+
+        if (!function_exists('get_plugin_data')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        // Try to get plugin file path from constant (if defined in v2.4.2+)
+        $plugin_file = null;
+        if (defined('PLAUSIBLE_ANALYTICS_PLUGIN_FILE')) {
+            $plugin_file = PLAUSIBLE_ANALYTICS_PLUGIN_FILE;
+        } else {
+            // Fallback: try to find the plugin file
+            $plugin_file = WP_PLUGIN_DIR . '/plausible-analytics/plausible-analytics.php';
+            if (!file_exists($plugin_file)) {
+                // Try alternative path
+                $plugin_file = WP_PLUGIN_DIR . '/plausible/plausible-analytics.php';
+            }
+        }
+
+        if ($plugin_file && file_exists($plugin_file)) {
+            $data = get_plugin_data($plugin_file);
+            return $data['Version'] ?? null;
+        }
+
+        return null;
     }
 
     /**

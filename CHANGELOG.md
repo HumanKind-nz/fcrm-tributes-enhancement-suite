@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.3 (2025-12-02)
+
+### Fixed
+- Fixed undefined constant error for `PLAUSIBLE_ANALYTICS_VERSION` when using Plausible Analytics plugin v2.4.2+. Now uses plugin data to retrieve version, matching the approach used in Plausible plugin v2.4.2+.
+
+---
+
 ## v2.2.2 (2025-12-02)
 
 ### Fixed
