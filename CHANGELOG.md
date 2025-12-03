@@ -5,6 +5,20 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.2 (2025-12-02)
+
+### Fixed
+- Fixed PHP warnings for undefined `embedUrl` and `embedCode` properties in enhanced-classic single tribute layout when livestream data is missing these fields.
+
+---
+
+## v2.2.1 (2025-11-24)
+
+### Fixed
+- Fixed admin assets loading on all WordPress admin pages causing conflicts with Gravity Forms save functionality. Admin scripts and styles now only load on the plugin's settings pages.
+
+---
+
 ## v2.2.0 (2025-11-21)
 
 ### Fixed

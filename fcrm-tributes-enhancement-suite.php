@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes Enhancement Suite
  * Plugin URI: https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
  * Description: Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
- * Version: 2.2.0
+ * Version: 2.2.2
  * Author: Weave Digital Studio, Gareth Bissland
  * Author URI: https://weave.co.nz/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.2.0');
+define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.2.2');
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_FILE', __FILE__);
@@ -212,12 +212,10 @@ class FCRM_Enhancement_Suite {
 	}
 
 	public function enqueue_admin_assets($hook): void {
-		// Debug: Always enqueue on admin pages for testing
-		
-		// Temporarily disable hook check for testing
-		// if ($hook !== 'settings_page_fcrm-enhancements') {
-		// 	return;
-		// }
+		// Only load on our plugin's admin pages
+		if ($hook !== 'settings_page_fcrm-enhancements') {
+			return;
+		}
 
 		wp_enqueue_style(
 			'fcrm-enhancement-admin',

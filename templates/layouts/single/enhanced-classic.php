@@ -983,9 +983,9 @@ if (empty($fcrmShowLocation)) {
             <div class="tribute-row stream-row">
               <div class="tribute-row-col">
                 <div class="live-stream-video-wrapper">
-                  <?php if ($liveStream->embedUrl): ?>
+                  <?php if (isset($liveStream->embedUrl) && $liveStream->embedUrl): ?>
                     <iframe class="livestream-video" width="100%" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo $liveStream->embedUrl; ?>" style="border:none"></iframe>
-                  <?php elseif ($liveStream->embedCode): ?>
+                  <?php elseif (isset($liveStream->embedCode) && $liveStream->embedCode): ?>
                     <?php echo $liveStream->embedCode ?>
                   <?php endif; ?>
                 </div>
