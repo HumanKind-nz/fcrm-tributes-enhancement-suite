@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes Enhancement Suite
  * Plugin URI: https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
  * Description: Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
- * Version: 2.2.3
+ * Version: 2.2.4
  * Author: Weave Digital Studio, Gareth Bissland
  * Author URI: https://weave.co.nz/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.2.3');
+define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.2.4');
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_FILE', __FILE__);
@@ -213,14 +213,32 @@ class FCRM_Enhancement_Suite {
 
 	public function enqueue_admin_assets($hook): void {
 		// Only load on our plugin's admin pages
-		if ($hook !== 'settings_page_fcrm-enhancements') {
+		// Note: Using toplevel_page_ because add_menu_page() creates a top-level menu
+		if ($hook !== 'toplevel_page_fcrm-enhancements') {
 			return;
 		}
 
+		// Enqueue main admin styles
 		wp_enqueue_style(
 			'fcrm-enhancement-admin',
 			FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/admin/module-pages.css',
 			[],
+			FCRM_ENHANCEMENT_SUITE_VERSION
+		);
+
+		// Enqueue dashboard styles
+		wp_enqueue_style(
+			'fcrm-enhancement-dashboard',
+			FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/admin/dashboard.css',
+			['fcrm-enhancement-admin'],
+			FCRM_ENHANCEMENT_SUITE_VERSION
+		);
+
+		// Enqueue admin form styles
+		wp_enqueue_style(
+			'fcrm-enhancement-admin-styles',
+			FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/css/admin/admin-styles.css',
+			['fcrm-enhancement-admin'],
 			FCRM_ENHANCEMENT_SUITE_VERSION
 		);
 

@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.4 (2025-12-02)
+
+### Fixed
+- Fixed admin styles not loading on settings pages. Corrected hook name from `settings_page_fcrm-enhancements` to `toplevel_page_fcrm-enhancements` to match the menu registration. Also enqueued dashboard and admin form stylesheets that were missing.
+
+---
+
 ## v2.2.3 (2025-12-02)
 
 ### Fixed
