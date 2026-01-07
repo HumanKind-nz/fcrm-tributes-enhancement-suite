@@ -344,6 +344,7 @@ class API_Interceptor {
 	 */
 	private static function parse_api_url($url, $args) {
 		// Parse different FCRM API endpoints
+		// IMPORTANT: More specific patterns must be checked BEFORE broader patterns
 		
 		// Client by file number: /api/client/file-number/{number}
 		if (preg_match('/\/api\/client\/file-number\/([^\/\?]+)/', $url, $matches)) {
@@ -362,6 +363,34 @@ class API_Interceptor {
 				'gallery' => isset($query_params['gallery']),
 				'extra' => isset($query_params['tribute']),
 				'params' => $query_params
+			];
+		}
+
+		// Tribute messages: /api/client/{id}/messages
+		// MUST be checked before single_client pattern which would also match this URL
+		if (preg_match('/\/api\/client\/([^\/]+)\/messages/', $url, $matches)) {
+			$client_id = $matches[1];
+			$body_params = [];
+			$query_params = [];
+
+			// Extract body parameters (for POST requests)
+			if (isset($args['body'])) {
+				$body_params = is_string($args['body']) ? json_decode($args['body'], true) : $args['body'];
+			}
+
+			// Extract query parameters from URL (for GET requests or pagination)
+			$parsed_url = parse_url($url);
+			if (isset($parsed_url['query'])) {
+				parse_str($parsed_url['query'], $query_params);
+			}
+
+			// Merge query params with body params (query params take precedence)
+			$params = array_merge($body_params ?: [], $query_params);
+
+			return [
+				'type' => 'tribute_messages',
+				'client_id' => $client_id,
+				'params' => $params
 			];
 		}
 		
@@ -396,22 +425,6 @@ class API_Interceptor {
 			
 			return [
 				'type' => 'client_list',
-				'params' => $body_params ?: []
-			];
-		}
-
-		// Tribute messages: /api/client/{id}/messages
-		if (preg_match('/\/api\/client\/([^\/]+)\/messages/', $url, $matches)) {
-			$client_id = $matches[1];
-			$body_params = [];
-
-			if (isset($args['body'])) {
-				$body_params = is_string($args['body']) ? json_decode($args['body'], true) : $args['body'];
-			}
-
-			return [
-				'type' => 'tribute_messages',
-				'client_id' => $client_id,
 				'params' => $body_params ?: []
 			];
 		}

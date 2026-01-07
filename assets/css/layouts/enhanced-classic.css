@@ -162,6 +162,28 @@
     }
 }
 
+/* Livestream Video - Taller for better viewing (especially OneRoom) */
+.fcrm-enhanced-classic .livestream-video,
+.fcrm-enhanced-classic.firehawk-tributes .livestream-video {
+    height: 600px; /* Mobile default */
+    width: 100%;
+    max-width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+    .fcrm-enhanced-classic .livestream-video,
+    .fcrm-enhanced-classic.firehawk-tributes .livestream-video {
+        height: 800px; /* Tablet */
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .fcrm-enhanced-classic .livestream-video,
+    .fcrm-enhanced-classic.firehawk-tributes .livestream-video {
+        height: 1000px; /* Desktop */
+    }
+}
+
 /* Print Styles */
 @media print {
     .fcrm-enhanced-classic .banner {
