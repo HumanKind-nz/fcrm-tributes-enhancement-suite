@@ -5,6 +5,20 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.6 (2026-01-07)
+
+### Improved
+- Increased livestream video iframe height for better viewing, especially for OneRoom embeds. Progressive sizing: 600px mobile → 800px tablet → 1000px desktop.
+
+---
+
+## v2.2.5 (2025-12-29)
+
+### Fixed
+- Fixed message pagination not working on single tribute pages. The API interceptor's pattern matching order caused message requests to be incorrectly cached as single client requests, ignoring pagination parameters. Reordered patterns so tribute messages endpoint is matched before the broader single client pattern.
+
+---
+
 ## v2.2.4 (2025-12-02)
 
 ### Fixed
