@@ -212,16 +212,33 @@ $container_classes = [
             this.isLoading = true;
             this.showLoading();
             
+            // Build params matching FireHawk's approach: only include optional
+            // fields when they have values. Sending empty strings for query/dates
+            // triggers unintended fuzzy search and breaks date override logic
+            // in FireHawk's get_tribute_search() handler.
+            let params = {
+                size: resetPage ? this.pageSize : this.loadMoreSize,
+                from: resetPage ? 0 : this.currentPage * this.loadMoreSize,
+            };
+
+            // Only include search/date params when they have values
+            if (this.searchQuery) params.query = this.searchQuery;
+            if (this.startDate) params.startDate = moment(this.startDate).startOf("day").valueOf();
+            if (this.endDate) params.endDate = moment(this.endDate).endOf("day").valueOf();
+
+            // Only include config properties that FireHawk's handler reads
+            if (this.config.sortByService) params.sortByService = this.config.sortByService;
+            if (this.config.nameFormat) params.nameFormat = this.config.nameFormat;
+            if (this.config.branch) params.branch = this.config.branch;
+            if (this.config.showFutureTributes) params.showFutureTributes = this.config.showFutureTributes;
+            if (this.config.showPastTributes) params.showPastTributes = this.config.showPastTributes;
+            if (this.config.displayServiceInfo) params.displayService = this.config.displayServiceInfo;
+            if (this.config.teamGroupIndex != null) params.teamGroupIndex = this.config.teamGroupIndex;
+            if (this.config.displayBranch) params.displayBranch = this.config.displayBranch;
+
             let data = {
                 action: 'get_tributes',
-                params: {
-                    size: resetPage ? this.pageSize : this.loadMoreSize,
-                    from: resetPage ? 0 : this.currentPage * this.loadMoreSize,
-                    query: this.searchQuery || '',
-                    startDate: this.startDate ? moment(this.startDate).startOf("day").valueOf() : '',
-                    endDate: this.endDate ? moment(this.endDate).endOf("day").valueOf() : '',
-                    ...this.config
-                }
+                params: params
             };
             
             console.log('Making AJAX request with data:', data);
