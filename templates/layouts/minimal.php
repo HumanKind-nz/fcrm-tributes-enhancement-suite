@@ -216,30 +216,31 @@ jQuery(document).ready(function($) {
         
         console.log('Loading tributes with search:', search);
         
+        // Build params matching FireHawk's approach: only include optional
+        // fields when they have values. Sending empty strings for query/dates
+        // triggers unintended fuzzy search and breaks date override logic
+        // in FireHawk's get_tribute_search() handler.
+        const ajaxParams = {
+            size: <?php echo intval($atts['size']); ?>,
+            from: (page - 1) * <?php echo intval($atts['size']); ?>,
+        };
+
+        if (search.name) ajaxParams.query = search.name;
+        if (search.date_from) ajaxParams.startDate = moment(search.date_from).startOf("day").valueOf();
+        if (search.date_to) ajaxParams.endDate = moment(search.date_to).endOf("day").valueOf();
+
+        <?php if ($sortByService): ?>ajaxParams.sortByService = true;<?php endif; ?>
+        <?php if ($nameFormat): ?>ajaxParams.nameFormat = <?php echo json_encode($nameFormat); ?>;<?php endif; ?>
+        <?php if ($branch): ?>ajaxParams.branch = <?php echo json_encode($branch); ?>;<?php endif; ?>
+        <?php if ($showFutureTributes): ?>ajaxParams.showFutureTributes = true;<?php endif; ?>
+        <?php if ($showPastTributes): ?>ajaxParams.showPastTributes = true;<?php endif; ?>
+        <?php if ($displayServiceInfo): ?>ajaxParams.displayService = true;<?php endif; ?>
+        <?php if ($teamGroupIndex !== null): ?>ajaxParams.teamGroupIndex = <?php echo json_encode($teamGroupIndex); ?>;<?php endif; ?>
+        <?php if ($displayBranch): ?>ajaxParams.displayBranch = true;<?php endif; ?>
+
         const ajaxData = {
             action: 'get_tributes',
-            params: {
-                size: <?php echo intval($atts['size']); ?>,
-                from: (page - 1) * <?php echo intval($atts['size']); ?>,
-                query: search.name || '',
-                startDate: search.date_from ? moment(search.date_from).startOf("day").valueOf() : '',
-                endDate: search.date_to ? moment(search.date_to).endOf("day").valueOf() : '',
-                // Include same configuration as modern grid
-                sortByService: <?php echo json_encode($sortByService); ?>,
-                team: <?php echo json_encode($team); ?>,
-                dateLocale: <?php echo json_encode($dateLocale); ?>,
-                nameFormat: <?php echo json_encode($nameFormat); ?>,
-                dateFormat: <?php echo json_encode($dateFormat); ?>,
-                filterDateFormat: <?php echo json_encode($filterDateFormat); ?>,
-                showFutureTributes: <?php echo json_encode($showFutureTributes); ?>,
-                showPastTributes: <?php echo json_encode($showPastTributes); ?>,
-                branch: <?php echo json_encode($branch); ?>,
-                displayBranch: <?php echo json_encode($displayBranch); ?>,
-                displayServiceInfo: <?php echo json_encode($displayServiceInfo); ?>,
-                hideDateOfBirth: <?php echo json_encode($hideDateOfBirth); ?>,
-                teamGroupIndex: <?php echo json_encode($teamGroupIndex); ?>,
-                defaultImageUrl: <?php echo json_encode($fcrmDefaultImageUrl); ?>
-            }
+            params: ajaxParams
         };
         
         console.log('Making AJAX request with data:', ajaxData);

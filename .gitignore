@@ -5,3 +5,7 @@ assets/js/.DS_Store
 .DS_Store
 /.nova
 .nova/Configuration.json
+CLAUDE.md
+CONTEXT.md
+.claude/
+screenshots/

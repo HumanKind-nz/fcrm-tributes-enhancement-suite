@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.7 (2026-02-15)
+
+### Fixed
+- Fixed grid layouts returning different tributes and ordering compared to FireHawk's default grid. All four grid templates (modern, elegant, gallery, minimal) were sending empty strings for `query`, `startDate`, and `endDate` parameters on initial load, which triggered an unintended fuzzy search in FireHawk's API handler and broke date override logic. Now matches FireHawk's approach of omitting optional parameters when not set. Also stopped spreading unnecessary config properties into the API request.
+
+---
+
 ## v2.2.6 (2026-01-07)
 
 ### Improved
