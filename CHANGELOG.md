@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.8 (2026-03-06)
+
+### Changed
+- Default tribute ordering now sorts by service date with date of death fallback, so the most recent tributes always appear first.
+
+---
+
 ## v2.2.7 (2026-02-15)
 
 ### Fixed
