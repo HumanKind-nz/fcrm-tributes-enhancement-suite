@@ -1,11 +1,12 @@
-
-assets/js/frontend/.DS_Store
-assets/js/admin/.DS_Store
-assets/js/.DS_Store
+# macOS
 .DS_Store
+
+# Nova IDE
 /.nova
-.nova/Configuration.json
-CLAUDE.md
+
+# Claude Code
 CONTEXT.md
 .claude/
+
+# Screenshots
 screenshots/
