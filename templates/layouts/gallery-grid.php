@@ -220,7 +220,7 @@ $container_classes = [
             // in FireHawk's get_tribute_search() handler.
             let params = {
                 size: reset ? this.pageSize : this.loadMoreSize,
-                from: reset ? 0 : this.currentPage * this.loadMoreSize,
+                from: reset ? 0 : this.totalLoaded,
             };
 
             if (this.searchQuery) params.query = this.searchQuery;

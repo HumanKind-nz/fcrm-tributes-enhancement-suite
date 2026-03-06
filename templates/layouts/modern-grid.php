@@ -218,7 +218,7 @@ $container_classes = [
             // in FireHawk's get_tribute_search() handler.
             let params = {
                 size: resetPage ? this.pageSize : this.loadMoreSize,
-                from: resetPage ? 0 : this.currentPage * this.loadMoreSize,
+                from: resetPage ? 0 : this.totalLoaded,
             };
 
             // Only include search/date params when they have values

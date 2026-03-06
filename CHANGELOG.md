@@ -5,6 +5,16 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.2.9 (2026-03-07)
+
+### Fixed
+- Fixed "Load More" button duplicating tributes when initial page size differs from load-more size. The offset calculation incorrectly used `currentPage * loadMoreSize` instead of `totalLoaded`, causing overlap. Affected modern-grid, elegant-grid, and gallery-grid layouts.
+
+### Changed
+- Reduced `.tribute-content` padding from 1.75rem to 1.2rem in modern grid layout.
+
+---
+
 ## v2.2.8 (2026-03-06)
 
 ### Changed
