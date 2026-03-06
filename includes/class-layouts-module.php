@@ -143,7 +143,7 @@ class FCRM_Layouts_Module {
             'range-hours' => null,
             'team-index' => null,
             'size' => get_option('fcrm_layout_default_page_size', 12),
-            'sort-by-service' => false,
+            'sort-by-service' => true,
             'display-service' => true,
             'display-branch' => false,
             'hide-dob' => false

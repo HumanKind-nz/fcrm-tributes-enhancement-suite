@@ -273,7 +273,17 @@ $container_classes = [
             
             const tributes = data.results || [];
             const total = data.total || 0;
-            
+
+            // Sort by service date (descending), falling back to date of death
+            tributes.sort((a, b) => {
+                const dateA = a.serviceDateTime || a.clientDateOfDeath || '';
+                const dateB = b.serviceDateTime || b.clientDateOfDeath || '';
+                if (!dateA && !dateB) return 0;
+                if (!dateA) return 1;
+                if (!dateB) return -1;
+                return new Date(dateB) - new Date(dateA);
+            });
+
             if (isNewSearch) {
                 this.clearGrid();
             }
