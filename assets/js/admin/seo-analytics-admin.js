@@ -94,7 +94,19 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     var d = response.data;
-                    var html = '<div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 12px;">';
+                    var modeLabel = d.dry_run ? 'DRY RUN' : 'LIVE';
+                    var borderColor = d.dry_run ? '#dba617' : (d.submitted ? '#00a32a' : '#ddd');
+                    var html = '<div style="background: #fff; border: 2px solid ' + borderColor + '; border-radius: 4px; padding: 12px;">';
+
+                    // Status banner
+                    if (d.submitted) {
+                        html += '<p style="background: #00a32a; color: #fff; padding: 6px 12px; border-radius: 3px; margin: 0 0 10px 0; font-weight: bold;">✅ URLs submitted to indexing APIs</p>';
+                    } else if (d.dry_run && d.new_tributes > 0) {
+                        html += '<p style="background: #dba617; color: #fff; padding: 6px 12px; border-radius: 3px; margin: 0 0 10px 0; font-weight: bold;">Preview only — no URLs were submitted (' + modeLabel + ')</p>';
+                    } else if (d.dry_run) {
+                        html += '<p style="background: #72777c; color: #fff; padding: 6px 12px; border-radius: 3px; margin: 0 0 10px 0; font-weight: bold;">' + modeLabel + ' — scan complete</p>';
+                    }
+
                     html += '<p><strong>Total tributes found:</strong> ' + d.total_tributes + '</p>';
                     html += '<p><strong>Previously known:</strong> ' + d.known_tributes + '</p>';
                     html += '<p><strong>New tributes:</strong> ' + d.new_tributes + '</p>';
@@ -104,7 +116,7 @@ jQuery(document).ready(function($) {
                     }
 
                     if (d.new_urls && d.new_urls.length > 0) {
-                        html += '<p><strong>' + (d.dry_run ? 'Would submit:' : 'Submitted:') + '</strong></p>';
+                        html += '<p><strong>' + (d.dry_run ? 'Would submit:' : 'Submitted to Google/IndexNow:') + '</strong></p>';
                         html += '<ul style="margin: 5px 0 5px 20px; list-style: disc;">';
                         d.new_urls.forEach(function(item) {
                             html += '<li><strong>' + (item.name || 'Unknown') + '</strong> — <code style="font-size: 11px;">' + item.url + '</code></li>';
@@ -113,6 +125,12 @@ jQuery(document).ready(function($) {
                             html += '<li><em>...and ' + (d.new_tributes - 20) + ' more</em></li>';
                         }
                         html += '</ul>';
+
+                        if (d.submitted) {
+                            html += '<p style="color: #00a32a;"><strong>Check the log below for submission results.</strong></p>';
+                        } else if (d.dry_run) {
+                            html += '<p style="color: #72777c;">Use <strong>Check & Submit</strong> to send these URLs to search engines.</p>';
+                        }
                     } else if (!d.first_run) {
                         html += '<p style="color: #00a32a;">No new tributes detected since last check.</p>';
                     }
