@@ -3,7 +3,7 @@
  * Plugin Name: FireHawkCRM Tributes Enhancement Suite
  * Plugin URI: https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
  * Description: Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
- * Version: 2.2.9
+ * Version: 2.3.0
  * Author: Weave Digital Studio, Gareth Bissland
  * Author URI: https://weave.co.nz/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.2.9');
+define('FCRM_ENHANCEMENT_SUITE_VERSION', '2.3.0');
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FCRM_ENHANCEMENT_SUITE_PLUGIN_FILE', __FILE__);
@@ -46,6 +46,14 @@ if (file_exists(plugin_dir_path(__FILE__) . 'includes/class-fcrm-api-interceptor
 
 // Include URL fixer for tribute detection
 require_once plugin_dir_path(__FILE__) . 'includes/class-tribute-url-fixer.php';
+
+// Include sitemap generator and instant indexing
+if (file_exists(plugin_dir_path(__FILE__) . 'includes/class-fcrm-sitemap-generator.php')) {
+	require_once plugin_dir_path(__FILE__) . 'includes/class-fcrm-sitemap-generator.php';
+}
+if (file_exists(plugin_dir_path(__FILE__) . 'includes/class-fcrm-instant-indexing.php')) {
+	require_once plugin_dir_path(__FILE__) . 'includes/class-fcrm-instant-indexing.php';
+}
 
 /**
  * Main plugin class
@@ -82,6 +90,16 @@ class FCRM_Enhancement_Suite {
 		// Initialize tribute URL fixer (always needed for proper tribute detection)
 		if (class_exists('FCRM\\EnhancementSuite\\Tribute_URL_Fixer')) {
 			add_action('init', ['FCRM\\EnhancementSuite\\Tribute_URL_Fixer', 'init'], 5);
+		}
+
+		// Initialize sitemap generator (always active — generates XML at /fhf_tributes_sitemap_N.xml)
+		if (class_exists('FCRM\\EnhancementSuite\\Sitemap_Generator')) {
+			\FCRM\EnhancementSuite\Sitemap_Generator::init();
+		}
+
+		// Initialize instant indexing (Google Indexing API + IndexNow)
+		if (class_exists('FCRM\\EnhancementSuite\\Instant_Indexing')) {
+			\FCRM\EnhancementSuite\Instant_Indexing::init();
 		}
 		
 		// Add AJAX handlers for cache management
