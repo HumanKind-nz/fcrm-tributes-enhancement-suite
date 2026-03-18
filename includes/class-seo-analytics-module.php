@@ -464,55 +464,66 @@ class FCRM_SEO_Analytics_Module {
         </div>
 
         <div class="settings-section">
-            <h3>🗺️ SEOPress Sitemap Integration</h3>
+            <h3>🗺️ Tribute Sitemap</h3>
             <div class="section-content">
-                <?php $seopress_active = $this->is_seopress_available(); ?>
+                <?php
+                $seo_plugin = $this->detect_active_seo_plugin();
+                $seo_label = $seo_plugin ? ucfirst($seo_plugin) : 'None detected';
+                ?>
+                <p>Generates XML sitemaps for all tribute pages and registers them with your SEO plugin. Works with SEOPress, Yoast SEO, RankMath, and WordPress native sitemaps.</p>
 
-                <?php if ($seopress_active): ?>
-                    <p>Automatically add all tribute pages to your SEOPress XML sitemap for better search engine indexing.</p>
+                <div class="notice notice-info inline" style="margin-bottom: 15px;">
+                    <p><strong>Active SEO plugin:</strong> <?php echo esc_html($seo_label); ?>.
+                    Tribute sitemaps are also directly accessible at <code>/fhf_tributes_sitemap_1.xml</code> regardless of which SEO plugin is active.</p>
+                </div>
 
-                    <div class="notice notice-info inline" style="margin-bottom: 15px;">
-                        <p><strong>Note:</strong> Yoast SEO sitemap integration is already handled by the Firehawk CRM plugin. This setting only applies to SEOPress.</p>
-                    </div>
-
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">Enable SEOPress Sitemap</th>
-                            <td>
-                                <label class="toggle-switch">
-                                    <input type="checkbox"
-                                           name="fcrm_enhancement_seo_analytics_enable_sitemap"
-                                           value="1"
-                                           <?php checked(get_option('fcrm_enhancement_seo_analytics_enable_sitemap', 1), 1); ?>>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <p class="description">
-                                    Add all tribute pages to your SEOPress sitemap automatically.
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">View Sitemap</th>
-                            <td>
-                                <a href="<?php echo esc_url(home_url('/sitemaps.xml')); ?>"
-                                   target="_blank"
-                                   class="button">
-                                    View SEOPress Sitemap
-                                </a>
-                                <p class="description">
-                                    View your sitemap to verify tribute pages are included.
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                <?php else: ?>
-                    <div class="notice notice-warning inline">
-                        <p><strong>SEOPress plugin not detected.</strong> Install and activate SEOPress to enable sitemap integration.</p>
-                        <p><em>Note: Yoast SEO sitemap integration is already handled by the Firehawk CRM plugin.</em></p>
-                    </div>
-                <?php endif; ?>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">Enable Tribute Sitemap</th>
+                        <td>
+                            <label class="toggle-switch">
+                                <input type="checkbox"
+                                       name="fcrm_enhancement_seo_analytics_enable_sitemap"
+                                       value="1"
+                                       <?php checked(get_option('fcrm_enhancement_seo_analytics_enable_sitemap', 1), 1); ?>>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <p class="description">
+                                Generate tribute sitemaps and register them with your SEO plugin's sitemap index.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">View Sitemap</th>
+                        <td>
+                            <a href="<?php echo esc_url(home_url('/fhf_tributes_sitemap_1.xml')); ?>"
+                               target="_blank"
+                               class="button">
+                                View Tribute Sitemap
+                            </a>
+                            <?php if ($seo_plugin): ?>
+                            <a href="<?php echo esc_url(home_url('/sitemaps.xml')); ?>"
+                               target="_blank"
+                               class="button"
+                               style="margin-left: 5px;">
+                                View Sitemap Index
+                            </a>
+                            <?php endif; ?>
+                            <p class="description">
+                                View your tribute sitemap to verify tribute pages are included.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
+
+        <?php
+        // Render instant indexing settings
+        if (class_exists('FCRM\\EnhancementSuite\\Instant_Indexing')) {
+            \FCRM\EnhancementSuite\Instant_Indexing::render_settings();
+        }
+        ?>
 
         <?php
         // Show conflicts if any standalone plugins are active
@@ -541,111 +552,34 @@ class FCRM_SEO_Analytics_Module {
     }
 
     /**
-     * Register sitemap integration for SEOPress
+     * Register sitemap integration
      *
-     * Note: Yoast SEO sitemap integration is already handled by Firehawk plugin.
-     * This method only adds SEOPress support.
+     * Sitemap XML generation and SEO plugin registration is now handled
+     * by the Sitemap_Generator class. This method is kept for backward
+     * compatibility but delegates to the new system.
      */
     public function register_sitemap_integration(): void {
-        // Check if sitemap integration is enabled (checkbox value is '1' or 1 when checked)
-        $sitemap_enabled = get_option('fcrm_enhancement_seo_analytics_enable_sitemap', 1);
-
-        if (!$sitemap_enabled || $sitemap_enabled === '0') {
-            return;
-        }
-
-        // Only register SEOPress - Yoast is handled by Firehawk core plugin
-        if ($this->is_seopress_available()) {
-            add_filter('seopress_sitemaps_external_link', [$this, 'add_tributes_to_seopress_sitemap'], 10, 1);
-        }
+        // Sitemap generation and SEO plugin registration is now handled by
+        // FCRM\EnhancementSuite\Sitemap_Generator which is initialized in the main plugin file.
+        // It registers with SEOPress, Yoast, RankMath, and WordPress native sitemaps.
     }
 
     /**
      * Detect active SEO plugin
      *
-     * Note: Only detects SEOPress. Yoast is already handled by Firehawk core plugin.
-     *
-     * @return string|false 'seopress' or false
+     * @return string|false 'seopress', 'yoast', 'rankmath', or false
      */
     private function detect_active_seo_plugin() {
-        $seopress_active = defined('SEOPRESS_VERSION') || function_exists('seopress_get_service');
-
-        if ($seopress_active) {
+        if (defined('SEOPRESS_VERSION') || function_exists('seopress_get_service')) {
             return 'seopress';
         }
-
+        if (defined('WPSEO_VERSION')) {
+            return 'yoast';
+        }
+        if (class_exists('RankMath')) {
+            return 'rankmath';
+        }
         return false;
-    }
-
-    /**
-     * Add FireHawk tribute sitemap files to SEOPress sitemap index
-     *
-     * Adds references to the FireHawk CRM generated sitemap files
-     * (e.g., /fhf_tributes_sitemap_1.xml) to the SEOPress sitemap index.
-     * This matches the Yoast SEO integration approach.
-     *
-     * Supports both old and new FireHawk API structures:
-     * - Old API (api.firehawkcrm.com): Uses /api/tributes/count, calculates ceil(count/500) pages
-     * - New API (Australian endpoints): Uses /api/tributes/sitemap-count, returns page count directly
-     *
-     * @param array $external_links Existing external links
-     * @return array Modified external links array
-     */
-    public function add_tributes_to_seopress_sitemap($external_links): array {
-        // Ensure we have an array
-        if (!is_array($external_links)) {
-            $external_links = array();
-        }
-
-        // Check if FireHawk CRM Tributes API is available
-        if (!class_exists('Fcrm_Tributes_Api')) {
-            return $external_links;
-        }
-
-        try {
-            $sitemap_count = 1; // Default to 1 sitemap page
-            $is_new_api = \FCRM\EnhancementSuite\API_Interceptor::is_new_api_structure();
-
-            if ($is_new_api) {
-                // New API structure - sitemap-count endpoint returns page count directly
-                $count_response = Fcrm_Tributes_Api::get_tributes_count();
-
-                if (is_object($count_response) && isset($count_response->count)) {
-                    $sitemap_count = (int) $count_response->count;
-                } elseif (is_numeric($count_response)) {
-                    $sitemap_count = (int) $count_response;
-                }
-            } else {
-                // Old API structure - calculate from tribute count
-                $count_response = Fcrm_Tributes_Api::get_tributes_count();
-                $tribute_count = 0;
-
-                if (is_object($count_response) && isset($count_response->count)) {
-                    $tribute_count = (int) $count_response->count;
-                } elseif (is_numeric($count_response)) {
-                    $tribute_count = (int) $count_response;
-                }
-
-                // Calculate number of sitemap pages (500 tributes per page)
-                $sitemap_count = ($tribute_count > 0) ? ceil($tribute_count / 500) : 1;
-            }
-
-            // Add each FireHawk tribute sitemap file to SEOPress index
-            // SEOPress 9.2 expects: array with 'sitemap_url' and 'sitemap_last_mod' keys
-            for ($i = 1; $i <= $sitemap_count; $i++) {
-                $sitemap_entry = array(
-                    'sitemap_url'      => get_site_url() . '/fhf_tributes_sitemap_' . $i . '.xml',
-                    'sitemap_last_mod' => date('c'), // ISO 8601 format
-                );
-
-                $external_links[] = $sitemap_entry;
-            }
-
-        } catch (Exception $e) {
-            // Silently fail - don't break the sitemap
-        }
-
-        return $external_links;
     }
 
     /**
@@ -695,7 +629,8 @@ class FCRM_SEO_Analytics_Module {
         
         // Pass data to JavaScript
         wp_localize_script('fcrm-seo-analytics-admin', 'fcrmSeoAnalyticsAdmin', [
-            'defaultImageUrl' => FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/images/default-social-share.jpg'
+            'defaultImageUrl' => FCRM_ENHANCEMENT_SUITE_PLUGIN_URL . 'assets/images/default-social-share.jpg',
+            'indexingNonce'   => wp_create_nonce('fcrm_indexing_nonce'),
         ]);
     }
 } 

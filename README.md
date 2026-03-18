@@ -64,8 +64,11 @@ These results translate to real-world gains: faster access to tribute pages, bet
 
 ### SEO and Analytics Integration
 
-The suite helps search engines index tribute pages correctly and ensures they appear properly when shared on social media. 
-The FireHawk Tributes plugin already includes built-in support for Yoast SEOs. Because we use SEOPress across our projects, the Enhancement Suite adds full SEOPress integration, ensuring tribute pages appear in XML sitemaps and include correct metadata for search and social sharing.
+The suite helps search engines index tribute pages correctly and ensures they appear properly when shared on social media.
+
+**Sitemap generation** is now built directly into the Enhancement Suite. It generates proper XML sitemaps at `/fhf_tributes_sitemap_N.xml` with all tribute URLs, and automatically registers them with your SEO plugin’s sitemap index. Works with SEOPress, Yoast SEO, RankMath, and WordPress native sitemaps — no configuration needed beyond enabling the module.
+
+**Instant indexing** notifies search engines when new tributes are published, so they appear in search results faster. Supports the Google Indexing API (requires service account credentials) and IndexNow (Bing, Yandex, DuckDuckGo — auto-configured, no setup needed). New tributes are detected hourly via WP-Cron, compatible with both standard WordPress cron and GridPane’s gp-cron.
 
 For analytics, it integrates with Plausible Analytics to provide lightweight, privacy-friendly tracking that’s cookie-free and GDPR compliant. These integrations activate only when the corresponding plugins are installed, so you never load unnecessary features. Plausible account required.
 
@@ -73,7 +76,9 @@ For analytics, it integrates with Plausible Analytics to provide lightweight, pr
 
 ### Recent Updates
 
-Recent updates improve compatibility with newer FireHawk versions and add dual-layout demos, sitemap support, and smarter caching. The suite now adapts automatically across FireHawk releases, reducing the need for manual configuration.
+**v2.3.0** — Tribute sitemap XML generation (fixes empty sitemaps when not using Yoast), universal SEO plugin support (SEOPress, Yoast, RankMath, WP native), instant indexing via Google Indexing API and IndexNow, hourly new tribute detection via WP-Cron.
+
+Previous updates improve compatibility with newer FireHawk versions and add dual-layout demos and smarter caching. The suite now adapts automatically across FireHawk releases, reducing the need for manual configuration.
 
 ---
 
