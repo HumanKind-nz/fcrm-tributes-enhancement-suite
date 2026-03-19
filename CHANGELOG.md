@@ -5,6 +5,24 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.3.1 (2026-03-20)
+
+### Fixed
+- Fixed intermittent blank tribute sitemap caused by FireHawk API timeouts. The Cloud Functions endpoint fetching 500 tributes frequently exceeded the default 5-second timeout on cold starts. Increased to 30 seconds for sitemap and instant indexing API calls.
+- Added stale-while-error resilience: successful sitemap XML is now backed up for 7 days. When the API fails, the last known good sitemap is served instead of an empty one.
+- Sitemap failures now always log to `error_log` regardless of debug settings — critical path for SEO visibility.
+- Applied the same 30-second timeout fix to the instant indexing cron and manual check AJAX handler, preventing silent failures in new tribute detection.
+
+---
+
+## v2.3.0 (2026-03-14)
+
+### Added
+- **Sitemap Generator** — standalone class that intercepts `/fhf_tributes_sitemap_N.xml` requests and generates proper XML from the FireHawk API. Registers with SEOPress, Yoast, RankMath, and WordPress native sitemaps. Includes its own rewrite rules as fallback.
+- **Instant Indexing** — automatically detects new tributes via hourly WP-Cron and submits URLs to Google Indexing API and IndexNow (Bing, Yandex, DuckDuckGo). Includes admin UI with dry-run check, manual submit, daily quota tracking, and activity log. Compatible with GridPane's gp-cron.
+
+---
+
 ## v2.2.9 (2026-03-07)
 
 ### Fixed
