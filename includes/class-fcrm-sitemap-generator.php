@@ -25,9 +25,19 @@ class Sitemap_Generator {
 	const CACHE_PREFIX = 'fcrm_sitemap_xml_';
 
 	/**
+	 * Cache key prefix for long-lived backup (stale-while-error)
+	 */
+	const BACKUP_PREFIX = 'fcrm_sitemap_backup_';
+
+	/**
 	 * Cache duration for sitemap XML (2 hours)
 	 */
 	const CACHE_DURATION = 7200;
+
+	/**
+	 * Backup cache duration (7 days) — served when API fails
+	 */
+	const BACKUP_DURATION = 604800;
 
 	/**
 	 * Initialize the sitemap generator
@@ -122,13 +132,24 @@ class Sitemap_Generator {
 
 		self::log_debug('Calling get_tributes_sitemap(' . $from . ') for page ' . $page_num);
 
+		// Increase timeout for sitemap API calls — FireHawk's default 5s is
+		// too short for fetching 500 tributes from Cloud Functions cold starts
+		$timeout_filter = function ($args, $url) {
+			if (strpos($url, '/api/tributes/') !== false) {
+				$args['timeout'] = 30;
+			}
+			return $args;
+		};
+		add_filter('http_request_args', $timeout_filter, 10, 2);
+
 		try {
 			$response = \Fcrm_Tributes_Api::get_tributes_sitemap($from);
 		} catch (\Exception $e) {
-			self::log_debug('Sitemap API call failed: ' . $e->getMessage());
-			self::serve_empty_sitemap();
-			return;
+			self::log_debug('Sitemap API call threw exception: ' . $e->getMessage());
+			$response = null;
 		}
+
+		remove_filter('http_request_args', $timeout_filter, 10);
 
 		self::log_debug('API response type: ' . gettype($response) . (is_object($response) ? ' props: ' . implode(',', array_keys(get_object_vars($response))) : ''));
 
@@ -146,18 +167,51 @@ class Sitemap_Generator {
 		self::log_debug('Tributes found: ' . count($tributes));
 
 		if (empty($tributes)) {
-			self::serve_empty_sitemap();
+			// API failed or returned empty — serve stale backup if available
+			self::serve_stale_or_empty($page_num, $response);
 			return;
 		}
 
 		// Build the XML
 		$xml = self::build_sitemap_xml($tributes);
 
-		// Cache the generated XML
+		// Cache the generated XML (2 hours)
 		set_transient($cache_key, $xml, self::CACHE_DURATION);
 		wp_cache_set($cache_key, $xml, Cache_Manager::CACHE_GROUP, self::CACHE_DURATION);
 
+		// Also store a long-lived backup for stale-while-error resilience
+		$backup_key = self::BACKUP_PREFIX . $page_num;
+		set_transient($backup_key, $xml, self::BACKUP_DURATION);
+
 		self::output_xml($xml);
+	}
+
+	/**
+	 * Serve stale cached sitemap or empty sitemap as last resort
+	 *
+	 * When the API fails, this checks for a long-lived backup cache
+	 * so Google/Bing still see URLs instead of an empty sitemap.
+	 *
+	 * @param int   $page_num Sitemap page number
+	 * @param mixed $response The failed API response (for logging)
+	 */
+	private static function serve_stale_or_empty($page_num, $response) {
+		// Always log sitemap failures — this is critical for SEO
+		$detail = is_null($response) ? 'null (likely timeout)' : gettype($response);
+		error_log('[FCRM_ES Sitemap] API returned no tributes for page ' . $page_num . ' — response: ' . $detail);
+
+		// Try long-lived backup cache
+		$backup_key = self::BACKUP_PREFIX . $page_num;
+		$backup_xml = get_transient($backup_key);
+
+		if (false !== $backup_xml && !empty($backup_xml)) {
+			error_log('[FCRM_ES Sitemap] Serving stale backup for page ' . $page_num);
+			self::output_xml($backup_xml);
+			return;
+		}
+
+		error_log('[FCRM_ES Sitemap] No backup available — serving empty sitemap for page ' . $page_num);
+		self::serve_empty_sitemap();
 	}
 
 	/**
@@ -488,12 +542,14 @@ class Sitemap_Generator {
 	public static function clear_cache() {
 		global $wpdb;
 
-		// Clear all sitemap transients
+		// Clear all sitemap transients (both primary and backup)
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 				'_transient_' . self::CACHE_PREFIX . '%',
-				'_transient_timeout_' . self::CACHE_PREFIX . '%'
+				'_transient_timeout_' . self::CACHE_PREFIX . '%',
+				'_transient_' . self::BACKUP_PREFIX . '%',
+				'_transient_timeout_' . self::BACKUP_PREFIX . '%'
 			)
 		);
 
