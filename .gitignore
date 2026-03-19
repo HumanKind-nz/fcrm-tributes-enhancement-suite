@@ -6,6 +6,7 @@
 /.nova
 
 # Claude Code
+CLAUDE.md
 CONTEXT.md
 .claude/
 
