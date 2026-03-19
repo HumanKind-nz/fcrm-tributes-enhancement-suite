@@ -147,6 +147,10 @@ class Instant_Indexing {
 
 		self::log_debug('Cron check for new tributes started');
 
+		// Increase timeout — same fix as sitemap generator
+		$timeout_filter = self::get_timeout_filter();
+		add_filter('http_request_args', $timeout_filter, 10, 2);
+
 		try {
 			// Fetch tributes from all sitemap pages
 			$page_count = Sitemap_Generator::get_sitemap_page_count();
@@ -234,6 +238,8 @@ class Instant_Indexing {
 		} catch (\Exception $e) {
 			self::log_debug('Error checking for new tributes: ' . $e->getMessage());
 		}
+
+		remove_filter('http_request_args', $timeout_filter, 10);
 	}
 
 	/**
@@ -669,6 +675,10 @@ class Instant_Indexing {
 
 		$dry_run = isset($_POST['dry_run']) && $_POST['dry_run'] === '1';
 
+		// Increase timeout — same fix as sitemap generator
+		$timeout_filter = self::get_timeout_filter();
+		add_filter('http_request_args', $timeout_filter, 10, 2);
+
 		try {
 			// Fetch tributes from all sitemap pages
 			$page_count = Sitemap_Generator::get_sitemap_page_count();
@@ -749,9 +759,11 @@ class Instant_Indexing {
 				self::log_entry('info', 'Manual check: First run — stored ' . count($current_ids) . ' known tribute IDs');
 			}
 
+			remove_filter('http_request_args', $timeout_filter, 10);
 			wp_send_json_success($result);
 
 		} catch (\Exception $e) {
+			remove_filter('http_request_args', $timeout_filter, 10);
 			wp_send_json_error('Error: ' . $e->getMessage());
 		}
 	}
@@ -958,6 +970,23 @@ class Instant_Indexing {
 	 */
 	private static function base64url_encode($data) {
 		return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+	}
+
+	/**
+	 * Get a timeout filter for sitemap API calls
+	 *
+	 * FireHawk's default 5s timeout is too short for fetching 500 tributes
+	 * from Cloud Functions cold starts.
+	 *
+	 * @return \Closure Filter callback (add/remove with http_request_args)
+	 */
+	private static function get_timeout_filter() {
+		return function ($args, $url) {
+			if (strpos($url, '/api/tributes/') !== false) {
+				$args['timeout'] = 30;
+			}
+			return $args;
+		};
 	}
 
 	/**
