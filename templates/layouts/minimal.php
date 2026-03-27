@@ -271,9 +271,10 @@ jQuery(document).ready(function($) {
             const total = data.total || 0;
 
             // Sort by service date (descending), falling back to date of death
+            // Field names match FireHawk API response: serviceEvent.dateTime, dateOfDeath
             tributes.sort((a, b) => {
-                const dateA = a.serviceDateTime || a.clientDateOfDeath || '';
-                const dateB = b.serviceDateTime || b.clientDateOfDeath || '';
+                const dateA = (a.serviceEvent && a.serviceEvent.dateTime) || a.dateOfDeath || '';
+                const dateB = (b.serviceEvent && b.serviceEvent.dateTime) || b.dateOfDeath || '';
                 if (!dateA && !dateB) return 0;
                 if (!dateA) return 1;
                 if (!dateB) return -1;
