@@ -5,6 +5,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.3.2 (2026-03-27)
+
+### Fixed
+- Fixed tribute grid sorting showing wrong order. The client-side sort used incorrect API field names (`serviceDateTime`, `clientDateOfDeath`) that don't exist in the grid search response. The actual fields are `serviceEvent.dateTime` and `dateOfDeath`. This caused the sort to silently fail, scrambling the correctly-sorted API results. Affects all four grid layouts (modern, elegant, gallery, minimal).
+
+---
+
 ## v2.3.1 (2026-03-20)
 
 ### Fixed
