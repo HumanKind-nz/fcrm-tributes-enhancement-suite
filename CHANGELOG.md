@@ -8,8 +8,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## v2.3.3 (2026-04-10)
 
 ### Added
-- New `search` attribute for `[show_crm_tributes_grid]` shortcode — allows pre-filtering the grid to display specific tributes by name. Useful for featuring a particular tribute above the main grid, e.g. `[show_crm_tributes_grid search="Wheeler" size="1"]`.
-- Search bar is automatically hidden when the `search` attribute is set, providing a clean standalone card display.
+- New `search` attribute for `[show_crm_tributes_grid]` shortcode — pre-filter the grid by name, e.g. `[show_crm_tributes_grid search="Smith" size="1"]`. Search bar auto-hides when set.
 
 ---
 
