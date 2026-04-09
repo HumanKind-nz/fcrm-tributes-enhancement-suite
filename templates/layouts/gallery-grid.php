@@ -28,7 +28,7 @@ $container_classes = [
 
 <div class="<?php echo esc_attr(implode(' ', $container_classes)); ?>" id="fcrm-<?php echo $uniqueElementId ?>" data-element-id="<?php echo $uniqueElementId ?>">
     <!-- Unified Search Interface -->
-    <div class="fcrm-unified-search fcrm-gallery-search">
+    <div class="fcrm-unified-search fcrm-gallery-search" <?php if ($fixedSearch): ?>style="display:none"<?php endif; ?>>
         <div class="search-container">
             <!-- Name Search - Primary -->
             <div class="name-search-gallery">
@@ -145,7 +145,7 @@ $container_classes = [
             this.totalLoaded = 0;
             this.isLoading = false;
             this.hasMorePages = true;
-            this.searchQuery = null;
+            this.searchQuery = <?php echo json_encode($fixedSearch); ?>;
             this.startDate = null;
             this.endDate = null;
             this.unifiedSearch = null;

@@ -110,6 +110,16 @@ Available grid layouts: `modern-grid`, `elegant-grid`, `gallery-grid`, and `mini
 Available single tribute layouts: `modern-hero` and `enhanced-classic`.  
 To keep the original FireHawk look, use `layout="firehawk"` or `layout="default"`.
 
+### Filtering by name
+
+You can pre-filter the grid to show specific tributes using the `search` attribute. This is useful for featuring a particular tribute above the main grid:
+
+```php
+[show_crm_tributes_grid search="Wheeler" size="1"]
+```
+
+When `search` is set, the search bar is automatically hidden so the grid displays as a clean, standalone card. The search uses FireHawk's fuzzy name matching across display name, first name, and last name fields.
+
 ---
 
 ## Hosting Compatibility

@@ -146,7 +146,8 @@ class FCRM_Layouts_Module {
             'sort-by-service' => true,
             'display-service' => true,
             'display-branch' => false,
-            'hide-dob' => false
+            'hide-dob' => false,
+            'search' => null
         ], $atts);
 
         // Check if explicitly requesting FireHawk passthrough layout (shortcode-only, for demos/testing)
@@ -168,6 +169,7 @@ class FCRM_Layouts_Module {
         $branch = $attributes['branch'] ?? null;
         $displayBranch = $attributes['display-branch'] === true || $attributes['display-branch'] === 'true';
         $teamGroupIndex = $attributes['team-index'] ?? null;
+        $fixedSearch = $attributes['search'] ?? null;
 
         // Check global settings
         if (get_option('fcrm_tributes_hide_dob') == true) {
