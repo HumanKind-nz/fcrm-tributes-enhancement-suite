@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Unified Search Component
  * 
@@ -7,14 +9,18 @@
  * Variables expected:
  * - $uniqueElementId: Unique identifier for the layout instance
  * - $search_theme: Theme class (modern, elegant, gallery, minimal)
+ * - $search_hidden: Optional bool — render the search hidden (fixed-search grids)
  */
 
 if (!isset($search_theme)) {
     $search_theme = 'modern';
 }
+if (!isset($search_hidden)) {
+    $search_hidden = false;
+}
 ?>
 
-<div class="fcrm-unified-search fcrm-<?php echo esc_attr($search_theme); ?>-search">
+<div class="fcrm-unified-search fcrm-<?php echo esc_attr($search_theme); ?>-search"<?php echo $search_hidden ? ' style="display:none"' : ''; ?>>
     <div class="search-container">
         <!-- Name Search - Primary -->
         <div class="name-search-<?php echo esc_attr($search_theme); ?>">

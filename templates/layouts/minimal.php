@@ -1,11 +1,13 @@
 <?php
+declare(strict_types=1);
+
 /**
  * FCRM Enhancement Suite - List View Layout Template
  * 
  * Clean, typography-focused tribute listing with minimal visual elements.
  * Emphasizes readability and essential information with generous white space.
  * 
- * @package FCRM_Enhancement_Suite
+ * @package FcrmEnhancementSuite
  * @subpackage Templates
  * @since 1.0.0
  */
@@ -56,73 +58,16 @@ $uniqueElementId = $container_id;
     
     <?php if ($atts['search'] === 'true'): ?>
     <!-- Unified Search Interface -->
-    <div class="fcrm-unified-search fcrm-modern-search">
-        <div class="search-container">
-            <!-- Name Search - Primary -->
-            <div class="name-search-modern">
-                <form data-action="search" class="search-form">
-                    <div class="input-group">
-                        <span class="input-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-                                <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                        </span>
-                        <input type="text" 
-                               class="form-control modern-input" 
-                               id="grid-search-<?php echo esc_attr($container_id); ?>" 
-                               placeholder="Search by name..."
-                               autocomplete="off">
-                        <button class="btn reset-btn modern-clear" type="button" data-action="clear-search" aria-label="Clear search">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
-                                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Date Range Picker - Single Input -->
-            <div class="date-picker-modern">
-                <div class="input-group">
-                    <span class="input-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-                            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-                            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </span>
-                    <input type="text" 
-                           class="form-control modern-input date-range-input" 
-                           id="date-range-<?php echo esc_attr($container_id); ?>" 
-                           placeholder="Select date range..."
-                           readonly>
-                    <button class="btn reset-btn modern-reset" type="button" data-action="clear-dates" aria-label="Clear dates">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
-                            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Search Button -->
-            <button class="btn modern-search-btn" type="button" data-action="search-submit">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-                    <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span>Search</span>
-            </button>
-        </div>
-    </div>
+    <?php
+    $search_theme = 'modern';
+    include __DIR__ . '/partials/unified-search.php';
+    ?>
     <?php endif; ?>
     
     <!-- Minimal Tributes List -->
     <div class="minimal-tributes-container">
         <div class="minimal-loading" style="display: none;">
+            <div class="loading-spinner"></div>
             <div class="loading-text">Loading tributes...</div>
         </div>
         

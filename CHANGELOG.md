@@ -5,16 +5,29 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## v2.3.3 (2026-04-10)
+## v3.0.0 (2026-06-25)
+
+A major update to the settings and admin experience. Existing settings carry over automatically on upgrade; tribute layouts and front-end behaviour are unchanged.
 
 ### Added
-- New `search` attribute for `[show_crm_tributes_grid]` shortcode — pre-filter the grid by name, e.g. `[show_crm_tributes_grid search="Smith" size="1"]`. Search bar auto-hides when set.
+- Custom CSS box for per-site styling, applied on tribute pages only and included in settings export.
+- "Reset layout & spacing to defaults" button on the Styling tab.
+- Loading spinner on the Single Column List layout, matching the other layouts.
 
----
+### Changed
+- Rebuilt the settings screen; v2.x settings migrate automatically on upgrade.
+- Dashboard is now a read-only status overview; layout is chosen with a single Layout Mode control (Modern or FireHawk original).
+- Border radius split into separate Card Radius and Button & Field Radius controls.
+- Simplified the loading spinner to a single indicator with a configurable colour.
 
-## v2.3.2 (2026-03-27)
+### Fixed
+- Border width and colour now apply to the modern grid cards.
+- Radius controls can now be set to 0.
+- Single Column List search-button alignment and row hover.
 
-### Bug Fix
+### Removed
+- Spinner style and size options (replaced by the single configurable spinner).
+
 ---
 
 ## v2.3.1 (2026-03-20)
@@ -31,7 +44,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - **Sitemap Generator** — standalone class that intercepts `/fhf_tributes_sitemap_N.xml` requests and generates proper XML from the FireHawk API. Registers with SEOPress, Yoast, RankMath, and WordPress native sitemaps. Includes its own rewrite rules as fallback.
-- **Instant Indexing** — automatically detects new tributes via hourly WP-Cron and submits URLs to Google Indexing API and IndexNow (Bing, Yandex, DuckDuckGo). Includes admin UI with dry-run check, manual submit, daily quota tracking, and activity log. Compatible with GridPane's gp-cron.
+- **Instant Indexing** — automatically detects new tributes via hourly WP-Cron and submits URLs to Google Indexing API and IndexNow (Bing, Yandex, DuckDuckGo). Includes admin UI with dry-run check, manual submit, daily quota tracking, and activity log. Works with standard and server-level WP-Cron.
 
 ---
 

@@ -34,8 +34,22 @@
 @media (min-width: 768px) {
     .fcrm-modern-search .search-container {
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         gap: 1rem;
+    }
+
+    /* Equal-height row: let the bordered input groups fill their wrappers so the
+       inputs and the solid Search button line up to the same height. */
+    .fcrm-modern-search .name-search-modern,
+    .fcrm-modern-search .date-picker-modern,
+    .fcrm-modern-search .search-form {
+        display: flex;
+    }
+
+    .fcrm-modern-search .search-form,
+    .fcrm-modern-search .name-search-modern .input-group,
+    .fcrm-modern-search .date-picker-modern .input-group {
+        flex: 1 1 auto;
     }
 }
 

@@ -68,8 +68,21 @@
 @media (min-width: 768px) {
     .fcrm-gallery-search .search-container {
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         gap: 1rem;
+    }
+
+    /* Equal-height row: inputs and the solid Search button share one height. */
+    .fcrm-gallery-search .name-search-gallery,
+    .fcrm-gallery-search .date-picker-gallery,
+    .fcrm-gallery-search .search-form {
+        display: flex;
+    }
+
+    .fcrm-gallery-search .search-form,
+    .fcrm-gallery-search .name-search-gallery .input-group,
+    .fcrm-gallery-search .date-picker-gallery .input-group {
+        flex: 1 1 auto;
     }
 }
 

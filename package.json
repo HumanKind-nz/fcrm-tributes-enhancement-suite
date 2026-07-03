@@ -1,0 +1,19 @@
+{
+	"name": "fcrm-tributes-enhancement-suite",
+	"version": "3.0.0",
+	"description": "Performance optimisations and enhancements for the FireHawkCRM Tributes plugin.",
+	"author": "Weave Digital Studio",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build --config webpack.scripts.config.js",
+		"start": "wp-scripts start --config webpack.scripts.config.js",
+		"lint": "npm run lint:js && npm run lint:css",
+		"lint:js": "wp-scripts lint-js src/",
+		"lint:css": "wp-scripts lint-style src/"
+	},
+	"devDependencies": {
+		"@wordpress/dependency-extraction-webpack-plugin": "^6.0.0",
+		"@wordpress/icons": "^11.8.0",
+		"@wordpress/scripts": "^31.4.0"
+	}
+}

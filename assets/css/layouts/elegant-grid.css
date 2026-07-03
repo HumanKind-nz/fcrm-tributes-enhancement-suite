@@ -66,8 +66,21 @@
 @media (min-width: 768px) {
     .fcrm-elegant-search .search-container {
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         gap: 1.5rem;
+    }
+
+    /* Equal-height row: inputs and the solid Search button share one height. */
+    .fcrm-elegant-search .name-search-elegant,
+    .fcrm-elegant-search .date-picker-elegant,
+    .fcrm-elegant-search .search-form {
+        display: flex;
+    }
+
+    .fcrm-elegant-search .search-form,
+    .fcrm-elegant-search .name-search-elegant .input-group,
+    .fcrm-elegant-search .date-picker-elegant .input-group {
+        flex: 1 1 auto;
     }
 }
 

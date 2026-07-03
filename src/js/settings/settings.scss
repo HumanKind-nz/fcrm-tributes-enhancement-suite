@@ -1,0 +1,41 @@
+/**
+ * Settings page polish.
+ *
+ * One consistent spacing rhythm for the React settings app. WordPress's own
+ * @wordpress/components controls ship inconsistent (and mid-migration to zero)
+ * default margins, so adjacent controls stack with no gap. Rather than scatter
+ * inline margins through every tab, we establish a single vertical rhythm here.
+ *
+ * Everything is scoped under #fcrm-enhancement-settings (the app mount point)
+ * and uses id specificity so it reliably wins over the runtime wp-components
+ * stylesheet — without !important and without leaking into the rest of wp-admin.
+ *
+ * @package FcrmEnhancementSuite
+ */
+
+#fcrm-enhancement-settings {
+	.components-card__body {
+		// Neutralise WP components' own (inconsistent, version-dependent) bottom
+		// margins so the rhythm below is the single source of spacing.
+		.components-base-control,
+		.components-toggle-control {
+			margin-bottom: 0;
+		}
+
+		// One consistent gap between every top-level block in a card — controls,
+		// wrapper divs (Export/Import), colour rows, help paragraphs. Margins are
+		// used (not flex gap) so buttons keep their natural width and don't
+		// stretch edge-to-edge. Adjacent margins collapse, so this stays 16px
+		// even where a child carries a small inline margin of its own.
+		> * + * {
+			margin-top: 16px;
+		}
+	}
+
+	// The "Save Changes" primary button is a child of each tab's flex column,
+	// so flexbox stretches it edge-to-edge. Keep it natural width, left-aligned
+	// — a normal button reads as intentional; the full-width bar does not.
+	.components-button.is-primary {
+		align-self: flex-start;
+	}
+}

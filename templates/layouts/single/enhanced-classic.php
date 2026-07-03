@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Enhanced Classic Single Tribute Layout Template
  * 
@@ -54,7 +56,7 @@ $tribute_data = $single_tribute->client;
 $tribute_id = $tribute_data->id ?? null;
 
 // Debug: log resolved identifiers and cache source for enhanced-classic
-$debug_enabled = (bool) get_option('fcrm_debug_logging', 0);
+$debug_enabled = (bool) \FcrmEnhancementSuite\Helpers\get_setting('debug_logging', false);
 if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
     error_log('[FCRM_ES] enhanced-classic cache source: ' . $cache_source . ' for ID: ' . ($tribute_id ?? 'null'));
     $qv_id = get_query_var('id');

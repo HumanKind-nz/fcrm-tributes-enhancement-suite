@@ -69,8 +69,22 @@
 @media (min-width: 768px) {
     .fcrm-minimal-layout .fcrm-modern-search .search-container {
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         gap: 1rem;
+    }
+
+    /* Equal-height row: let the bordered input groups fill their wrappers so the
+       inputs and the solid Search button line up to the same height. */
+    .fcrm-minimal-layout .fcrm-modern-search .name-search-modern,
+    .fcrm-minimal-layout .fcrm-modern-search .date-picker-modern,
+    .fcrm-minimal-layout .fcrm-modern-search .search-form {
+        display: flex;
+    }
+
+    .fcrm-minimal-layout .fcrm-modern-search .search-form,
+    .fcrm-minimal-layout .fcrm-modern-search .name-search-modern .input-group,
+    .fcrm-minimal-layout .fcrm-modern-search .date-picker-modern .input-group {
+        flex: 1 1 auto;
     }
 }
 
@@ -232,8 +246,38 @@
 
 /* Loading State */
 .minimal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 3rem 0;
     text-align: center;
+}
+
+.minimal-loading .loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+    margin-bottom: 1rem;
+}
+
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .minimal-loading .loading-text {
@@ -263,10 +307,6 @@
 
 .minimal-tribute-item:hover {
     background: var(--minimal-grey-50);
-    margin: 0 -1rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border-radius: var(--minimal-radius-sm);
 }
 
 /* Tribute Photo */

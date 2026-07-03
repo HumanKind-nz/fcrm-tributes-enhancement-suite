@@ -12,3 +12,13 @@ CONTEXT.md
 
 # Screenshots
 screenshots/
+
+# Build artifacts
+node_modules/
+build/
+build-release/
+
+# Internal planning docs — keep local, never publish to this public repo
+/standalone-plugin-strategy-removing-the-firehawk-dependency.md
+/docs/superpowers/
+/docs/ROADMAP-v4-invocare.md
