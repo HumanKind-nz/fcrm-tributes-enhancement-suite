@@ -5,9 +5,9 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## v2.3.4 (2026-09-15)
+## v2.3.5 (2026-09-15)
 
-Security hotfix on the 2.3 line. No change to layouts, settings or what renders; every value is now escaped for the place it lands.
+Security hotfix on the 2.3 line, numbered past the hand-built 2.3.4 that is already on a site so the updater picks it up. Built from the v2.3.3 tag; anything that only changed in that 2.3.4 is not carried here. No change to layouts, settings or what renders; every value is now escaped for the place it lands.
 
 ### Fixed
 - **Reflected XSS on tribute pages.** The share buttons on the Enhanced Classic layout built their URL from the whole query string and printed it unescaped into the button attributes, so a crafted tribute link could inject script into a public page. The share URL is now passed through `esc_url()` at every output, and the "Service for ..." strings beside it through `esc_attr()`.
