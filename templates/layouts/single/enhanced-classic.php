@@ -61,8 +61,10 @@ if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
     error_log('[FCRM_ES] enhanced-classic cache source: ' . $cache_source . ' for ID: ' . ($tribute_id ?? 'null'));
     $qv_id = get_query_var('id');
     $qv_tid = get_query_var('tid');
-    $get_id = $_GET['id'] ?? null;
-    $get_tid = $_GET['tid'] ?? null;
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only debug logging.
+    $get_id = isset( $_GET['id'] ) ? sanitize_text_field( wp_unslash( $_GET['id'] ) ) : null;
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only debug logging.
+    $get_tid = isset( $_GET['tid'] ) ? sanitize_text_field( wp_unslash( $_GET['tid'] ) ) : null;
     $client_page_id = method_exists($single_tribute, 'getClientPageId') ? $single_tribute->getClientPageId() : null;
     error_log('[FCRM_ES] enhanced-classic template GET_id=' . ($get_id ?? 'null') . ' QV_id=' . ($qv_id ?: 'null') . ' client_id=' . ($tribute_id ?? 'null') . ' client_page_id=' . ($client_page_id ?? 'null') . ' GET_tid=' . ($get_tid ?? 'null') . ' QV_tid=' . ($qv_tid ?: 'null'));
 }
@@ -191,7 +193,7 @@ if (isset($client->content)) {
 
 // Current URL for sharing - PRESERVE EXACTLY
 global $wp;
-$current_url = home_url(add_query_arg(array($_GET), $wp->request));
+$current_url = home_url(add_query_arg(array($_GET), $wp->request)); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builds the share URL from the current request; escaped with esc_url() at every output.
 $shareUrl = $current_url;
 
 if (empty($fcrmShowLocation)) {
@@ -205,13 +207,13 @@ if (empty($fcrmShowLocation)) {
 
 <!-- Enhanced Classic Single Tribute Layout -->
 <div class="fcrm-enhanced-classic firehawk-crm firehawk-crm-tributes firehawk-tributes">
-  <div class="tribute-display <?php echo $layout; ?>">
+  <div class="tribute-display <?php echo esc_attr( $layout ); ?>">
     
     <!-- Enhanced Banner Section -->
-    <div class="banner enhanced-banner <?php echo (isset($headingLayout) ? $headingLayout : "") ?>">
+    <div class="banner enhanced-banner <?php echo esc_attr( isset( $headingLayout ) ? $headingLayout : "" ); ?>">
       <?php if (isset($client->bannerImage)): ?>
-        <a class="banner-bg gallery-selector" data-src="<?php echo $client->bannerImage; ?>" style="background-image: url('<?php echo $client->bannerImage; ?>')">
-          <img style="display: none;" src="<?php echo $client->bannerImage; ?>"></img>
+        <a class="banner-bg gallery-selector" data-src="<?php echo esc_url( $client->bannerImage ); ?>" style="background-image: url('<?php echo esc_url( $client->bannerImage ); ?>')">
+          <img style="display: none;" src="<?php echo esc_url( $client->bannerImage ); ?>"></img>
         </a>
       <?php else: ?>
         <div class="banner-bg"></div>
@@ -227,30 +229,30 @@ if (empty($fcrmShowLocation)) {
           </svg>
         </button>
         <div class="firehawk-tributes-social-menu social-menu enhanced-social-menu" role="tooltip">
-          <button class="button enhanced-social-btn" data-sharer="facebook" data-url="<?php echo $shareUrl; ?>" title="Share to Facebook">
+          <button class="button enhanced-social-btn" data-sharer="facebook" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share to Facebook">
             <i class="fab fa-facebook-f"></i>
           </button>
-          <button class="button enhanced-social-btn" data-sharer="twitter" data-title="<?php echo 'Service for '.$client->fullName; ?>" data-url="<?php echo $shareUrl; ?>" title="Share to Twitter">
+          <button class="button enhanced-social-btn" data-sharer="twitter" data-title="<?php echo esc_attr( 'Service for '.$client->fullName ); ?>" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share to Twitter">
             <i class="fab fa-x-twitter"></i>
           </button>
-          <button class="button enhanced-social-btn" data-sharer="email" data-to="" data-subject="<?php echo 'Service for '.$client->fullName; ?>" data-title="<?php echo 'Here is the service details for '.$client->fullName; ?>" data-url="<?php echo $shareUrl; ?>" title="Share via email">
+          <button class="button enhanced-social-btn" data-sharer="email" data-to="" data-subject="<?php echo esc_attr( 'Service for '.$client->fullName ); ?>" data-title="<?php echo esc_attr( 'Here is the service details for '.$client->fullName ); ?>" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share via email">
             <i class="fas fa-envelope"></i>
           </button>
-          <button class="button enhanced-social-btn" data-sharer="sms" data-to="" data-title="<?php echo 'Here is the tribute page for '.$client->fullName; ?>" data-body="<?php echo $shareUrl; ?>" title="Share via sms">
+          <button class="button enhanced-social-btn" data-sharer="sms" data-to="" data-title="<?php echo esc_attr( 'Here is the tribute page for '.$client->fullName ); ?>" data-body="<?php echo esc_url( $shareUrl ); ?>" title="Share via sms">
             <i class="fas fa-sms"></i>
           </button>
-          <button class="button enhanced-social-btn copy-btn" data-clipboard-text="<?php echo $shareUrl; ?>" title="Copy">
+          <button class="button enhanced-social-btn copy-btn" data-clipboard-text="<?php echo esc_url( $shareUrl ); ?>" title="Copy">
             <i class="fas fa-copy"></i>
           </button>
         </div>
       <?php } ?>
 
       <?php if (isset($client->displayImage)) : ?>
-        <a class="display-image enhanced-portrait gallery-selector" href="<?php echo $client->displayImage; ?>" style="background-image: url('<?php echo $client->displayImage; ?>')">
-          <img style="display: none;" src="<?php echo $client->displayImage; ?>"></img>
+        <a class="display-image enhanced-portrait gallery-selector" href="<?php echo esc_url( $client->displayImage ); ?>" style="background-image: url('<?php echo esc_url( $client->displayImage ); ?>')">
+          <img style="display: none;" src="<?php echo esc_url( $client->displayImage ); ?>"></img>
         </a>
       <?php elseif ($fcrmDefaultImageUrl && strlen($fcrmDefaultImageUrl)) : ?>
-        <div class="display-image enhanced-portrait" style="background-image: url('<?php echo $fcrmDefaultImageUrl; ?>')"></div>
+        <div class="display-image enhanced-portrait" style="background-image: url('<?php echo esc_url( $fcrmDefaultImageUrl ); ?>')"></div>
       <?php else: ?>
         <div class="display-image enhanced-portrait enhanced-portrait-placeholder">
           <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -262,7 +264,7 @@ if (empty($fcrmShowLocation)) {
 
       <div class="heading enhanced-heading">
         <div class="title enhanced-title">
-          <?php echo (isset($client->fullName) ? $client->fullName : ""); ?>
+          <?php echo esc_html( isset( $client->fullName ) ? $client->fullName : "" ); ?>
         </div>
         <?php if (isset($client->clientDateOfBirth) && isset($client->clientDateOfDeath) && get_option('fcrm_tributes_hide_dob') != true) {
             $date1 = new DateTime($client->clientDateOfBirth);
@@ -273,7 +275,7 @@ if (empty($fcrmShowLocation)) {
             if (isset($customDateFormat)) {
               $dateFormat = $customDateFormat;
             }
-            echo '<div class="dates enhanced-dates">'.$date1->format($dateFormat) . " - " . $date2->format($dateFormat) . '</div>';
+            echo '<div class="dates enhanced-dates">' . esc_html( $date1->format($dateFormat) . " - " . $date2->format($dateFormat) ) . '</div>';
         } elseif (isset($client->clientDateOfDeath)) {
             $date1 = new DateTime($client->clientDateOfDeath);
             $dateFormat = "F jS Y";
@@ -281,27 +283,27 @@ if (empty($fcrmShowLocation)) {
             if (isset($customDateFormat)) {
               $dateFormat = $customDateFormat;
             }
-            echo '<div class="dates enhanced-dates">' . $date1->format($dateFormat) . '</div>';
+            echo '<div class="dates enhanced-dates">' . esc_html( $date1->format($dateFormat) ) . '</div>';
         } ?>
       </div>
     </div>
 
     <?php if (isset($client->formatted_content)):?>
       <div class="tribute-content enhanced-content">
-          <?php echo $client->formatted_content; ?>
+          <?php echo wp_kses_post( $client->formatted_content ); ?>
       </div>
     <?php endif; ?>
 
     <?php if (isset($client->events) && is_array($client->events) && count($client->events) > 0): ?>
       <?php if (isset($client->tributeEventsHeadingText)) : ?>
         <div class="tribute-heading enhanced-section-heading">
-          <h3 class="tribute-heading-text"><?php echo $client->tributeEventsHeadingText; ?></h3>
+          <h3 class="tribute-heading-text"><?php echo esc_html( $client->tributeEventsHeadingText ); ?></h3>
           <hr class="tribute-heading-line enhanced-divider">
         </div>
       <?php endif; ?>
       <?php if (isset($client->tributeEventSectionMessage)):?>
         <div class="tribute-content enhanced-content">
-            <?php echo $client->tributeEventSectionMessage; ?>
+            <?php echo wp_kses_post( $client->tributeEventSectionMessage ); ?>
         </div>
       <?php endif; ?>
 
@@ -386,9 +388,9 @@ if (empty($fcrmShowLocation)) {
     <?php
       if (isset($client->upcomingStreamMessage)) {
         if (isset($client->tributeLivestreamHeadingText)) {
-          echo '<div class="tribute-heading enhanced-section-heading"><h3 class="tribute-heading-text">'.$client->tributeLivestreamHeadingText.'</h3><hr class="tribute-heading-line enhanced-divider"></div>';
+          echo '<div class="tribute-heading enhanced-section-heading"><h3 class="tribute-heading-text">' . esc_html( $client->tributeLivestreamHeadingText ) . '</h3><hr class="tribute-heading-line enhanced-divider"></div>';
         }
-        echo '<div class="tribute-row"><div class="tribute-row-col"><div class="bd-callout my-0 enhanced-callout">'.$client->upcomingStreamMessage.'</div></div></div>';
+        echo '<div class="tribute-row"><div class="tribute-row-col"><div class="bd-callout my-0 enhanced-callout">' . wp_kses_post( $client->upcomingStreamMessage ) . '</div></div></div>';
       }
     ?>
 
@@ -396,7 +398,7 @@ if (empty($fcrmShowLocation)) {
 
     <?php if (isset($client->tributeHeadingText)): ?>
     <div class="tribute-heading enhanced-section-heading">
-      <h3 class="tribute-heading-text"><?php echo $client->tributeHeadingText; ?></h3>
+      <h3 class="tribute-heading-text"><?php echo esc_html( $client->tributeHeadingText ); ?></h3>
       <hr class="tribute-heading-line enhanced-divider">
     </div>
     <?php endif; ?>
@@ -440,7 +442,7 @@ if (empty($fcrmShowLocation)) {
                 </li>
               <?php elseif (isset($client->donationsUrl)): ?>
                 <li class="nav-item">
-                  <a class="nav-link enhanced-nav-link" href="<?php echo $client->donationsUrl; ?>" target="_blank">
+                  <a class="nav-link enhanced-nav-link" href="<?php echo esc_url( $client->donationsUrl ); ?>" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -453,13 +455,13 @@ if (empty($fcrmShowLocation)) {
               <?php if (isset($client->donationLinks)): ?>
                 <?php foreach ($client->donationLinks as $link): ?>
                   <li class="nav-item">
-                    <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo $link->url; ?>" target="_blank">
+                    <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo esc_url( $link->url ); ?>" target="_blank">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M18 13V19C18 19.5304 17.7893 20.0391 17.4142 20.4142C17.0391 20.7893 16.5304 21 16 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M15 3H21V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
-                      <?php echo $link->name ?>
+                      <?php echo esc_html( $link->name ); ?>
                     </a>
                   </li>
                 <?php endforeach; ?>
@@ -467,7 +469,7 @@ if (empty($fcrmShowLocation)) {
 
               <?php if (isset($client->serviceSheetUrl)): ?>
                 <li class="nav-item">
-                  <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo $client->serviceSheetUrl; ?>" target="_blank">
+                  <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo esc_url( $client->serviceSheetUrl ); ?>" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -477,7 +479,7 @@ if (empty($fcrmShowLocation)) {
                     </svg>
                     <?php
                       $printingButtonLabel = rtrim(get_option('fcrm_tributes_page_options_printing_button', "Printing"));
-                      echo empty($printingButtonLabel) ? "Printing" : $printingButtonLabel;
+                      echo esc_html( empty( $printingButtonLabel ) ? "Printing" : $printingButtonLabel );
                     ?>
                   </a>
                 </li>
@@ -486,13 +488,13 @@ if (empty($fcrmShowLocation)) {
               <?php if (isset($client->graphicsLinks)): ?>
                 <?php foreach ($client->graphicsLinks as $link): ?>
                   <li class="nav-item">
-                    <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo $link->url; ?>" target="_blank">
+                    <a class="nav-link enhanced-nav-link enhanced-external-link" href="<?php echo esc_url( $link->url ); ?>" target="_blank">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
                         <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
                         <path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
-                      <?php echo $link->name ?>
+                      <?php echo esc_html( $link->name ); ?>
                     </a>
                   </li>
                 <?php endforeach; ?>
@@ -545,7 +547,7 @@ if (empty($fcrmShowLocation)) {
                 </li>
               <?php elseif (isset($client->liveStreamUrl)): ?>
                 <li class="nav-item live-stream-link">
-                  <a class="nav-link enhanced-nav-link" href="<?php echo $client->liveStreamUrl; ?>" target="_blank">
+                  <a class="nav-link enhanced-nav-link" href="<?php echo esc_url( $client->liveStreamUrl ); ?>" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
@@ -571,22 +573,22 @@ if (empty($fcrmShowLocation)) {
                 <?php foreach ($client->additionalLiveStreams as $key=>$liveStream): ?>
                   <?php if ($liveStream->type == "url" && $liveStream->url): ?>
                     <li class="nav-item live-stream-link">
-                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="<?php echo $liveStream->url; ?>" target="_blank">
+                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="<?php echo esc_url( $liveStream->url ); ?>" target="_blank">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
                         </svg>
-                        <?php echo $liveStream->name ?>
+                        <?php echo esc_html( $liveStream->name ); ?>
                       </a>
                     </li>
                   <?php elseif ($liveStream->type == "embed"): ?>
                     <li class="nav-item live-stream-link">
-                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="#" data-page="funeral-stream-<?php echo $key?>">
+                      <a class="nav-link enhanced-nav-link dynamic-live-stream-link" href="#" data-page="funeral-stream-<?php echo esc_attr( $key ); ?>">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
                         </svg>
-                        <?php echo $liveStream->name ?>
+                        <?php echo esc_html( $liveStream->name ); ?>
                       </a>
                     </li>
                   <?php endif; ?>
@@ -595,7 +597,7 @@ if (empty($fcrmShowLocation)) {
 
               <?php if (isset($client->slideshowUrl)): ?>
                 <li class="nav-item">
-                  <a class="nav-link enhanced-nav-link" href="<?php echo $client->slideshowUrl; ?>" target="_blank">
+                  <a class="nav-link enhanced-nav-link" href="<?php echo esc_url( $client->slideshowUrl ); ?>" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
                       <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -631,11 +633,11 @@ if (empty($fcrmShowLocation)) {
                   </button>
 
                   <div class="firehawk-tributes-social-menu social-menu enhanced-social-menu" role="tooltip">
-                    <button class="button enhanced-social-btn" data-sharer="facebook" data-url="<?php echo $shareUrl; ?>" title="Share to Facebook"><i class="fab fa-facebook-f"></i></button>
-                    <button class="button enhanced-social-btn" data-sharer="twitter" data-title="<?php echo 'Tribute for '.$client->fullName; ?>" data-url="<?php echo $shareUrl; ?>" title="Share to Twitter"><i class="fab fa-x-twitter"></i></button>
-                    <button class="button enhanced-social-btn" data-sharer="email" data-to="" data-subject="<?php echo 'Tribute for '.$client->fullName; ?>" data-title="<?php echo 'Here is the tribute page for '.$client->fullName; ?>" data-url="<?php echo $shareUrl; ?>" title="Share via email"><i class="fas fa-envelope"></i></button>
-                    <button class="button enhanced-social-btn" data-sharer="sms" data-to="" data-title="<?php echo 'Here is the tribute page for '.$client->fullName; ?>" data-body="<?php echo $shareUrl; ?>" title="Share via sms"><i class="fas fa-sms"></i></button>
-                    <button class="button enhanced-social-btn copy-btn" data-clipboard-text="<?php echo $shareUrl; ?>" title="Copy"><i class="fas fa-copy"></i></button>
+                    <button class="button enhanced-social-btn" data-sharer="facebook" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share to Facebook"><i class="fab fa-facebook-f"></i></button>
+                    <button class="button enhanced-social-btn" data-sharer="twitter" data-title="<?php echo esc_attr( 'Tribute for '.$client->fullName ); ?>" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share to Twitter"><i class="fab fa-x-twitter"></i></button>
+                    <button class="button enhanced-social-btn" data-sharer="email" data-to="" data-subject="<?php echo esc_attr( 'Tribute for '.$client->fullName ); ?>" data-title="<?php echo esc_attr( 'Here is the tribute page for '.$client->fullName ); ?>" data-url="<?php echo esc_url( $shareUrl ); ?>" title="Share via email"><i class="fas fa-envelope"></i></button>
+                    <button class="button enhanced-social-btn" data-sharer="sms" data-to="" data-title="<?php echo esc_attr( 'Here is the tribute page for '.$client->fullName ); ?>" data-body="<?php echo esc_url( $shareUrl ); ?>" title="Share via sms"><i class="fas fa-sms"></i></button>
+                    <button class="button enhanced-social-btn copy-btn" data-clipboard-text="<?php echo esc_url( $shareUrl ); ?>" title="Copy"><i class="fas fa-copy"></i></button>
                   </div>
                 </li>
               <?php } ?>
@@ -655,7 +657,7 @@ if (empty($fcrmShowLocation)) {
                     <path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <?php echo $writeAMessageButtonText; ?>
+                  <?php echo esc_html( $writeAMessageButtonText ); ?>
                 </button>
               <?php } ?>
 
@@ -925,7 +927,7 @@ if (empty($fcrmShowLocation)) {
           <div class="tribute-row video-row">
             <div class="tribute-row-col">
               <div class="fragment-video-wrapper">
-                <iframe class="fragment-video" width="720" height="480" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo $client->fragmentTributeUrl; ?>" style="border:none"></iframe>
+                <iframe class="fragment-video" width="720" height="480" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo esc_url( $client->fragmentTributeUrl ); ?>" style="border:none"></iframe>
               </div>
             </div>
           </div>
@@ -935,7 +937,7 @@ if (empty($fcrmShowLocation)) {
           <div class="tribute-row video-row">
             <div class="tribute-row-col">
               <div class="fragment-video-wrapper">
-                <?php echo $client->tributeVideoEmbedCode ?>
+                <?php echo $client->tributeVideoEmbedCode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Embed markup supplied by the funeral home's FireHawk CRM; must render as given (iframes and provider scripts). ?>
               </div>
             </div>
           </div>
@@ -960,9 +962,9 @@ if (empty($fcrmShowLocation)) {
             <div class="tribute-row-col">
               <div class="live-stream-video-wrapper">
                 <?php if (isset($client->liveStreamEmbedUrl)) { ?>
-                  <iframe class="livestream-video" width="100%" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo $client->liveStreamEmbedUrl; ?>" style="border:none"></iframe>
+                  <iframe class="livestream-video" width="100%" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo esc_url( $client->liveStreamEmbedUrl ); ?>" style="border:none"></iframe>
                 <?php } else if (isset($client->tributeLiveStreamEmbedCode)) { ?>
-                  <?php echo $client->tributeLiveStreamEmbedCode ?>
+                  <?php echo $client->tributeLiveStreamEmbedCode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Embed markup supplied by the funeral home's FireHawk CRM; must render as given (iframes and provider scripts). ?>
                 <?php } ?>
               </div>
             </div>
@@ -981,14 +983,14 @@ if (empty($fcrmShowLocation)) {
 
       <?php if (isset($client->additionalLiveStreams)): ?>
         <?php foreach ($client->additionalLiveStreams as $key=>$liveStream): ?>
-          <div class="firehawk-crm-tribute-stream-page tab-page mt-4" style="display: none;" id="funeral-stream-<?php echo $key?>">
+          <div class="firehawk-crm-tribute-stream-page tab-page mt-4" style="display: none;" id="funeral-stream-<?php echo esc_attr( $key ); ?>">
             <div class="tribute-row stream-row">
               <div class="tribute-row-col">
                 <div class="live-stream-video-wrapper">
                   <?php if (isset($liveStream->embedUrl) && $liveStream->embedUrl): ?>
-                    <iframe class="livestream-video" width="100%" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo $liveStream->embedUrl; ?>" style="border:none"></iframe>
+                    <iframe class="livestream-video" width="100%" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" src="<?php echo esc_url( $liveStream->embedUrl ); ?>" style="border:none"></iframe>
                   <?php elseif (isset($liveStream->embedCode) && $liveStream->embedCode): ?>
-                    <?php echo $liveStream->embedCode ?>
+                    <?php echo $liveStream->embedCode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Embed markup supplied by the funeral home's FireHawk CRM; must render as given (iframes and provider scripts). ?>
                   <?php endif; ?>
                 </div>
               </div>
@@ -1013,7 +1015,7 @@ if (empty($fcrmShowLocation)) {
     let detailPage = <?php echo isset($detailPage) ? json_encode($detailPage) : json_encode(null); ?>;
 
     if(queryParamId && queryParamId.length && is_get_param && page_id && page_id.length && detailPage && detailPage.length) {
-      history.pushState({}, null, '/<?php echo $detailPage; ?>/?' + queryParamId + '/<?php echo isset($page_id) ? $page_id : ""; ?>--');
+      history.pushState({}, null, '/<?php echo esc_js( $detailPage ); ?>/?' + queryParamId + '/<?php echo esc_js( isset( $page_id ) ? $page_id : "" ); ?>--');
     }
   });
 </script>
@@ -1089,9 +1091,9 @@ if (empty($fcrmShowLocation)) {
   tributeTrees.teamId = <?php echo json_encode($client->teamId); ?>;
   tributeTrees.teamGroupIndex = <?php echo json_encode($teamGroupIndex); ?>;
   tributeTrees.dateLocale = <?php echo json_encode($dateLocale); ?>;
-  tributeTrees.checkoutCartUrl = "<?php echo $checkoutCartUrl; ?>";
-  tributeTrees.clientName = "<?php echo (isset($client->fullName) ? $client->fullName : ""); ?>";
-  tributeTrees.country = "<?php echo (isset($client->country) ? $client->country : ""); ?>";
+  tributeTrees.checkoutCartUrl = "<?php echo esc_js( $checkoutCartUrl ); ?>";
+  tributeTrees.clientName = "<?php echo esc_js( isset( $client->fullName ) ? $client->fullName : "" ); ?>";
+  tributeTrees.country = "<?php echo esc_js( isset( $client->country ) ? $client->country : "" ); ?>";
   tributeTrees.reloadView(0)
 
   jQuery(".firehawk-crm.firehawk-tributes .plant-tree-btn").on("click", function(event) {
@@ -1106,9 +1108,9 @@ if (empty($fcrmShowLocation)) {
   tributeDonations.teamId = <?php echo json_encode($client->teamId); ?>;
   tributeDonations.teamGroupIndex = <?php echo json_encode($teamGroupIndex); ?>;
   tributeDonations.dateLocale = <?php echo json_encode($dateLocale); ?>;
-  tributeDonations.checkoutCartUrl = "<?php echo $checkoutCartUrl; ?>";
-  tributeDonations.clientName = "<?php echo (isset($client->fullName) ? $client->fullName : ""); ?>";
-  tributeDonations.country = "<?php echo (isset($client->country) ? $client->country : ""); ?>";
+  tributeDonations.checkoutCartUrl = "<?php echo esc_js( $checkoutCartUrl ); ?>";
+  tributeDonations.clientName = "<?php echo esc_js( isset( $client->fullName ) ? $client->fullName : "" ); ?>";
+  tributeDonations.country = "<?php echo esc_js( isset( $client->country ) ? $client->country : "" ); ?>";
   tributeDonations.charity = <?php echo json_encode($client->donationsCharity); ?>;
   tributeDonations.reloadView(0)
 

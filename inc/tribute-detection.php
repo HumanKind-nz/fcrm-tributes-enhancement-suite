@@ -23,7 +23,7 @@ function is_tribute_page(): bool {
 	$is_tribute = false;
 
 	// Check for tribute single post type.
-	if ( isset( $_GET['id'] ) && is_singular() && get_post_type() === 'tribute' ) {
+	if ( isset( $_GET['id'] ) && is_singular() && get_post_type() === 'tribute' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
 		$is_tribute = true;
 	}
 

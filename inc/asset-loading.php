@@ -35,7 +35,7 @@ function conditional_fcrm_assets(): void {
 
 	// More robust single tribute detection — check multiple sources.
 	global $wp;
-	$is_single_tribute = isset( $_GET['id'] ) ||
+	$is_single_tribute = isset( $_GET['id'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
 	                     ( get_query_var( 'id' ) !== '' && get_query_var( 'id' ) !== false ) ||
 	                     ( isset( $wp->query_vars['id'] ) && $wp->query_vars['id'] !== '' );
 
@@ -297,27 +297,27 @@ function page_has_firehawk_passthrough(): bool {
  */
 function is_page_builder_active(): bool {
 	// Beaver Builder.
-	if ( isset( $_GET['fl_builder'] ) || ( class_exists( 'FLBuilderModel' ) && \FLBuilderModel::is_builder_active() ) ) {
+	if ( isset( $_GET['fl_builder'] ) || ( class_exists( 'FLBuilderModel' ) && \FLBuilderModel::is_builder_active() ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builder detection, presence only.
 		return true;
 	}
 
 	// Elementor.
-	if ( isset( $_GET['elementor-preview'] ) || ( defined( 'ELEMENTOR_VERSION' ) && \Elementor\Plugin::$instance->preview->is_preview_mode() ) ) {
+	if ( isset( $_GET['elementor-preview'] ) || ( defined( 'ELEMENTOR_VERSION' ) && \Elementor\Plugin::$instance->preview->is_preview_mode() ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builder detection, presence only.
 		return true;
 	}
 
 	// Divi Builder.
-	if ( isset( $_GET['et_fb'] ) || function_exists( 'et_fb_is_enabled' ) && et_fb_is_enabled() ) {
+	if ( isset( $_GET['et_fb'] ) || function_exists( 'et_fb_is_enabled' ) && et_fb_is_enabled() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builder detection, presence only.
 		return true;
 	}
 
 	// Oxygen Builder.
-	if ( isset( $_GET['ct_builder'] ) || ( defined( 'CT_VERSION' ) && isset( $_GET['oxygen_iframe'] ) ) ) {
+	if ( isset( $_GET['ct_builder'] ) || ( defined( 'CT_VERSION' ) && isset( $_GET['oxygen_iframe'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builder detection, presence only.
 		return true;
 	}
 
 	// Bricks Builder.
-	if ( isset( $_GET['bricks'] ) && $_GET['bricks'] === 'run' ) {
+	if ( isset( $_GET['bricks'] ) && $_GET['bricks'] === 'run' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Builder detection, compared to a literal.
 		return true;
 	}
 

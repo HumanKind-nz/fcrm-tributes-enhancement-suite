@@ -3,7 +3,7 @@
  * Plugin Name:       FireHawkCRM Tributes Enhancement Suite
  * Plugin URI:        https://github.com/HumanKind-nz/fcrm-tributes-enhancement-suite
  * Description:       Performance optimisations and enhancements for the FireHawkCRM Tributes plugin
- * Version:           3.0.0
+ * Version:           3.0.1
  * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            Weave Digital Studio, Gareth Bissland
@@ -22,7 +22,7 @@ declare( strict_types=1 );
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'FCRM_ENHANCEMENT_SUITE_VERSION', '3.0.0' );
+define( 'FCRM_ENHANCEMENT_SUITE_VERSION', '3.0.1' );
 define( 'FCRM_ENHANCEMENT_SUITE_FILE', __FILE__ );
 define( 'FCRM_ENHANCEMENT_SUITE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FCRM_ENHANCEMENT_SUITE_URL', plugin_dir_url( __FILE__ ) );

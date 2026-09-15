@@ -111,7 +111,7 @@ function check_plugin_conflicts(): void {
  */
 function ajax_clear_cache(): void {
 	// Verify nonce and permissions.
-	if ( ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( $_POST['nonce'], 'fcrm_clear_cache' ) ) {
+	if ( ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'fcrm_clear_cache' ) ) {
 		wp_die( 'Unauthorised' );
 	}
 
@@ -131,7 +131,7 @@ function ajax_clear_cache(): void {
  */
 function ajax_get_cache_stats(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( __( 'Insufficient permissions' ) );
+		wp_die( esc_html__( 'Insufficient permissions', 'fcrm-enhancement-suite' ) );
 	}
 
 	if ( ! class_exists( 'FcrmEnhancementSuite\\Cache_Manager' ) ) {

@@ -355,7 +355,7 @@ class Sitemap_Generator {
 		}
 
 		// Fallback: query param URL
-		return $base_url . '?id=' . urlencode($tribute->id);
+		return $base_url . '?id=' . rawurlencode( $tribute->id );
 	}
 
 	/**
@@ -396,7 +396,7 @@ class Sitemap_Generator {
 			header('Cache-Control: public, max-age=3600');
 		}
 
-		echo $xml;
+		echo $xml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML document assembled by this class; served as text/xml.
 		exit;
 	}
 

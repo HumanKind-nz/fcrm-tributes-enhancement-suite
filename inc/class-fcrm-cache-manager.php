@@ -123,7 +123,7 @@ class Cache_Manager {
 	 * @return mixed|false Cached data or false if not found
 	 */
 	public static function get_tribute_messages($client_id, $params = []) {
-		$cache_key = self::PREFIX_MESSAGES . $client_id . '_' . md5(serialize($params));
+		$cache_key = self::PREFIX_MESSAGES . $client_id . '_' . md5(serialize($params)); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hashed into a cache key, never unserialised.
 		
 		$cached_data = wp_cache_get($cache_key, self::CACHE_GROUP);
 		
@@ -143,7 +143,7 @@ class Cache_Manager {
 	 * @return bool Success status
 	 */
 	public static function set_tribute_messages($client_id, $data, $params = []) {
-		$cache_key = self::PREFIX_MESSAGES . $client_id . '_' . md5(serialize($params));
+		$cache_key = self::PREFIX_MESSAGES . $client_id . '_' . md5(serialize($params)); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hashed into a cache key, never unserialised.
 		$duration = self::get_cache_duration('messages');
 
 		wp_cache_set($cache_key, $data, self::CACHE_GROUP, $duration);
@@ -369,7 +369,7 @@ class Cache_Manager {
 		// Sort parameters for consistent cache keys
 		ksort($params);
 		
-		return self::CACHE_GROUP . '_' . self::PREFIX_CLIENT_LIST . md5(serialize($params));
+		return self::CACHE_GROUP . '_' . self::PREFIX_CLIENT_LIST . md5(serialize($params)); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hashed into a cache key, never unserialised.
 	}
 
 	/**

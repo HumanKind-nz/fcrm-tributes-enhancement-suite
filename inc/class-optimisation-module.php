@@ -39,7 +39,7 @@ class FCRM_Optimisation_Module {
         }
 
         // Spinner only on grid pages (not single tribute pages, which set ?id=).
-        if (isset($_GET['id'])) {
+        if (isset( $_GET['id'] )) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
             return;
         }
 

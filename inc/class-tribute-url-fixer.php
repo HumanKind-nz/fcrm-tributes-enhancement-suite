@@ -38,10 +38,10 @@ class Tribute_URL_Fixer {
      */
     public static function parse_tribute_url_fallback() {
         global $wp;
-        $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared only, never output.
 
         // Check if this looks like a tribute URL and we haven't set the ID yet
-        if (self::is_tribute_url($request_uri) && (empty($_GET['id']) || empty($wp->query_vars['id'] ?? null))) {
+        if (self::is_tribute_url($request_uri) && (empty( $_GET['id'] ) || empty( $wp->query_vars['id'] ?? null ))) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
             $tribute_file_number = self::extract_tribute_id($request_uri);
             $tribute_slug = self::extract_tribute_slug($request_uri);
 
@@ -88,7 +88,7 @@ class Tribute_URL_Fixer {
      * Parse tribute URLs and extract the ID
      */
     public static function parse_tribute_url($wp) {
-        $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared only, never output.
 
         // Check if this looks like a tribute URL
         if (!self::is_tribute_url($request_uri)) {
@@ -203,7 +203,7 @@ class Tribute_URL_Fixer {
         $sources = [
             get_query_var('id'),
             $wp->query_vars['id'] ?? null,
-            $_GET['id'] ?? null,
+            isset( $_GET['id'] ) ? sanitize_text_field( wp_unslash( $_GET['id'] ) ) : null, // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read of the tribute id.
             get_query_var('tribute_id'),
             $wp->query_vars['tribute_id'] ?? null
         ];
@@ -218,7 +218,7 @@ class Tribute_URL_Fixer {
         }
 
         // Last resort: try to extract from current URL
-        $current_url = $_SERVER['REQUEST_URI'] ?? '';
+        $current_url = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared only, never output.
         $fallback = self::extract_tribute_id($current_url);
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('[FCRM_ES] get_current_tribute_id fallback from url=' . $current_url . ' -> ' . ($fallback ?? 'null'));
@@ -277,7 +277,7 @@ class Tribute_URL_Fixer {
      */
     public static function convert_grid_to_single_tribute($content) {
         // Only process on tribute pages
-        $current_url = $_SERVER['REQUEST_URI'] ?? '';
+        $current_url = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared only, never output.
         if (!self::is_tribute_url($current_url)) {
             return $content;
         }
