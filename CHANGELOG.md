@@ -7,12 +7,21 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## v2.3.5 (2026-09-15)
 
-Security hotfix on the 2.3 line, numbered past the hand-built 2.3.4 that is already on a site so the updater picks it up. Built from the v2.3.3 tag; anything that only changed in that 2.3.4 is not carried here. No change to layouts, settings or what renders; every value is now escaped for the place it lands.
+Security hotfix on the 2.3 line, numbered past the hand-built 2.3.4 that is already on a site so the updater picks it up. Built from the v2.3.3 tag plus the one change in that 2.3.4 (below), so nothing installed is lost. No change to layouts, settings or what renders; every value is now escaped for the place it lands.
 
 ### Fixed
 - **Reflected XSS on tribute pages.** The share buttons on the Enhanced Classic layout built their URL from the whole query string and printed it unescaped into the button attributes, so a crafted tribute link could inject script into a public page. The share URL is now passed through `esc_url()` at every output, and the "Service for ..." strings beside it through `esc_attr()`.
 - Every other value printed by the Enhanced Classic, Modern Hero and the three grid layouts is escaped for its context: URLs and image sources with `esc_url()`, attributes with `esc_attr()`, headings, names and labels with `esc_html()`, message bodies and the formatted tribute content with `wp_kses_post()`, values inside inline scripts with `esc_js()`. The CRM-supplied embed codes (tribute video, live stream) still render exactly as supplied, because provider embeds carry iframes and scripts that any filter would strip.
 - Request values (`id`, `tid`, the flower-delivery `action`) are unslashed and sanitised on read. The nonce reads in the cache AJAX handlers no longer raise a notice when the field is missing.
+
+## v2.3.4 (2026-05-20)
+
+Built and installed by hand; recovered into the repo on 2026-09-15 from the build-release folder.
+
+### Fixed
+- Grid no longer drops the most recent deaths from the top. The `sort-by-service` shortcode default changed from `true` to `false`. With it on, FireHawk's API silently filters out tributes that have no scheduled service event and reorders the rest, so families saw freshly deceased relatives missing from the grid until a service was entered in the CRM. Default behaviour now matches FireHawk's native grid (strict date-of-death descending). Funeral homes that want service-date prioritisation can still opt in per-grid with `sort-by-service="true"` on the shortcode.
+
+---
 
 ## v2.3.3 (2026-04-10)
 
