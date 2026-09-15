@@ -541,7 +541,7 @@ class API_Interceptor {
 	 */
 	public static function ajax_clear_cache() {
 		// Verify nonce and permissions
-		if (!current_user_can('manage_options') || !wp_verify_nonce($_POST['nonce'], 'fcrm_clear_cache')) {
+		if (!current_user_can('manage_options') || !wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'fcrm_clear_cache')) {
 			wp_die('Unauthorised');
 		}
 
@@ -558,11 +558,11 @@ class API_Interceptor {
 	 */
 	public static function ajax_clear_client_cache() {
 		// Verify nonce and permissions
-		if (!current_user_can('manage_options') || !wp_verify_nonce($_POST['nonce'], 'fcrm_clear_cache')) {
+		if (!current_user_can('manage_options') || !wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'fcrm_clear_cache')) {
 			wp_die('Unauthorised');
 		}
 
-		$client_id = sanitize_text_field($_POST['client_id'] ?? '');
+		$client_id = sanitize_text_field( wp_unslash( $_POST['client_id'] ?? '' ) );
 		
 		if (empty($client_id)) {
 			wp_send_json(['success' => false, 'message' => 'Client ID required']);

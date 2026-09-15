@@ -26,7 +26,7 @@ $container_classes = [
 ];
 ?>
 
-<div class="<?php echo esc_attr(implode(' ', $container_classes)); ?>" id="fcrm-<?php echo $uniqueElementId ?>" data-element-id="<?php echo $uniqueElementId ?>">
+<div class="<?php echo esc_attr(implode(' ', $container_classes)); ?>" id="fcrm-<?php echo esc_attr( $uniqueElementId ); ?>" data-element-id="<?php echo esc_attr( $uniqueElementId ); ?>">
     <!-- Unified Search Interface -->
     <div class="fcrm-unified-search fcrm-gallery-search" <?php if ($fixedSearch): ?>style="display:none"<?php endif; ?>>
         <div class="search-container">
@@ -94,19 +94,19 @@ $container_classes = [
     <!-- Gallery Grid Container -->
     <div class="fcrm-gallery-grid-container">
         <!-- Loading state -->
-        <div class="gallery-loading" id="tributes-loading-<?php echo $uniqueElementId ?>">
+        <div class="gallery-loading" id="tributes-loading-<?php echo esc_attr( $uniqueElementId ); ?>">
             <div class="loading-spinner"></div>
             <p>Loading gallery...</p>
         </div>
 
         <!-- Gallery Tributes Grid -->
-        <div class="gallery-tributes-grid" id="tributes-grid-<?php echo $uniqueElementId ?>">
+        <div class="gallery-tributes-grid" id="tributes-grid-<?php echo esc_attr( $uniqueElementId ); ?>">
             <!-- Cards will be inserted here by JavaScript -->
         </div>
 
         <!-- Load More Button -->
-        <div class="load-more-container" id="load-more-container-<?php echo $uniqueElementId ?>" style="display: none;">
-            <button class="btn btn-secondary load-more-btn gallery-load-more" id="load-more-btn-<?php echo $uniqueElementId ?>" data-action="load-more">
+        <div class="load-more-container" id="load-more-container-<?php echo esc_attr( $uniqueElementId ); ?>" style="display: none;">
+            <button class="btn btn-secondary load-more-btn gallery-load-more" id="load-more-btn-<?php echo esc_attr( $uniqueElementId ); ?>" data-action="load-more">
                 <span class="btn-text">Load More Photos</span>
                 <span class="btn-spinner" style="display: none;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,7 @@ $container_classes = [
         </div>
 
         <!-- Empty state -->
-        <div class="empty-state" id="empty-state-<?php echo $uniqueElementId ?>" style="display: none;">
+        <div class="empty-state" id="empty-state-<?php echo esc_attr( $uniqueElementId ); ?>" style="display: none;">
             <div class="empty-state-content">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="empty-icon">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
@@ -140,8 +140,8 @@ $container_classes = [
         constructor(elementId) {
             this.elementId = elementId;
             this.currentPage = 0;
-            this.pageSize = <?php echo $size ? $size : 16; ?>;
-            this.loadMoreSize = <?php echo get_option('fcrm_layout_load_more_size', $size ? $size : 16); ?>;
+            this.pageSize = <?php echo (int) ($size ? $size : 16); ?>;
+            this.loadMoreSize = <?php echo (int) get_option('fcrm_layout_load_more_size', $size ? $size : 16); ?>;
             this.totalLoaded = 0;
             this.isLoading = false;
             this.hasMorePages = true;

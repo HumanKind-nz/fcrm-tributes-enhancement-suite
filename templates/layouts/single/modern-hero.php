@@ -51,8 +51,10 @@ if ($debug_enabled && defined('WP_DEBUG') && WP_DEBUG) {
     error_log('[FCRM_ES] modern-hero cache source: ' . $cache_source . ' for ID: ' . ($tribute_id ?? 'null'));
     $qv_id = get_query_var('id');
     $qv_tid = get_query_var('tid');
-    $get_id = $_GET['id'] ?? null;
-    $get_tid = $_GET['tid'] ?? null;
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only debug logging.
+    $get_id = isset( $_GET['id'] ) ? sanitize_text_field( wp_unslash( $_GET['id'] ) ) : null;
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only debug logging.
+    $get_tid = isset( $_GET['tid'] ) ? sanitize_text_field( wp_unslash( $_GET['tid'] ) ) : null;
     $client_page_id = method_exists($single_tribute, 'getClientPageId') ? $single_tribute->getClientPageId() : null;
     error_log('[FCRM_ES] modern-hero template GET_id=' . ($get_id ?? 'null') . ' QV_id=' . ($qv_id ?: 'null') . ' client_id=' . ($tribute_id ?? 'null') . ' client_page_id=' . ($client_page_id ?? 'null') . ' GET_tid=' . ($get_tid ?? 'null') . ' QV_tid=' . ($qv_tid ?: 'null'));
 }
@@ -305,7 +307,7 @@ $uniqueElementId = 'fcrm-tribute-' . $tribute_id;
         );
 
         echo '<div class="fcrm-original-content-preserved">';
-        echo $modern_content;
+        echo $modern_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup rendered by the FireHawk Tributes plugin's own shortcode, with one wrapper removed.
         echo '</div>';
     }
     ?>

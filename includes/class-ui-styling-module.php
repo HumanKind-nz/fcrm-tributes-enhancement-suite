@@ -176,7 +176,7 @@ class FCRM_UI_Styling_Module {
             } else {
                 // Fallback: output as inline style tag if shared CSS isn't loaded yet
                 add_action('wp_head', function() use ($css) {
-                    echo "<style id='fcrm-ui-custom-styles'>\n" . $css . "\n</style>\n";
+                    echo "<style id='fcrm-ui-custom-styles'>\n" . wp_strip_all_tags( $css ) . "\n</style>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS generated from the plugin's own colour settings, tag-stripped above.
                 }, 999);
             }
         }
@@ -373,7 +373,7 @@ class FCRM_UI_Styling_Module {
 
         // Single Tribute Button Styling (Enhanced Classic & Modern Hero)
         // Only add if we're on a single tribute page
-        if (isset($_GET['id'])) {
+        if (isset( $_GET['id'] )) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
             $css .= "/* Single Tribute Enhanced Classic Button Styling */\n";
             $css .= ".fcrm-enhanced-classic {\n";
             $css .= "  --enhanced-primary: var(--fcrm-ui-primary) !important;\n";

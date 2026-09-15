@@ -512,7 +512,7 @@ class Instant_Indexing {
 				status_header(200);
 				header('Content-Type: text/plain; charset=UTF-8');
 			}
-			echo $key;
+			echo esc_html( $key );
 			exit;
 		}
 	}
@@ -945,7 +945,7 @@ class Instant_Indexing {
 										'warning' => '⚠️',
 										'info'    => 'ℹ️',
 									];
-									echo $status_icons[$entry['type']] ?? '•';
+									echo esc_html( $status_icons[$entry['type']] ?? '•' );
 									?>
 								</td>
 								<td style="font-size: 13px;"><?php echo esc_html($entry['message']); ?></td>
@@ -969,7 +969,7 @@ class Instant_Indexing {
 	 * @return string Encoded string
 	 */
 	private static function base64url_encode($data) {
-		return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+		return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64url for a JWT segment.
 	}
 
 	/**

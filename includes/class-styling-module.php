@@ -262,7 +262,7 @@ class FCRM_Styling_Module {
         if (!empty($custom_css)) {
             // Add CSS directly to wp_head with maximum priority
             add_action('wp_head', function() use ($custom_css) {
-                echo '<style type="text/css" id="fcrm-styling-overrides">' . "\n" . $custom_css . "\n" . '</style>' . "\n";
+                echo '<style type="text/css" id="fcrm-styling-overrides">' . "\n" . wp_strip_all_tags( $custom_css ) . "\n" . '</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS generated from the plugin's own colour settings, tag-stripped above.
             }, 99999);
         }
     }

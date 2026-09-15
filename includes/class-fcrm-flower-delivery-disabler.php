@@ -127,7 +127,7 @@ class Flower_Delivery_Disabler {
 	 * Intercept flower delivery API requests early
 	 */
 	public function intercept_flower_requests(): void {
-		if (!isset($_REQUEST['action'])) {
+		if (!isset( $_REQUEST['action'] )) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check; the action is only compared to a fixed list.
 			return;
 		}
 
@@ -149,7 +149,8 @@ class Flower_Delivery_Disabler {
 			'getCartCount' => 1
 		];
 
-		if (isset($flower_actions[$_REQUEST['action']])) {
+		$requested_action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Compared to a fixed list only.
+		if (isset( $flower_actions[$requested_action] )) {
 			wp_send_json([
 				'success' => false,
 				'error' => __('Flower delivery is currently disabled.', 'fcrm-enhancement-suite'),

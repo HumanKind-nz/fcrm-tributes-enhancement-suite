@@ -5,6 +5,15 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## v2.3.4 (2026-09-15)
+
+Security hotfix on the 2.3 line. No change to layouts, settings or what renders; every value is now escaped for the place it lands.
+
+### Fixed
+- **Reflected XSS on tribute pages.** The share buttons on the Enhanced Classic layout built their URL from the whole query string and printed it unescaped into the button attributes, so a crafted tribute link could inject script into a public page. The share URL is now passed through `esc_url()` at every output, and the "Service for ..." strings beside it through `esc_attr()`.
+- Every other value printed by the Enhanced Classic, Modern Hero and the three grid layouts is escaped for its context: URLs and image sources with `esc_url()`, attributes with `esc_attr()`, headings, names and labels with `esc_html()`, message bodies and the formatted tribute content with `wp_kses_post()`, values inside inline scripts with `esc_js()`. The CRM-supplied embed codes (tribute video, live stream) still render exactly as supplied, because provider embeds carry iframes and scripts that any filter would strip.
+- Request values (`id`, `tid`, the flower-delivery `action`) are unslashed and sanitised on read. The nonce reads in the cache AJAX handlers no longer raise a notice when the field is missing.
+
 ## v2.3.3 (2026-04-10)
 
 ### Added

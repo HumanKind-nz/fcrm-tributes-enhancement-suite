@@ -303,8 +303,8 @@ class FCRM_Layouts_Module {
                     $tribute_id = FCRM\EnhancementSuite\Tribute_URL_Fixer::get_current_tribute_id();
                 }
                 // Also check $_GET directly as a fallback
-                if (empty($tribute_id) && !empty($_GET['id'])) {
-                    $tribute_id = $_GET['id'];
+                if (empty( $tribute_id ) && !empty( $_GET['id'] )) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read of the tribute id.
+                    $tribute_id = sanitize_text_field( wp_unslash( $_GET['id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read of the tribute id.
                 }
             }
 
@@ -386,7 +386,7 @@ class FCRM_Layouts_Module {
                 extract($template_vars);
                 include $fallback_template;
             } else {
-                echo '<div class="fcrm-error">Template file not found: ' . $template_file . '</div>';
+                echo '<div class="fcrm-error">Template file not found: ' . esc_html( $template_file ) . '</div>';
             }
         }
         
@@ -573,7 +573,7 @@ class FCRM_Layouts_Module {
         }
 
         // Single tribute layout styles - ONLY load on single tribute pages (has ?id parameter)
-        $is_single_tribute = isset($_GET['id']);
+        $is_single_tribute = isset( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence check on a public read.
 
         if ($is_single_tribute && $active_single_layout === 'enhanced-classic') {
             wp_enqueue_style(
